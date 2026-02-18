@@ -263,7 +263,6 @@ private fun Toolbar(
 private fun Item(
     modifier: Modifier = Modifier,
     title : String = "Title",
-    //titleData : (String) -> Unit = {},
     titleClick : () -> Unit = {},
     bookmarkTitleClick : () -> Unit = {}
     ) {
@@ -295,7 +294,6 @@ private fun Item(
                     onClick = {
                         isBookmarkVisible = false
                         titleClick()
-                        //if (title.isNotEmpty()) titleData(title)
 
                     }
                 )
@@ -322,7 +320,6 @@ private fun Item(
                 IconButton(
                     onClick = {
                         bookmarkTitleClick()
-                        //if (title.isNotEmpty()) titleData(title)
                         isBookmarkVisible = false
                               },
                     modifier = Modifier
