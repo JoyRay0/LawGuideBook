@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +68,6 @@ import com.rk_softwares.lawguidebook.Model.GridList
 import com.rk_softwares.lawguidebook.Model.ItemList
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -96,7 +94,10 @@ class Act_home : ComponentActivity() {
             var isSearchScreenList by remember { mutableStateOf(true) }
             var inputFiledData by remember { mutableStateOf("") }
             val list = remember { mutableStateListOf<GridList>() }
+            val bookmarkQuestionList = remember { mutableStateListOf<ItemList>() }
             val scope = rememberCoroutineScope()
+            var bookmarkReloadDB by remember { mutableIntStateOf(0) }
+            var historyReloadDB by remember { mutableIntStateOf(0) }
 
             list.clear()
             list.add(GridList(
@@ -123,6 +124,19 @@ class Act_home : ComponentActivity() {
                 title = "লোডিং"
             ))
 
+            LaunchedEffect(bookmarkReloadDB) {
+
+                val item = withContext(Dispatchers.IO){
+
+                    bookmarkDatabase.getAll()
+
+                }
+
+                bookmarkQuestionList.clear()
+                bookmarkQuestionList.addAll(item)
+
+            }
+
             if (isSearchScreenList){
 
                 searchList.clear()
@@ -136,7 +150,7 @@ class Act_home : ComponentActivity() {
 
             }else{
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(historyReloadDB) {
 
                     val historyItem = withContext(Dispatchers.IO){
 
@@ -178,7 +192,9 @@ class Act_home : ComponentActivity() {
                     historyList = historyList,
                     searchScreenBool = { isSearchScreenList = it },
                     searchInput = { inputFiledData = it },
-                    searchClick = {},
+                    searchClick = {
+                        historyReloadDB++
+                    },
                     historyTitleClick = {},
                     searchItemClick = {
 
@@ -216,12 +232,48 @@ class Act_home : ComponentActivity() {
                                 bookmarkDatabase.insert(item)
 
                             }
+                            bookmarkReloadDB++
 
                             Toast.makeText(this@Act_home, "সেভ হয়েছে", Toast.LENGTH_SHORT).show()
 
                         }
 
+                    },
+
+                    bookmarkList = bookmarkQuestionList,
+                    bookmarkQuestionClick = {
+
+                        IntentHelper.dataIntent(
+                            this,
+                            Act_answer::class.java,
+                            KeyHelper.sendQuestion_IntentKey(),
+                            it
+                        )
+
+                    },
+
+                    deleteBookmarkClick = { item ->
+
+                        scope.launch {
+
+                           val deleted = withContext(Dispatchers.IO){
+
+                               bookmarkDatabase.deleteOne(item)
+
+                            }
+
+                            if (deleted){
+
+                                bookmarkReloadDB++
+
+                                Toast.makeText(this@Act_home, "ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
+
+                            }
+
+                        }
+
                     }
+
 
                 )
 
@@ -259,15 +311,22 @@ private fun HomeFullScreen(
     gridClick: (String) -> Unit = {},
     gridList : List<GridList> = emptyList(),
     settingClick : () -> Unit = {},
-    bookmarkClick: (String) -> Unit = {}
+    bookmarkClick: (String) -> Unit = {},
+    bookmarkList: List<ItemList> = emptyList(),
+    bookmarkQuestionClick: (String) -> Unit = {},
+    deleteBookmarkClick : (String) -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
 
     Scaffold(
-        topBar = { Toolbar() },
+
+        topBar = { Toolbar(
+            settingClick = {settingClick()}
+        )},
         bottomBar = { BottomNav(  screenIndex = { screen = it }) },
         modifier = Modifier.fillMaxSize())
+
     { innerPadding ->
 
         Box(
@@ -296,7 +355,11 @@ private fun HomeFullScreen(
                     bookmarkClick = { bookmarkClick(it) }
 
                 )
-                3 -> settingClick()
+                3 -> BookmarkScreen(
+                    bookmarkList = bookmarkList,
+                    titleClick = { bookmarkQuestionClick(it) },
+                    deleteClick = { deleteBookmarkClick(it) }
+                )
 
             }
 
@@ -310,7 +373,11 @@ private fun HomeFullScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun Toolbar() {
+private fun Toolbar(
+
+    settingClick: () -> Unit = {}
+
+) {
 
     Box(
 
@@ -338,6 +405,41 @@ private fun Toolbar() {
                     .padding(10.dp)
                     .align(Alignment.CenterStart)
                 )
+
+            Row(
+
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterEnd)
+
+            ) {
+
+                IconButton(
+                    onClick = { settingClick() },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .clip(shape = CircleShape)
+                        //.background(color = Color(0xFF00BCD4))
+                        .size(32.dp)
+                        .align(Alignment.CenterVertically)
+
+                ) {
+
+                    Icon( painter = painterResource(R.drawable.ic_setting),
+                        contentDescription = "Setting",
+                        tint = Color(0xFFFFFFFF),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(19.dp)
+                            .align(Alignment.CenterVertically)
+
+                    )
+
+                }
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+            }//row
 
         }//box
 
@@ -367,8 +469,8 @@ private fun BottomNav(
 
     ) {
 
-        val itemText = arrayOf("হোম", "লিস্ট", "সার্চ", "সেটিংস")
-        val icons = arrayOf(R.drawable.ic_home, R.drawable.ic_list, R.drawable.ic_search, R.drawable.ic_setting)
+        val itemText = arrayOf("হোম", "লিস্ট", "সার্চ", "বুকমার্ক")
+        val icons = arrayOf(R.drawable.ic_home, R.drawable.ic_list, R.drawable.ic_search, R.drawable.ic_bookmark_fill)
 
         itemText.forEachIndexed { index, it ->
 
@@ -636,10 +738,11 @@ fun SearchScreen(
                     key = { it. question}
                 ){ it ->
 
-                    SearchItem(
+                    QuestionItem(
                         title = it.question,
                         titleClick = { searchItemClick(it.question) },
-                        bookmarkClick = { bookmarkClick(it.question) }
+                        bookmarkClick = { bookmarkClick(it.question) },
+                        blockBookmarkIcon = "visible"
 
                     )
 
@@ -915,14 +1018,17 @@ fun SearchBarHelper(
 
 @Preview(showBackground = true)
 @Composable
-private fun SearchItem(
+private fun QuestionItem(
     modifier: Modifier = Modifier,
     title : String = "Title",
     titleClick : () -> Unit = {},
-    bookmarkClick : () -> Unit = {}
+    bookmarkClick : () -> Unit = {},
+    deleteClick : () -> Unit = {},
+    blockBookmarkIcon : String = "",
+    deleteIcon : String = ""
 ) {
 
-    var isBookmarkVisible by remember { mutableStateOf(false) }
+    var isIconVisible by remember { mutableStateOf(false) }
 
     Box(
         
@@ -942,12 +1048,25 @@ private fun SearchItem(
 
                     onLongClick = {
 
-                        isBookmarkVisible = true
+                        if (blockBookmarkIcon.isNotEmpty()){
+
+                            isIconVisible = true
+
+                        }else if (deleteIcon.isNotEmpty()){
+
+                            isIconVisible = true
+
+                        }
+                        else{
+
+                            isIconVisible = false
+
+                        }
 
                     },
 
                     onClick = {
-                        isBookmarkVisible = false
+                        isIconVisible = false
                         titleClick()
 
                     }
@@ -971,12 +1090,20 @@ private fun SearchItem(
                     .align(Alignment.CenterStart)
                 )
 
-            if (isBookmarkVisible){
+            if (isIconVisible){
 
                 IconButton(
                     onClick = {
-                        bookmarkClick()
-                        isBookmarkVisible = false
+
+                        if (blockBookmarkIcon.isNotEmpty()){
+
+                            bookmarkClick()
+                        }else{
+
+                            deleteClick()
+                        }
+
+                        isIconVisible = false
                     },
                     modifier = Modifier
                         .wrapContentWidth()
@@ -986,7 +1113,16 @@ private fun SearchItem(
 
                 ) {
 
-                    Icon( painter = painterResource(R.drawable.ic_bookmark),
+                    Icon(
+                        painter = painterResource(
+
+                            if (deleteIcon.isNotEmpty()) {
+                                R.drawable.ic_delete
+                            }else{
+                                R.drawable.ic_bookmark
+                            }
+
+                        ),
                         contentDescription = "Delete",
                         tint = Color(0xFF4D4747),
                         modifier = Modifier
@@ -1084,3 +1220,72 @@ private fun HistoryItem(
 
 }//fun end
 
+
+@Preview(showBackground = true)
+@Composable
+fun BookmarkScreen(
+    bookmarkList: List<ItemList> = emptyList(),
+    titleClick: (String) -> Unit = {},
+    deleteClick: (String) -> Unit = {}
+) {
+
+    val lazyState = rememberLazyListState()
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+
+        Box(
+
+            modifier = Modifier
+                .fillMaxSize()
+
+        ) {
+
+            LazyColumn(
+                state = lazyState,
+                modifier = Modifier
+                    .fillMaxWidth()
+
+            ) {
+
+
+                items(
+                    items = bookmarkList,
+                    key = { it.question }
+                ){ item ->
+
+                    QuestionItem(
+                        title = item.question,
+                        titleClick = { titleClick(item.question) },
+                        deleteClick = { deleteClick(item.question) },
+                        deleteIcon = "visible"
+                    )
+
+                }
+
+            }
+
+            if (bookmarkList.isEmpty()){
+
+                Text("কোন বুকমার্ক নেই।",
+                    fontSize = 18.sp,
+                    fontFamily = BanglaFont.font(),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF000000),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.Center)
+                    )
+
+            }
+
+        }//box
+
+    }//box
+    
+}//fun end
