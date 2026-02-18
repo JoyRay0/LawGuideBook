@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,6 +33,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,6 +58,7 @@ import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
@@ -67,11 +70,14 @@ import com.rk_softwares.lawguidebook.Model.ItemList
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class Act_home : ComponentActivity() {
 
     private lateinit var historyDB : HistoryDatabase
+
+    private lateinit var bookmarkDatabase: BookmarkDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +96,7 @@ class Act_home : ComponentActivity() {
             var isSearchScreenList by remember { mutableStateOf(true) }
             var inputFiledData by remember { mutableStateOf("") }
             val list = remember { mutableStateListOf<GridList>() }
+            val scope = rememberCoroutineScope()
 
             list.clear()
             list.add(GridList(
@@ -199,6 +206,21 @@ class Act_home : ComponentActivity() {
 
                         startActivity(Intent(this, Act_setting::class.java))
                         finishAffinity()
+                    },
+                    bookmarkClick = { item ->
+
+                        scope.launch {
+
+                            withContext(Dispatchers.IO){
+
+                                bookmarkDatabase.insert(item)
+
+                            }
+
+                            Toast.makeText(this@Act_home, "সেভ হয়েছে", Toast.LENGTH_SHORT).show()
+
+                        }
+
                     }
 
                 )
@@ -211,6 +233,8 @@ class Act_home : ComponentActivity() {
     private fun init(){
 
         historyDB = HistoryDatabase(this)
+
+        bookmarkDatabase = BookmarkDatabase(this)
 
     }
 
@@ -234,7 +258,8 @@ private fun HomeFullScreen(
     searchItemClick: (String) -> Unit = {},
     gridClick: (String) -> Unit = {},
     gridList : List<GridList> = emptyList(),
-    settingClick : () -> Unit = {}
+    settingClick : () -> Unit = {},
+    bookmarkClick: (String) -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -267,7 +292,8 @@ private fun HomeFullScreen(
                     searchInput = { searchInput(it) },
                     searchClick = { searchClick()},
                     historyTitleClick = {historyTitleClick()},
-                    searchItemClick = {searchItemClick(it)}
+                    searchItemClick = {searchItemClick(it)},
+                    bookmarkClick = { bookmarkClick(it) }
 
                 )
                 3 -> settingClick()
@@ -570,7 +596,8 @@ fun SearchScreen(
     searchInput : (String) -> Unit = {},
     searchClick: () -> Unit = {},
     historyTitleClick: () -> Unit = {},
-    searchItemClick : (String) -> Unit = {}
+    searchItemClick : (String) -> Unit = {},
+    bookmarkClick: (String) -> Unit = {}
     ) {
 
     val lazyState = rememberLazyListState()
@@ -609,9 +636,10 @@ fun SearchScreen(
                     key = { it. question}
                 ){ it ->
 
-                    Item(
+                    SearchItem(
                         title = it.question,
-                        titleClick = { searchItemClick(it.question) }
+                        titleClick = { searchItemClick(it.question) },
+                        bookmarkClick = { bookmarkClick(it.question) }
 
                     )
 
@@ -624,9 +652,8 @@ fun SearchScreen(
                     key = { it. question}
                 ){ it ->
 
-                    Item(
+                    HistoryItem(
                         title = it.question,
-                        icon = R.drawable.ic_arrow,
                         titleData = { historyTitle.value = it },
                         titleClick = {
                             historyTitleClick()
@@ -888,15 +915,14 @@ fun SearchBarHelper(
 
 @Preview(showBackground = true)
 @Composable
-private fun Item(
+private fun SearchItem(
     modifier: Modifier = Modifier,
     title : String = "Title",
-    titleData : (String) -> Unit = {},
     titleClick : () -> Unit = {},
-    icon: Int = 0,
-    iconModifier: Modifier = Modifier,
-
+    bookmarkClick : () -> Unit = {}
 ) {
+
+    var isBookmarkVisible by remember { mutableStateOf(false) }
 
     Box(
         
@@ -912,10 +938,21 @@ private fun Item(
                 .fillMaxWidth()
                 .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
                 .clip(shape = RoundedCornerShape(12.dp))
-                .clickable {
-                    titleClick()
-                    if (title.isNotEmpty()) titleData(title)
-                }
+                .combinedClickable(
+
+                    onLongClick = {
+
+                        isBookmarkVisible = true
+
+                    },
+
+                    onClick = {
+                        isBookmarkVisible = false
+                        titleClick()
+
+                    }
+                )
+
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
                 .align(Alignment.Center)
@@ -934,16 +971,113 @@ private fun Item(
                     .align(Alignment.CenterStart)
                 )
 
-            Icon( painter = painterResource(if (icon > 0) icon else R.drawable.ic_right),
+            if (isBookmarkVisible){
+
+                IconButton(
+                    onClick = {
+                        bookmarkClick()
+                        isBookmarkVisible = false
+                    },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .clip(shape = CircleShape)
+                        .size(30.dp)
+                        .align(Alignment.CenterEnd)
+
+                ) {
+
+                    Icon( painter = painterResource(R.drawable.ic_bookmark),
+                        contentDescription = "Delete",
+                        tint = Color(0xFF4D4747),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(20.dp)
+                            .align(Alignment.Center)
+
+                    )
+
+                }
+
+            }else{
+
+                Icon( painter = painterResource(R.drawable.ic_right),
+                    contentDescription = "Right",
+                    tint = Color.Gray,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.CenterEnd)
+
+                )
+
+            }
+            
+        }//box
+
+    }//box
+
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+private fun HistoryItem(
+    modifier: Modifier = Modifier,
+    title : String = "Title",
+    titleData : (String) -> Unit = {},
+    titleClick : () -> Unit = {},
+) {
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+
+    ) {
+
+        Box(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
+                .combinedClickable(
+
+                    onClick = {
+
+                        titleClick()
+                        if (title.isNotEmpty()) titleData(title)
+
+                    }
+                )
+
+                .background(color = Color(0xFFFFFFFF))
+                .padding(7.dp)
+                .align(Alignment.Center)
+
+        ) {
+
+            Text(text = title,
+                fontSize = 16.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .fillMaxWidth(0.93f)
+                    .padding(3.dp)
+                    .align(Alignment.CenterStart)
+            )
+
+            Icon( painter = painterResource(R.drawable.ic_arrow),
                 contentDescription = "Right",
                 tint = Color.Gray,
-                modifier = iconModifier
+                modifier = Modifier
                     .wrapContentWidth()
                     .align(Alignment.CenterEnd)
 
             )
 
-            
         }//box
 
     }//box
