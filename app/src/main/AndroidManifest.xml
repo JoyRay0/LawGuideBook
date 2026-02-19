@@ -16,6 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LawGuideBook">
         <activity
+            android:name=".Activity.Act_calculation"
+            android:exported="false"
+            android:label="@string/title_activity_act_calculation"
+            android:theme="@style/Theme.LawGuideBook" />
+        <activity
             android:name=".Activity.Act_ai_chat"
             android:exported="false"
             android:label="@string/title_activity_act_ai_chat"

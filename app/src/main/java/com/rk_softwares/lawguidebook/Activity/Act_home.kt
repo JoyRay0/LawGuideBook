@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -278,6 +279,16 @@ class Act_home : ComponentActivity() {
 
                         IntentHelper.normalIntent(this, Act_ai_chat::class.java)
 
+                    },
+                    moreClick = {
+
+                        IntentHelper.normalIntent(this, Act_calculation::class.java)
+
+                    },
+                    calculationName = {
+
+                        Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+
                     }
 
 
@@ -322,7 +333,9 @@ private fun HomeFullScreen(
     bookmarkList: List<ItemList> = emptyList(),
     bookmarkQuestionClick: (String) -> Unit = {},
     deleteBookmarkClick : (String) -> Unit = {},
-    aiChatClick: () -> Unit = {}
+    aiChatClick: () -> Unit = {},
+    moreClick: () -> Unit = {},
+    calculationName : (String) -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -348,7 +361,11 @@ private fun HomeFullScreen(
             when(screen){       //navigation switch
 
                 0 -> HomeScreen(
-                    aiChatClick = {aiChatClick()}
+                    aiChatClick = {aiChatClick()},
+                    moreClick = { moreClick() },
+                    calculationName = {calculationName(it)}
+
+
                 )
                 1 -> ListScreen(
                     gridClick = { gridClick(it) },
@@ -572,7 +589,9 @@ private fun BottomNavHelper(
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreen(
-    aiChatClick: () -> Unit = {}
+    aiChatClick: () -> Unit = {},
+    moreClick: () -> Unit = {},
+    calculationName : (String) -> Unit = {}
 ) {
 
     Box(
@@ -590,6 +609,11 @@ private fun HomeScreen(
         ) {
 
             AiChatBot(aiChatClick = aiChatClick)
+
+            Calculator(
+                moreClick = { moreClick() },
+                calculationName = { calculationName(it) }
+            )
 
         }//column
 
@@ -617,8 +641,12 @@ private fun AiChatBot(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape = RoundedCornerShape(14.dp))
-                .clickable{ aiChatClick() }
-                .border(width = (1.5).dp, color = Color(0xFF2196F3), shape = RoundedCornerShape(14.dp))
+                .clickable { aiChatClick() }
+                .border(
+                    width = (1.5).dp,
+                    color = Color(0xFF2196F3),
+                    shape = RoundedCornerShape(14.dp)
+                )
                 .padding(10.dp)
 
 
@@ -651,7 +679,159 @@ private fun AiChatBot(
 }//fun end
 
 
+@Preview(showBackground = true)
+@Composable
+private fun Calculator(
+    moreClick : () -> Unit = {},
+    calculationName : (String) -> Unit = {}
+) {
 
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+
+        ) {
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+
+            ) {
+
+                Text("ক্যালকুলেটর",
+                    fontSize = 16.sp,
+                    fontFamily = BanglaFont.font(),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF000000),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = 4.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                Row(
+
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .clickable{ moreClick() }
+                        .padding(5.dp)
+                        .align(Alignment.CenterEnd)
+
+                ) {
+
+                    Text("আরো দেখুন",
+                        fontSize = 13.sp,
+                        fontFamily = BanglaFont.font(),
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        color = Color(0xFF000000),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.CenterVertically)
+                    )
+
+                    Icon( painter = painterResource(R.drawable.ic_right),
+                        contentDescription = "More",
+                        tint = Color(0xFF796868),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
+
+                    )
+
+                }//row
+
+            }//box
+
+
+            Row(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(3.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+
+            ) {
+
+                val calName = arrayOf("উওরাধিকার", "রেজিস্ট্রেশন ফি", "দেনমোহর")
+                val calImage = arrayOf(R.drawable.img_family, R.drawable.img_regi, R.drawable.img_denmhor)
+
+
+                calName.forEachIndexed { index, name ->
+
+                    Box(
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(5.dp)
+
+                    ) {
+
+                        Column(
+
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(shape = RoundedCornerShape(15.dp))
+                                .clickable{ calculationName(name) }
+                                .border(width = 1.dp, color = Color(0xFF9C27B0), shape = RoundedCornerShape(15.dp))
+                                .align(Alignment.Center)
+                                .padding(10.dp)
+
+                        ) {
+
+                            Image( painter = painterResource(calImage[index]),
+                                contentDescription = "Calculation",
+                                modifier = Modifier
+                                    .width(43.dp)
+                                    .height(43.dp)
+                                    .align(Alignment.CenterHorizontally)
+
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Text(text = name,
+                                fontSize = 13.sp,
+                                fontFamily = BanglaFont.font(),
+                                fontWeight = FontWeight.Normal,
+                                color = Color(0xFF000000),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterHorizontally)
+                            )
+
+
+                        }//column
+
+                    }//box
+
+
+                }//loop
+
+            }//row
+
+
+        }//column
+
+    }//box
+
+}//fun end
 
 @Preview(showBackground = true)
 @Composable
