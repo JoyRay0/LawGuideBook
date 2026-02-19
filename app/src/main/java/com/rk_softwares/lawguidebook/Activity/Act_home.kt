@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -272,6 +273,11 @@ class Act_home : ComponentActivity() {
 
                         }
 
+                    },
+                    aiChatClick = {
+
+                        IntentHelper.normalIntent(this, Act_ai_chat::class.java)
+
                     }
 
 
@@ -293,6 +299,7 @@ class Act_home : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         historyDB.closeDB()
+        bookmarkDatabase.closeDB()
     }
 
 }// class====================================================
@@ -314,7 +321,8 @@ private fun HomeFullScreen(
     bookmarkClick: (String) -> Unit = {},
     bookmarkList: List<ItemList> = emptyList(),
     bookmarkQuestionClick: (String) -> Unit = {},
-    deleteBookmarkClick : (String) -> Unit = {}
+    deleteBookmarkClick : (String) -> Unit = {},
+    aiChatClick: () -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -339,7 +347,9 @@ private fun HomeFullScreen(
 
             when(screen){       //navigation switch
 
-                0 -> HomeScreen()
+                0 -> HomeScreen(
+                    aiChatClick = {aiChatClick()}
+                )
                 1 -> ListScreen(
                     gridClick = { gridClick(it) },
                     list = gridList
@@ -561,17 +571,91 @@ private fun BottomNavHelper(
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreen() {
+private fun HomeScreen(
+    aiChatClick: () -> Unit = {}
+) {
 
-    Text("Home ")
+    Box(
 
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxHeight()
+
+        ) {
+
+            AiChatBot(aiChatClick = aiChatClick)
+
+        }//column
+
+    }//box
+    
+
+}//fun end
+
+@Preview(showBackground = true)
+@Composable
+private fun AiChatBot(
+    aiChatClick : () -> Unit = {}
+) {
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+
+    ) {
+        
+        Row(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(14.dp))
+                .clickable{ aiChatClick() }
+                .border(width = (1.5).dp, color = Color(0xFF2196F3), shape = RoundedCornerShape(14.dp))
+                .padding(10.dp)
+
+
+        ) {
+
+            Image( painter = painterResource(R.drawable.ic_ai_chat),
+                contentDescription = "Ai",
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterVertically)
+            )
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Text(text = "আপনার আইনি সহায়ক AI",
+                fontSize = 15.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF494343),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterVertically)
+                )
+
+        }//row
+        
+    }//box
 
 }//fun end
 
 
+
+
 @Preview(showBackground = true)
 @Composable
-fun ListScreen(
+private fun ListScreen(
     list: List<GridList> = emptyList(),
     gridClick : (String) -> Unit = {}
 ) {
@@ -614,7 +698,7 @@ fun ListScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun ListGridHelper(
+private fun ListGridHelper(
     gridImageUrl : String = "",
     gridText : String = "Title",
     onGridClick : () -> Unit = {}
@@ -691,7 +775,7 @@ fun ListGridHelper(
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreen(
+private fun SearchScreen(
     searchList : MutableList<ItemList> = mutableListOf(),
     historyList : MutableList<ItemList> = mutableListOf(),
     searchScreenBool : (Boolean) -> Unit = {},
@@ -831,7 +915,7 @@ fun SearchScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun SearchBarHelper(
+private fun SearchBarHelper(
     search: (String) -> Unit = {},
     historyClick: () -> Unit = {},
     historyTitle: MutableState<String> = mutableStateOf(""),
@@ -904,11 +988,11 @@ fun SearchBarHelper(
 
                         if (searchFiled.isEmpty()){
 
-                            Text("সার্চ করুন",
+                            Text("যেকোনো আইনি বিষয় সার্চ করুন",
                                 fontSize = 15.sp,
                                 fontFamily = BanglaFont.font(),
                                 fontWeight = FontWeight.Normal,
-                                color = Color.Gray,
+                                color = Color(0xFF695D5D),
                                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                                 modifier = Modifier
                                     .wrapContentWidth()
@@ -1048,16 +1132,15 @@ private fun QuestionItem(
 
                     onLongClick = {
 
-                        if (blockBookmarkIcon.isNotEmpty()){
+                        if (blockBookmarkIcon.isNotEmpty()) {
 
                             isIconVisible = true
 
-                        }else if (deleteIcon.isNotEmpty()){
+                        } else if (deleteIcon.isNotEmpty()) {
 
                             isIconVisible = true
 
-                        }
-                        else{
+                        } else {
 
                             isIconVisible = false
 
@@ -1223,7 +1306,7 @@ private fun HistoryItem(
 
 @Preview(showBackground = true)
 @Composable
-fun BookmarkScreen(
+private fun BookmarkScreen(
     bookmarkList: List<ItemList> = emptyList(),
     titleClick: (String) -> Unit = {},
     deleteClick: (String) -> Unit = {}
@@ -1271,16 +1354,37 @@ fun BookmarkScreen(
 
             if (bookmarkList.isEmpty()){
 
-                Text("কোন বুকমার্ক নেই।",
-                    fontSize = 18.sp,
-                    fontFamily = BanglaFont.font(),
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF000000),
-                    textAlign = TextAlign.Center,
+                Column(
+
                     modifier = Modifier
-                        .wrapContentWidth()
+                        .fillMaxWidth()
                         .align(Alignment.Center)
+
+                ) {
+
+                    Image( painter = painterResource(R.drawable.img_empty_folder),
+                        contentDescription = "Empty",
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(125.dp)
+                            .align(Alignment.CenterHorizontally)
+
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text("কোন বুকমার্ক নেই।",
+                        fontSize = 18.sp,
+                        fontFamily = BanglaFont.font(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                }
 
             }
 
