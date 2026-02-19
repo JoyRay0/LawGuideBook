@@ -17,7 +17,7 @@ object IntentHelper {
 
     fun normalIntent(activity: Activity, cls: Class<*>){
 
-        activity.startActivity(Intent(activity, cls::class.java))
+        activity.startActivity(Intent(activity, cls))
 
     }
 

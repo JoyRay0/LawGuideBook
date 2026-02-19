@@ -132,6 +132,11 @@ class Act_question : ComponentActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        bookmarkDatabase.closeDB()
+    }
+
 }//class=======================================================
 
 

@@ -1,7 +1,6 @@
 package com.rk_softwares.lawguidebook.Helper
 
-object DebugHelper {
+object ApiLinks {
 
-    val DEBUG_APP = true
 
 }

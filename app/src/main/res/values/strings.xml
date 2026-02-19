@@ -5,4 +5,5 @@
     <string name="title_activity_act_setting">Act_setting</string>
     <string name="title_activity_act_webview">Act_webview</string>
     <string name="title_activity_act_splash">Act_splash</string>
+    <string name="title_activity_act_ai_chat">Act_ai_chat</string>
 </resources>
