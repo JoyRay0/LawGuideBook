@@ -10,6 +10,5 @@ data class GridList(
 data class ItemList(
 
     val question : String,
-    //val answer : String
 
 )
