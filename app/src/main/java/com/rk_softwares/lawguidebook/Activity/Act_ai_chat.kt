@@ -1,14 +1,19 @@
 package com.rk_softwares.lawguidebook.Activity
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -27,9 +32,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +43,7 @@ import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Model.ChatModel
 import com.rk_softwares.lawguidebook.R
 
 class Act_ai_chat : ComponentActivity() {
@@ -52,10 +57,35 @@ class Act_ai_chat : ComponentActivity() {
                 darkIcons = false
             )
 
+            val chatList = remember { mutableStateListOf<ChatModel>() }
+            var reloadChatDB by remember { mutableIntStateOf(0) }
+            var messageId by remember { mutableLongStateOf(0L) }
+
+            LaunchedEffect(Unit) {
+
+                chatList.clear()
+                chatList.add(ChatModel(id = reloadChatDB++.toLong(), user_message = "Hello", isUser = false))
+
+            }
+
             LawGuideBookTheme {
 
                 ChatFullScreen(
-                    backClick = {finish()}
+                    backClick = {finish()},
+                    chatList = chatList,
+                    message = { chatList.add(ChatModel(id = reloadChatDB++.toLong(), user_message = it, isUser = true)) },
+                    deleteMessageId = { messageId = it },
+                    deleteClick = {
+
+                        if (messageId > 0L){
+
+                            chatList.removeAll{ messageId == it.id }
+
+                        }
+
+                        Toast.makeText(this, "ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
+
+                    }
                 )
 
             }
@@ -74,16 +104,104 @@ class Act_ai_chat : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 private fun ChatFullScreen(
-    backClick: () -> Unit = {}
+    backClick: () -> Unit = {},
+    chatList: List<ChatModel> = emptyList(),
+    message: (String) -> Unit = {},
+    deleteMessageId: (Long) -> Unit = {},
+    deleteClick: () -> Unit = {}
 ) {
 
     Scaffold(
         topBar = { Toolbar(
             backClick = { backClick() }
         ) },
-        bottomBar = { ChatNav() },
+
+        bottomBar = { ChatNav(
+            message = { message(it) }
+        ) },
+
         modifier = Modifier.fillMaxSize())
+
     { innerPadding ->
+
+        val lazyState = rememberLazyListState()
+        var isDeleteDialogVisible by remember { mutableStateOf(false) }
+
+
+        LaunchedEffect(chatList.size) {
+
+            if (chatList.isNotEmpty()) lazyState.animateScrollToItem(0)
+
+        }
+
+
+        val reverseList = chatList.reversed()
+
+
+        Box(
+            
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+            
+        ) {
+
+            Column(
+
+                modifier = Modifier.fillMaxSize()
+
+            ) {
+
+                LazyColumn(
+
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(3.dp),
+                    state = lazyState,
+                    reverseLayout = true
+
+                ) {
+
+                    items(
+                        items = reverseList,
+                        key = { it.id }
+                    ){ item ->
+
+                        ChatBubble(
+                            message = item.user_message,
+                            isUser = item.isUser,
+                            deleteMessageLongClick = {
+                                deleteMessageId(item.id)
+                                isDeleteDialogVisible = true
+                            }
+                        )
+
+                    }
+
+                }//lazy column
+
+            }//column
+
+            if (isDeleteDialogVisible){
+
+                DeleteDialog(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    deleteClick = {
+                        isDeleteDialogVisible = false
+                        deleteClick()
+                                  },
+                    closeClick = { isDeleteDialogVisible = false }
+
+                )
+
+            }
+
+
+
+        }//box
 
     }//scaffold
 
@@ -94,6 +212,7 @@ private fun ChatFullScreen(
 @Composable
 private fun Toolbar(
     backClick : () -> Unit = {},
+    moreClick : () -> Unit = {}
 ) {
 
     Box(
@@ -125,12 +244,66 @@ private fun Toolbar(
                     tint = Color(0xFFFFFFFF),
                     modifier = Modifier
                         .wrapContentWidth()
+                        .align(Alignment.Center)
+
+                )
+
+            }
+            
+            IconButton(
+                onClick = { moreClick() },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterEnd)
+            ) {
+
+                Icon( painter = painterResource(R.drawable.ic_vertical_three_dot),
+                    contentDescription = "Back",
+                    tint = Color(0xFFFFFFFF),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+                        .align(Alignment.Center)
 
                 )
 
             }
 
-        }//row
+
+            Row(
+
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Center)
+
+            ) {
+
+                Image( painter = painterResource(R.drawable.img_bot),
+                    contentDescription = "AI",
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(22.dp)
+                        //.align(Alignment.CenterVertically)
+
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(text = "আইনি অ্যাসিস্ট্যান্ট",
+                    fontSize = 17.sp,
+                    fontFamily = BanglaFont.font(),
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFFFFFFF),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.CenterVertically)
+                )
+
+            }//row
+
+
+        }//box
 
     }//box
 
@@ -139,7 +312,9 @@ private fun Toolbar(
 
 @Preview(showBackground = true)
 @Composable
-private fun ChatNav() {
+private fun ChatNav(
+    message : (String) -> Unit = {}
+) {
 
     var inputMessage by remember { mutableStateOf("") }
 
@@ -154,8 +329,13 @@ private fun ChatNav() {
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 7.dp, shape = RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+                //.shadow(elevation = 10.dp, shape = RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
                 .clip(shape = RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
+                .border(
+                    width = 1.dp,
+                    color = Color(0xFFF3DFDF),
+                    shape = RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
+                )
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
 
@@ -197,7 +377,11 @@ private fun ChatNav() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(shape = RoundedCornerShape(15.dp))
-                        .border(width = 1.dp, color = Color(0xFF000000), shape = RoundedCornerShape(15.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF938181),
+                            shape = RoundedCornerShape(15.dp)
+                        )
                         .padding(10.dp)
                         .align(Alignment.CenterStart)
                 )
@@ -207,7 +391,10 @@ private fun ChatNav() {
             Spacer(modifier = Modifier.width(5.dp))
 
             IconButton(
-                onClick = {},
+                onClick = {
+                    if (inputMessage.isNotEmpty()) message(inputMessage)
+                    inputMessage = ""
+                          },
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
@@ -237,8 +424,8 @@ private fun ChatNav() {
 @Composable
 private fun ChatBubble(
     message : String = "Hello",
-    isUser : Boolean = true,
-    deleteMessage : () -> Unit = {}
+    isUser : Boolean = false,
+    deleteMessageLongClick : () -> Unit = {}
 ) {
 
     Box(
@@ -252,10 +439,26 @@ private fun ChatBubble(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(7.dp),
+                .padding(5.dp),
             horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
 
         ) {
+
+            /* chatbot icon */
+            if (!isUser){
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Image( painter = painterResource(R.drawable.ic_bot),
+                    contentDescription = "User",
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(17.dp)
+                        .align(Alignment.Top)
+
+                )
+
+            }
 
             Text(text = message,
                 fontSize = 15.sp,
@@ -269,19 +472,19 @@ private fun ChatBubble(
                             if (isUser) {
 
                                 RoundedCornerShape(
-                                    topStart = 17.dp,
+                                    topStart = 15.dp,
                                     topEnd = 5.dp,
-                                    bottomStart = 17.dp,
-                                    bottomEnd = 17.dp
+                                    bottomStart = 15.dp,
+                                    bottomEnd = 15.dp
                                 )
 
                             } else {
 
                                 RoundedCornerShape(
                                     topStart = 5.dp,
-                                    topEnd = 17.dp,
-                                    bottomStart = 17.dp,
-                                    bottomEnd = 17.dp
+                                    topEnd = 15.dp,
+                                    bottomStart = 15.dp,
+                                    bottomEnd = 15.dp
                                 )
 
                             }
@@ -289,11 +492,27 @@ private fun ChatBubble(
                     )
                     .combinedClickable(
                         onClick = {},
-                        onLongClick = { deleteMessage() }
+                        onLongClick = { deleteMessageLongClick() }
                     )
                     .background(color = if (isUser) Color(0xFFD849F1) else Color(0xFFF3C9C9))
                     .padding(10.dp)
                 )
+
+            /* user icon */
+            if (isUser){
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Image( painter = painterResource(R.drawable.ic_user),
+                    contentDescription = "User",
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(17.dp)
+                        .align(Alignment.Top)
+
+                )
+
+            }
 
 
 
@@ -303,3 +522,69 @@ private fun ChatBubble(
     
 }//fun end
 
+
+@Preview(showBackground = true)
+@Composable
+private fun DeleteDialog(
+    modifier : Modifier = Modifier,
+    deleteClick : () -> Unit = {},
+    closeClick : () -> Unit = {}
+) {
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(15.dp))
+                .clip(shape = RoundedCornerShape(15.dp))
+                .background(color = Color(0xFFFFFFFF))
+                .padding(14.dp)
+
+        ) {
+
+            Text(text = "ডিলিট মেসেজ",
+                fontSize = 15.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFFF44336),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable{ deleteClick() }
+                    .border(width = 1.dp, color = Color(0xFFF44336), shape = RoundedCornerShape(12.dp))
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+                )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(text = "বন্ধ করুন",
+                fontSize = 15.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF4F4545),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable{ closeClick() }
+                    .border(width = 1.dp, color = Color(0xFF625353), shape = RoundedCornerShape(12.dp))
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            )
+
+
+        }//column
+
+    }//box
+
+}//fun end
