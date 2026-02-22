@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -41,12 +42,23 @@ import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.CacheHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.ChatModel
+import com.rk_softwares.lawguidebook.Model.PostChatModel
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.Server.ChatServer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Act_ai_chat : ComponentActivity() {
+
+    private lateinit var chatDatabase: ChatDatabase
+    private lateinit var cacheHelper: CacheHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -57,47 +69,161 @@ class Act_ai_chat : ComponentActivity() {
                 darkIcons = false
             )
 
+            init()
+
             val chatList = remember { mutableStateListOf<ChatModel>() }
             var reloadChatDB by remember { mutableIntStateOf(0) }
-            var messageId by remember { mutableLongStateOf(0L) }
+            var messageId by remember { mutableIntStateOf(0) }
+            var userMessage by remember { mutableStateOf("") }
+            var isMessageSendFailed by remember { mutableStateOf(false) }
+            var isAlertDialogShowed by remember { mutableStateOf(false) }
+            val scope = rememberCoroutineScope()
 
-            LaunchedEffect(Unit) {
+            val cacheData = cacheHelper.getCache("alert_ai_message")  //checking alert message cache data
+
+            if (cacheData == "showed") isAlertDialogShowed = true else isAlertDialogShowed = false
+
+            LaunchedEffect(reloadChatDB) {
+
+                val item = withContext(Dispatchers.IO){
+
+                    chatDatabase.getAll()
+                }
 
                 chatList.clear()
-                chatList.add(ChatModel(id = reloadChatDB++.toLong(), user_message = "Hello", isUser = false))
+                chatList.addAll(item)
 
             }
 
             LawGuideBookTheme {
 
                 ChatFullScreen(
-                    backClick = {finish()},
+                    backClick = {
+                        userMessage = ""
+                        finish()
+                                },
                     chatList = chatList,
-                    message = { chatList.add(ChatModel(id = reloadChatDB++.toLong(), user_message = it, isUser = true)) },
+                    message = { if (it.isNotEmpty()) userMessage = it },
                     deleteMessageId = { messageId = it },
                     deleteClick = {
 
-                        if (messageId > 0L){
+                        if (messageId > 0){
 
-                            chatList.removeAll{ messageId == it.id }
+                            scope.launch {
+
+                                withContext(Dispatchers.IO){
+
+                                    chatDatabase.deleteOne(messageId)
+
+                                }
+
+                                withContext(Dispatchers.Main){
+
+                                    reloadChatDB++
+
+                                    Toast.makeText(this@Act_ai_chat, "মেসেজ ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
+
+                                }
+
+                            }
 
                         }
 
-                        Toast.makeText(this, "ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
+                    },
+                    deleteAllMessage = {
+                        scope.launch {
+
+                            withContext(Dispatchers.IO){
+
+                                chatDatabase.deleteAll()
+
+                            }
+
+                            withContext(Dispatchers.Main){
+
+                                chatList.clear()
+                                reloadChatDB++
+                                Toast.makeText(this@Act_ai_chat, "সব মেসেজ ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
+                            }
+
+                        }
+                    },
+                    sendClick = {
+
+                        scope.launch {
+
+                            withContext(Dispatchers.IO){
+
+                                chatDatabase.insert(
+                                    message = userMessage,
+                                    messageType = "user",
+                                    timestamp = System.currentTimeMillis().toString()
+                                )
+
+                            }
+
+                            withContext(Dispatchers.IO){
+
+                                ChatServer.chatData(
+                                    userMessage = PostChatModel(user_message = userMessage, isUser = true),
+                                    onFailed = { isMessageSendFailed = it },
+                                    onSuccess = { item ->
+
+                                        if (!isMessageSendFailed){
+
+                                            chatDatabase.insert(
+                                                message = item.ai_message,
+                                                messageType = "ai",
+                                                timestamp = System.currentTimeMillis().toString()
+                                            )
+
+                                        }
+
+                                    },
+
+                                )
+
+                            }
+
+                            withContext(Dispatchers.Main){
+
+                                reloadChatDB++
+
+                            }
+
+                        }
+
+                    },
+                    userCheckedMessage =  isAlertDialogShowed ,
+                    alertCloseClick = {
+
+                        cacheHelper.setCache("alert_ai_message", "showed")
+
+                        isAlertDialogShowed = true
 
                     }
+
                 )
 
             }
 
             BackHandler{
 
+                userMessage = ""
                 finish()
 
             }
 
         }
     }//on create=============================
+
+    private fun init(){
+
+        chatDatabase = ChatDatabase(this)
+        cacheHelper = CacheHelper(this, "ai_chat")
+
+    }
+
 }//class=====================================
 
 
@@ -107,26 +233,33 @@ private fun ChatFullScreen(
     backClick: () -> Unit = {},
     chatList: List<ChatModel> = emptyList(),
     message: (String) -> Unit = {},
-    deleteMessageId: (Long) -> Unit = {},
-    deleteClick: () -> Unit = {}
+    deleteMessageId: (Int) -> Unit = {},
+    deleteClick: () -> Unit = {},
+    deleteAllMessage: () -> Unit = {},
+    sendClick: () -> Unit = {},
+    userCheckedMessage : Boolean = true,
+    alertCloseClick: () -> Unit = {}
 ) {
+
+    val lazyState = rememberLazyListState()
+    var isDeleteDialogVisible by remember { mutableStateOf(false) }
+    var isPopUpMenuVisible by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = { Toolbar(
-            backClick = { backClick() }
+            backClick = { backClick() },
+            moreClick = { isPopUpMenuVisible = !isPopUpMenuVisible }
         ) },
 
         bottomBar = { ChatNav(
-            message = { message(it) }
+            message = { message(it) },
+            sendClick = { sendClick() }
         ) },
 
         modifier = Modifier.fillMaxSize())
 
     { innerPadding ->
-
-        val lazyState = rememberLazyListState()
-        var isDeleteDialogVisible by remember { mutableStateOf(false) }
-
 
         LaunchedEffect(chatList.size) {
 
@@ -134,9 +267,7 @@ private fun ChatFullScreen(
 
         }
 
-
         val reverseList = chatList.reversed()
-
 
         Box(
             
@@ -148,7 +279,12 @@ private fun ChatFullScreen(
 
             Column(
 
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = null
+                    ) { isPopUpMenuVisible = false }
 
             ) {
 
@@ -168,8 +304,8 @@ private fun ChatFullScreen(
                     ){ item ->
 
                         ChatBubble(
-                            message = item.user_message,
-                            isUser = item.isUser,
+                            message = item.message,
+                            isUser = if (item.sender == "user") true else false,
                             deleteMessageLongClick = {
                                 deleteMessageId(item.id)
                                 isDeleteDialogVisible = true
@@ -182,7 +318,7 @@ private fun ChatFullScreen(
 
             }//column
 
-            if (isDeleteDialogVisible){
+            if (isDeleteDialogVisible){     //delete single message
 
                 DeleteDialog(
 
@@ -199,7 +335,43 @@ private fun ChatFullScreen(
 
             }
 
+            if (isPopUpMenuVisible){
 
+                PopUpMenu(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopEnd),
+                    deleteAllMessage = {
+                        deleteAllMessage()
+                        isPopUpMenuVisible = false
+
+                    }
+
+                )
+
+            }
+
+            if (!userCheckedMessage){
+
+                AlertDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    alertCloseClick = { alertCloseClick() }
+                )
+
+            }
+
+            if (chatList.isEmpty()){
+
+                EmptyChatMessage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                )
+
+            }
 
         }//box
 
@@ -313,7 +485,8 @@ private fun Toolbar(
 @Preview(showBackground = true)
 @Composable
 private fun ChatNav(
-    message : (String) -> Unit = {}
+    message : (String) -> Unit = {},
+    sendClick : () -> Unit = {}
 ) {
 
     var inputMessage by remember { mutableStateOf("") }
@@ -394,11 +567,14 @@ private fun ChatNav(
                 onClick = {
                     if (inputMessage.isNotEmpty()) message(inputMessage)
                     inputMessage = ""
+                    sendClick()
                           },
+                enabled = if (inputMessage.isEmpty()) false else true,
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
                     //.background(color = Color(0xFF00BCD4))
+                    .alpha(if (inputMessage.isEmpty()) 0.5f else 1f)
                     .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
@@ -559,8 +735,12 @@ private fun DeleteDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable{ deleteClick() }
-                    .border(width = 1.dp, color = Color(0xFFF44336), shape = RoundedCornerShape(12.dp))
+                    .clickable { deleteClick() }
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFF44336),
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                 )
@@ -576,12 +756,257 @@ private fun DeleteDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable{ closeClick() }
-                    .border(width = 1.dp, color = Color(0xFF625353), shape = RoundedCornerShape(12.dp))
+                    .clickable { closeClick() }
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFF625353),
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
             )
 
+
+        }//column
+
+    }//box
+
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+private fun PopUpMenu(
+    modifier: Modifier = Modifier,
+    deleteAllMessage : () -> Unit = {}
+
+) {
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .width(170.dp)
+                .wrapContentHeight()
+                .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
+                .background(color = Color(0xFFFFFFFF))
+                .padding(7.dp)
+                .align(Alignment.CenterEnd)
+
+        ) {
+
+            Text("সব মেসেজ ডিলিট করুন",
+                fontSize = 14.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(10.dp))
+                    .clickable { deleteAllMessage() }
+                    //.background(color = Color(0xFF00BCD4))
+                    .padding(8.dp)
+                    .align(Alignment.CenterHorizontally)
+                )
+
+        }//column
+
+    }//box
+
+    
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+fun AlertDialog(
+    modifier: Modifier = Modifier,
+    alertCloseClick : () -> Unit = {}
+) {
+
+    var isChecked by remember { mutableStateOf(false) }
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(15.dp)
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 7.dp, shape = RoundedCornerShape(14.dp))
+                .clip(shape = RoundedCornerShape(14.dp))
+                .background(color = Color(0xFFFFFFFF))
+                .padding(10.dp)
+                .align(Alignment.Center)
+
+        ) {
+
+            Text(text = "আমাদের AI আইসিস্ট্যান্ট আপনােক আইনি ধারনা দিতে প্রস্তত। " +
+                    "তবে এটি কোনো পেশাদার আইনজীবীর সরাসরি বিকল্প নয়। " +
+                    "প্রতিটি আইনি বিষয়ের দিকগুলো ভিন্ন হতে পারে, তাই এই অ্যাপ থেকে প্রাপ্ত তথ্যগুলো প্রাথমিক গাইডলাইন হিসেবে বিবেচনা করুন।" +
+                    "যেকোনো আইনি বাধ্যবাধকতা বা দাপ্তরিক কাজে ব্যবহারের আগে তথ্যগুলো সংশ্লিষ্ট আইন বিশেষজ্ঞের দ্বারা যাচাই করে নেওয়ার জন্য বিশেষ অনুরোধ রইলো।",
+                fontSize = 17.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .align(Alignment.Start)
+
+            ) {
+
+
+                Checkbox(
+
+                    checked = isChecked,
+                    onCheckedChange = { isChecked = it },
+                    colors = CheckboxDefaults.colors(
+
+                        checkedColor = Color(0xFF9C27B0),
+                        uncheckedColor = Color.Gray,
+                        checkmarkColor = Color.White
+
+                    ),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(18.dp)
+                        .align(Alignment.CenterVertically)
+
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(text =  "আমি সম্মত আছি",
+                    fontSize = 15.sp,
+                    fontFamily = BanglaFont.font(),
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF463D3D),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.CenterVertically)
+                    )
+
+            }//row
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(text = "ঠিক আছে",
+                fontSize = 13.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable(
+                        enabled = if (isChecked) true else false
+                    ) {
+                        alertCloseClick()
+                    }
+                    //.background(color = Color(0xFF00BCD4))
+                    .padding(8.dp)
+                    .alpha(if (isChecked) 1f else 0.5f)
+                    .align(Alignment.End)
+                )
+
+        }//column
+
+    }//box
+    
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyChatMessage(
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+
+
+        ) {
+
+            Image( painter = painterResource(R.drawable.img_bot),
+                contentDescription = "AI",
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(100.dp)
+                    .align(Alignment.CenterHorizontally)
+
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "হ্যালো!",
+                fontSize = 16.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(20.dp))
+                    .background(color = Color(0xFFFAEEEE))
+                    .padding(start = 20.dp, end = 20.dp, top = 9.dp, bottom = 9.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "আমি কীভাবে আপনাকে সাহায্য করতে পারি?",
+                fontSize = 16.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(20.dp))
+                    .background(color = Color(0xFFFAEEEE))
+                    .padding(start = 20.dp, end = 20.dp, top = 9.dp, bottom = 9.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
 
         }//column
 
