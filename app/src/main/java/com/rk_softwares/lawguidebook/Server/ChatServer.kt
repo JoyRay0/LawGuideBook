@@ -2,7 +2,7 @@ package com.rk_softwares.lawguidebook.Server
 
 import com.google.gson.Gson
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
-import com.rk_softwares.lawguidebook.Model.ChatModel
+import com.rk_softwares.lawguidebook.Model.PostChatModel
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -12,9 +12,9 @@ import java.lang.Exception
 object ChatServer {
 
     fun chatData(
-        userMessage : ChatModel? = null,
-        onSuccess : (ChatModel) -> Unit = {},
-        onFailed : (Boolean) -> Unit = {}
+        userMessage : PostChatModel? = null,
+        onFailed : (Boolean) -> Unit = {},
+        onSuccess : (PostChatModel) -> Unit = {},
     ){
 
         if (userMessage == null) return
@@ -47,7 +47,7 @@ object ChatServer {
 
                     try {
 
-                        val item_message = gson.fromJson(data, ChatModel::class.java)
+                        val item_message = gson.fromJson(data, PostChatModel::class.java)
 
                         onSuccess(item_message)
                         onFailed(false)
