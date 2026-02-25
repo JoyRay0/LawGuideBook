@@ -73,5 +73,7 @@ dependencies {
 
     implementation(libs.twain) //README format
 
+    implementation("com.github.razaghimahdi:Compose-Loading-Dots:1.2.3")
+
     //implementation("com.airbnb.android:lottie-compose:6.7.1")
 }

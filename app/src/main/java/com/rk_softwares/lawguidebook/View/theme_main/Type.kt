@@ -1,12 +1,10 @@
-package com.rk_softwares.lawguidebook.Activity.theme_main
+package com.rk_softwares.lawguidebook.View.theme_main
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
 
 // Set of Material typography styles to start with
 val Typography = Typography(

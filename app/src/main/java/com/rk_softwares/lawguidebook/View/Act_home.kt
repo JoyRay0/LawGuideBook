@@ -1,4 +1,4 @@
-package com.rk_softwares.lawguidebook.Activity
+package com.rk_softwares.lawguidebook.View
 
 import android.content.Intent
 import android.os.Bundle
@@ -55,10 +55,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
+import com.rk_softwares.lawguidebook.View.theme_main.LightNav
+import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
@@ -66,8 +66,8 @@ import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
-import com.rk_softwares.lawguidebook.Model.GridList
-import com.rk_softwares.lawguidebook.Model.ItemList
+import com.rk_softwares.lawguidebook.model.GridList
+import com.rk_softwares.lawguidebook.model.ItemList
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

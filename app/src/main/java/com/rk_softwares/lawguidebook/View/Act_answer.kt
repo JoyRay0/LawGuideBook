@@ -1,4 +1,4 @@
-package com.rk_softwares.lawguidebook.Activity
+package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
 import android.widget.Toast
@@ -43,10 +43,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.colintheshots.twain.MarkdownText
-import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
+import com.rk_softwares.lawguidebook.View.theme_main.LightNav
+import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.KeyHelper

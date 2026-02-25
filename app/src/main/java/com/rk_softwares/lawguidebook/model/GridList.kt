@@ -1,4 +1,4 @@
-package com.rk_softwares.lawguidebook.Model
+package com.rk_softwares.lawguidebook.model
 
 data class GridList(
 

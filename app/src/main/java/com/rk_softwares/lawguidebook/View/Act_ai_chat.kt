@@ -1,16 +1,18 @@
-package com.rk_softwares.lawguidebook.Activity
+package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,7 +31,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,28 +42,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.razzaghi.compose_loading_dots.LoadingWavy
+import com.razzaghi.compose_loading_dots.core.rememberDotsLoadingController
+import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
+import com.rk_softwares.lawguidebook.View.theme_main.LightNav
+import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.CacheHelper
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
-import com.rk_softwares.lawguidebook.Model.ChatModel
-import com.rk_softwares.lawguidebook.Model.PostChatModel
+import com.rk_softwares.lawguidebook.Model.ChatMessage
+import com.rk_softwares.lawguidebook.Presenter.ChatPresenter
+import com.rk_softwares.lawguidebook.Presenter.ChatView
 import com.rk_softwares.lawguidebook.R
-import com.rk_softwares.lawguidebook.Server.ChatServer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class Act_ai_chat : ComponentActivity() {
+class Act_ai_chat : ComponentActivity(), ChatView{//class=====================================
 
     private lateinit var chatDatabase: ChatDatabase
     private lateinit var cacheHelper: CacheHelper
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var chatPresenter: ChatPresenter
+
+    //init---------------------------
+
+    private val chatList = mutableStateListOf<ChatMessage>()
+    private var messageStatus = mutableStateOf("")
+    private var cacheStatus = mutableStateOf("")
+
+
+    override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContent {
 
@@ -71,29 +84,13 @@ class Act_ai_chat : ComponentActivity() {
 
             init()
 
-            val chatList = remember { mutableStateListOf<ChatModel>() }
-            var reloadChatDB by remember { mutableIntStateOf(0) }
             var messageId by remember { mutableIntStateOf(0) }
             var userMessage by remember { mutableStateOf("") }
-            var isMessageSendFailed by remember { mutableStateOf(false) }
-            var isAlertDialogShowed by remember { mutableStateOf(false) }
-            val scope = rememberCoroutineScope()
+            val clipBoardManager = LocalClipboardManager.current
+            //val scope = rememberCoroutineScope()
 
-            val cacheData = cacheHelper.getCache("alert_ai_message")  //checking alert message cache data
-
-            if (cacheData == "showed") isAlertDialogShowed = true else isAlertDialogShowed = false
-
-            LaunchedEffect(reloadChatDB) {
-
-                val item = withContext(Dispatchers.IO){
-
-                    chatDatabase.getAll()
-                }
-
-                chatList.clear()
-                chatList.addAll(item)
-
-            }
+            chatPresenter.getCache("alert_message")
+            chatPresenter.getMessages()
 
             LawGuideBookTheme {
 
@@ -102,108 +99,45 @@ class Act_ai_chat : ComponentActivity() {
                         userMessage = ""
                         finish()
                                 },
+
                     chatList = chatList,
+
                     message = { if (it.isNotEmpty()) userMessage = it },
-                    deleteMessageId = { messageId = it },
-                    deleteClick = {
+
+                    messageId = { messageId = it },
+
+                    deleteClick = { chatPresenter.deleteMessage(messageId) },
+
+                    deleteAllMessage = { chatPresenter.deleteAllMessages()
+                                       },
+                    sendClick = {
+
+                        chatPresenter.sendMessage(message = userMessage, uMessage = ChatMessage(
+                            user_message = userMessage))
+
+                    },
+                    userCheckedMessage = if (cacheStatus.value == "showed") true else false ,
+                    alertCloseClick = { chatPresenter.setCache("alert_message", "showed") },
+
+                    copyClick = {
 
                         if (messageId > 0){
 
-                            scope.launch {
+                            val chatMessage = chatList.find { it.id == messageId }
 
-                                withContext(Dispatchers.IO){
+                            clipBoardManager.setText(AnnotatedString(chatMessage?.message ?: ""))
 
-                                    chatDatabase.deleteOne(messageId)
-
-                                }
-
-                                withContext(Dispatchers.Main){
-
-                                    reloadChatDB++
-
-                                    Toast.makeText(this@Act_ai_chat, "মেসেজ ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
-
-                                }
-
-                            }
+                            ShortMessageHelper.toast(this, "কপি হয়েছে")
 
                         }
 
                     },
-                    deleteAllMessage = {
-                        scope.launch {
+                    resultAvailableStatus = messageStatus.value
 
-                            withContext(Dispatchers.IO){
-
-                                chatDatabase.deleteAll()
-
-                            }
-
-                            withContext(Dispatchers.Main){
-
-                                chatList.clear()
-                                reloadChatDB++
-                                Toast.makeText(this@Act_ai_chat, "সব মেসেজ ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
-                            }
-
-                        }
-                    },
-                    sendClick = {
-
-                        scope.launch {
-
-                            withContext(Dispatchers.IO){
-
-                                chatDatabase.insert(
-                                    message = userMessage,
-                                    messageType = "user",
-                                    timestamp = System.currentTimeMillis().toString()
-                                )
-
-                            }
-
-                            withContext(Dispatchers.IO){
-
-                                ChatServer.chatData(
-                                    userMessage = PostChatModel(user_message = userMessage, isUser = true),
-                                    onFailed = { isMessageSendFailed = it },
-                                    onSuccess = { item ->
-
-                                        if (!isMessageSendFailed){
-
-                                            chatDatabase.insert(
-                                                message = item.ai_message,
-                                                messageType = "ai",
-                                                timestamp = System.currentTimeMillis().toString()
-                                            )
-
-                                        }
-
-                                    },
-
-                                )
-
-                            }
-
-                            withContext(Dispatchers.Main){
-
-                                reloadChatDB++
-
-                            }
-
-                        }
-
-                    },
-                    userCheckedMessage =  isAlertDialogShowed ,
-                    alertCloseClick = {
-
-                        cacheHelper.setCache("alert_ai_message", "showed")
-
-                        isAlertDialogShowed = true
-
-                    }
 
                 )
+
+                Log.d("user_message", userMessage)
 
             }
 
@@ -221,30 +155,53 @@ class Act_ai_chat : ComponentActivity() {
 
         chatDatabase = ChatDatabase(this)
         cacheHelper = CacheHelper(this, "ai_chat")
+        chatPresenter = ChatPresenter(this, chatDatabase, cacheHelper)
 
     }
 
-}//class=====================================
+    override fun messages(messages: List<ChatMessage>) {
+
+        chatList.clear()
+        chatList.addAll(messages)
+
+    }
+
+    override fun messageStatus(status: String) {
+        messageStatus.value = status
+    }
+
+    override fun deleteStatus(isDeleted: Boolean, message: String) {
+
+        if (isDeleted) ShortMessageHelper.toast(this, message)
+
+    }
+
+    override fun cacheStatus(status: String) {
+        cacheStatus.value = status
+    }
+
+}
 
 
 @Preview(showBackground = true)
 @Composable
 private fun ChatFullScreen(
     backClick: () -> Unit = {},
-    chatList: List<ChatModel> = emptyList(),
+    chatList: List<ChatMessage> = emptyList(),
     message: (String) -> Unit = {},
-    deleteMessageId: (Int) -> Unit = {},
+    messageId: (Int) -> Unit = {},
     deleteClick: () -> Unit = {},
     deleteAllMessage: () -> Unit = {},
     sendClick: () -> Unit = {},
     userCheckedMessage : Boolean = true,
-    alertCloseClick: () -> Unit = {}
+    alertCloseClick: () -> Unit = {},
+    copyClick: () -> Unit = {},
+    resultAvailableStatus : String = ""
 ) {
 
     val lazyState = rememberLazyListState()
     var isDeleteDialogVisible by remember { mutableStateOf(false) }
     var isPopUpMenuVisible by remember { mutableStateOf(false) }
-
 
     Scaffold(
         topBar = { Toolbar(
@@ -291,8 +248,8 @@ private fun ChatFullScreen(
                 LazyColumn(
 
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(3.dp),
+                        .fillMaxWidth()
+                        .padding(5.dp),
                     state = lazyState,
                     reverseLayout = true
 
@@ -305,11 +262,12 @@ private fun ChatFullScreen(
 
                         ChatBubble(
                             message = item.message,
-                            isUser = if (item.sender == "user") true else false,
+                            isUser = item.isUser,
                             deleteMessageLongClick = {
-                                deleteMessageId(item.id)
+                                messageId(item.id)
                                 isDeleteDialogVisible = true
-                            }
+                            },
+                            resultAvailableStatus = resultAvailableStatus
                         )
 
                     }
@@ -317,6 +275,16 @@ private fun ChatFullScreen(
                 }//lazy column
 
             }//column
+
+            if (chatList.isEmpty()){
+
+                EmptyChatMessage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                )
+
+            }
 
             if (isDeleteDialogVisible){     //delete single message
 
@@ -329,7 +297,11 @@ private fun ChatFullScreen(
                         isDeleteDialogVisible = false
                         deleteClick()
                                   },
-                    closeClick = { isDeleteDialogVisible = false }
+                    closeClick = { isDeleteDialogVisible = false },
+                    copyClick = {
+                        isDeleteDialogVisible = false
+                        copyClick()
+                    }
 
                 )
 
@@ -363,15 +335,6 @@ private fun ChatFullScreen(
 
             }
 
-            if (chatList.isEmpty()){
-
-                EmptyChatMessage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                )
-
-            }
 
         }//box
 
@@ -599,10 +562,15 @@ private fun ChatNav(
 @Preview(showBackground = true)
 @Composable
 private fun ChatBubble(
-    message : String = "Hello",
+    message : String = "hi",
     isUser : Boolean = false,
-    deleteMessageLongClick : () -> Unit = {}
+    deleteMessageLongClick : () -> Unit = {},
+    resultAvailableStatus: String = "pending"
 ) {
+
+    //var isDotVisible by remember { mutableStateOf(false) }
+    val dotWave = rememberDotsLoadingController()
+
 
     Box(
 
@@ -636,11 +604,8 @@ private fun ChatBubble(
 
             }
 
-            Text(text = message,
-                fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.Normal,
-                color = if (isUser) Color(0xFFFFFFFF) else Color(0xFF000000),
+            Box(
+
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(
@@ -648,19 +613,19 @@ private fun ChatBubble(
                             if (isUser) {
 
                                 RoundedCornerShape(
-                                    topStart = 15.dp,
+                                    topStart = 17.dp,
                                     topEnd = 5.dp,
-                                    bottomStart = 15.dp,
-                                    bottomEnd = 15.dp
+                                    bottomStart = 17.dp,
+                                    bottomEnd = 17.dp
                                 )
 
                             } else {
 
                                 RoundedCornerShape(
                                     topStart = 5.dp,
-                                    topEnd = 15.dp,
-                                    bottomStart = 15.dp,
-                                    bottomEnd = 15.dp
+                                    topEnd = 17.dp,
+                                    bottomStart = 17.dp,
+                                    bottomEnd = 17.dp
                                 )
 
                             }
@@ -670,9 +635,85 @@ private fun ChatBubble(
                         onClick = {},
                         onLongClick = { deleteMessageLongClick() }
                     )
-                    .background(color = if (isUser) Color(0xFFD849F1) else Color(0xFFF3C9C9))
+                    .background(color = if (isUser) Color(0xFFD849F1) else Color(0xFFFAD9D9))
                     .padding(10.dp)
-                )
+
+            ) {
+
+                /*
+                if (!isUser){
+
+                    when(resultAvailableStatus){
+
+                        "pending" ->  LoadingWavy(
+                            controller = dotWave,
+                            modifier = Modifier
+                                .wrapContentWidth(),
+                            //.align(Alignment.Center)
+                            //.padding(2.dp),
+                            dotsCount = 3,
+                            dotsColor = Color(0xFFD849F1),
+                            dotsSize = 10.dp,
+                            duration = 700,
+                            easing = LinearEasing
+                        )
+
+                        "success" -> Text(text = message,
+                            fontSize = 15.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF000000),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.Center)
+                        )
+
+                        "failed" -> Text(text = "পুনরায় চেষ্টা করুন।",
+                            fontSize = 15.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF000000),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.Center)
+                        )
+
+                    }
+
+                }else{
+
+                    Text(text = message,
+                        fontSize = 15.sp,
+                        fontFamily = BanglaFont.font(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFFFFFFFF),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.Center)
+                    )
+
+                }
+
+                 */
+
+
+                BoxWithConstraints{
+
+                    val maxW = maxWidth * 0.7f
+
+                    Text(text = message,
+                        fontSize = 15.sp,
+                        fontFamily = BanglaFont.font(),
+                        fontWeight = FontWeight.Normal,
+                        color = if (isUser) Color(0xFFFFFFFF) else Color(0xFF000000),
+                        modifier = Modifier
+                            .widthIn(max = maxW)
+                            .align(Alignment.Center)
+                    )
+
+                }
+
+            }//box
 
             /* user icon */
             if (isUser){
@@ -704,7 +745,8 @@ private fun ChatBubble(
 private fun DeleteDialog(
     modifier : Modifier = Modifier,
     deleteClick : () -> Unit = {},
-    closeClick : () -> Unit = {}
+    closeClick : () -> Unit = {},
+    copyClick : () -> Unit = {}
 ) {
 
     Box(
@@ -726,6 +768,27 @@ private fun DeleteDialog(
 
         ) {
 
+            Text(text = "কপি মেসেজ",
+                fontSize = 15.sp,
+                fontFamily = BanglaFont.font(),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF695A5A),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable { copyClick() }
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xC6625353),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             Text(text = "ডিলিট মেসেজ",
                 fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
@@ -738,7 +801,7 @@ private fun DeleteDialog(
                     .clickable { deleteClick() }
                     .border(
                         width = 1.dp,
-                        color = Color(0xFFF44336),
+                        color = Color(0xBEF44336),
                         shape = RoundedCornerShape(12.dp)
                     )
                     .align(Alignment.CenterHorizontally)
@@ -752,14 +815,14 @@ private fun DeleteDialog(
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                color = Color(0xFF4F4545),
+                color = Color(0xFF9F8888),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(12.dp))
                     .clickable { closeClick() }
                     .border(
                         width = 1.dp,
-                        color = Color(0xFF625353),
+                        color = Color(0xFFB69494),
                         shape = RoundedCornerShape(12.dp)
                     )
                     .align(Alignment.CenterHorizontally)

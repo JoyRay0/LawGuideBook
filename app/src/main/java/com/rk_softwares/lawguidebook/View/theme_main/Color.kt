@@ -1,4 +1,4 @@
-package com.rk_softwares.lawguidebook.Activity.theme_main
+package com.rk_softwares.lawguidebook.View.theme_main
 
 import androidx.compose.ui.graphics.Color
 

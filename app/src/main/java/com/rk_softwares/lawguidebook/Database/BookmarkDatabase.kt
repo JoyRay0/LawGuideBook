@@ -3,7 +3,7 @@ package com.rk_softwares.lawguidebook.Database
 import android.content.*
 import android.database.Cursor
 import android.database.sqlite.*
-import com.rk_softwares.lawguidebook.Model.ItemList
+import com.rk_softwares.lawguidebook.model.ItemList
 
 class BookmarkDatabase
     (val context : Context)

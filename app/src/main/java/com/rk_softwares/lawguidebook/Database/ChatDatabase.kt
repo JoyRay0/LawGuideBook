@@ -5,25 +5,27 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.rk_softwares.lawguidebook.Model.ChatModel
+import com.rk_softwares.lawguidebook.Model.ChatMessage
 
 class ChatDatabase(
     val context: Context
-) : SQLiteOpenHelper(context, "chat.db", null, 2)  {
+) : SQLiteOpenHelper(context, "chat.db", null, 6)  {
 
     private val TABLE_NAME = "chat_history"
     private lateinit var db: SQLiteDatabase
 
     companion object{
         const val COL_ID = "id"
-        const val COL_MESSAGE = "message_text"
+        const val COL_MESSAGE = "message"
         const val COL_SENDER = "sender_type"
         const val COL_TIMESTAMP = "timestamp"
+
+        const val COL_IS_USER = "is_user"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
 
-        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, message_text TEXT, sender_type TEXT, timestamp TEXT)"
+        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, sender_type TEXT NOT NULL, is_user INTEGER NOT NULL DEFAULT 0, timestamp TEXT NOT NULL)"
 
         db?.execSQL(create_sql)
 
@@ -43,9 +45,11 @@ class ChatDatabase(
 
     }
 
-    fun insert(message : String, messageType : String, timestamp: String){
+    fun insert(message : String, isUser : Boolean, messageType : String, timestamp: String){
 
-        if (message.isEmpty() || messageType.isEmpty() || timestamp.isEmpty()) return
+        if (message.isEmpty() ||messageType.isEmpty() || timestamp.isEmpty()) return
+
+        val booleanData = if (isUser) 1 else 0
 
         val db = dbOpen(true)
 
@@ -55,6 +59,7 @@ class ChatDatabase(
 
             cv.put(COL_MESSAGE, message)
             cv.put(COL_SENDER, messageType)
+            cv.put(COL_IS_USER, booleanData)
             cv.put(COL_TIMESTAMP, timestamp)
 
             db.insert(TABLE_NAME, null, cv)
@@ -65,13 +70,13 @@ class ChatDatabase(
 
     }
 
-    fun getAll() : List<ChatModel>{
+    fun getAll() : List<ChatMessage>{
 
         val db = dbOpen()
 
         var cursor : Cursor? = null
 
-        val list : MutableList<ChatModel> = mutableListOf()
+        val list : MutableList<ChatMessage> = mutableListOf()
 
         try {
 
@@ -82,12 +87,14 @@ class ChatDatabase(
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID))
                 val message = cursor.getString(cursor.getColumnIndexOrThrow(COL_MESSAGE))
                 val sender = cursor.getString(cursor.getColumnIndexOrThrow(COL_SENDER))
+                val is_user = cursor.getInt(cursor.getColumnIndexOrThrow(COL_IS_USER))
                 val timestamp = cursor.getString(cursor.getColumnIndexOrThrow(COL_TIMESTAMP))
 
-                list.add(ChatModel(
+                list.add(ChatMessage(
                     id = id,
                     message = message,
                     sender = sender,
+                    isUser = if (is_user == 1) true else false,
                     timestamp = timestamp
                 ))
 

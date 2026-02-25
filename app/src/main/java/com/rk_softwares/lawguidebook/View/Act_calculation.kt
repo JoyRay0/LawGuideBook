@@ -1,17 +1,16 @@
-package com.rk_softwares.lawguidebook.Activity
+package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
+import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
+import com.rk_softwares.lawguidebook.View.theme_main.LightNav
+import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 
 class Act_calculation : ComponentActivity() {

@@ -3,7 +3,8 @@ package com.rk_softwares.lawguidebook.Database
 import android.content.*
 import android.database.Cursor
 import android.database.sqlite.*
-import com.rk_softwares.lawguidebook.Model.ItemList
+import com.rk_softwares.lawguidebook.Model.Items
+import com.rk_softwares.lawguidebook.model.ItemList
 
 class HistoryDatabase(
     val context: Context
@@ -53,13 +54,13 @@ class HistoryDatabase(
 
     }
 
-    fun getAll() : List<ItemList>{
+    fun getAll() : List<Items>{
 
         val db = dbOpen()
 
         var cursor : Cursor? = null
 
-        val list : MutableList<ItemList> = mutableListOf()
+        val list : MutableList<Items> = mutableListOf()
         try {
 
             cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
@@ -68,7 +69,7 @@ class HistoryDatabase(
 
                 val title = cursor.getString(cursor.getColumnIndexOrThrow("title"))
 
-                list.add(ItemList(question = title))
+                list.add(Items(question = title))
 
             }
 

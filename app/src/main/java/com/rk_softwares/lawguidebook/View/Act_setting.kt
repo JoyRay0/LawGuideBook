@@ -1,4 +1,4 @@
-package com.rk_softwares.lawguidebook.Activity
+package com.rk_softwares.lawguidebook.View
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -41,10 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import com.rk_softwares.lawguidebook.Activity.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightNav
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.Activity.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
+import com.rk_softwares.lawguidebook.View.theme_main.LightNav
+import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.IntentHelper

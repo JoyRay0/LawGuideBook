@@ -1,9 +1,7 @@
 package com.rk_softwares.lawguidebook.Helper
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import com.rk_softwares.lawguidebook.Activity.Act_home
 
 object IntentHelper {
 

@@ -14,46 +14,47 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:hardwareAccelerated="true"
         android:theme="@style/Theme.LawGuideBook">
         <activity
-            android:name=".Activity.Act_calculation"
+            android:name=".View.Act_calculation"
             android:exported="false"
             android:label="@string/title_activity_act_calculation"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_ai_chat"
+            android:name=".View.Act_ai_chat"
             android:exported="false"
             android:label="@string/title_activity_act_ai_chat"
             android:theme="@style/Theme.LawGuideBook"
             android:windowSoftInputMode="adjustResize"
             />
         <activity
-            android:name=".Activity.Act_home"
+            android:name=".View.Act_home"
             android:exported="false"
             android:label="@string/title_activity_act_splash"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_webview"
+            android:name=".View.Act_webview"
             android:exported="false"
             android:label="@string/title_activity_act_webview"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_setting"
+            android:name=".View.Act_setting"
             android:exported="false"
             android:label="@string/title_activity_act_setting"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_question"
+            android:name=".View.Act_question"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_answer"
+            android:name=".View.Act_answer"
             android:exported="false"
             android:label="@string/title_activity_act_answer"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
-            android:name=".Activity.Act_splash"
+            android:name=".View.Act_splash"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LawGuideBook">
