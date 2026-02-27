@@ -5,6 +5,8 @@ import com.rk_softwares.lawguidebook.Model.HomeModel
 import com.rk_softwares.lawguidebook.Model.Items
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,10 +28,12 @@ class HomePresenter(
 
     private val homeModel = HomeModel(historyDB)
 
+    private val scopeIO = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     fun getAllHistory(){
 
-        CoroutineScope(Dispatchers.Main).launch{
+        scopeMain.launch{
 
             val items = withContext(Dispatchers.IO){
 
@@ -40,13 +44,11 @@ class HomePresenter(
 
         }
 
-    }
+    }//fun end
 
-    fun historyToServer(
-        title : String,
-        ){
+    fun searchAndHistoryToServer(title : String){
 
-        CoroutineScope(Dispatchers.IO).launch {
+        scopeIO.launch {
 
             homeModel.dbAddHistory(title)
 
@@ -60,7 +62,7 @@ class HomePresenter(
                 items = Items(title = title),
                 onSuccess = { result ->
 
-                CoroutineScope(Dispatchers.Main).launch{
+                scopeMain.launch{
 
                     view.serverStatus("Success")
                     view.searchList(result)
@@ -69,7 +71,7 @@ class HomePresenter(
 
             }, onFailed = {
 
-                CoroutineScope(Dispatchers.Main).launch{
+                scopeMain.launch{
 
                     view.serverStatus("Failed")
 
@@ -79,7 +81,28 @@ class HomePresenter(
 
         }
 
+    }//fun end
+
+    fun categoryItemFromServer(){
+
+        scopeIO.launch {
+
+            homeModel.categoryServer(onSuccess = { result ->
+
+                view.serverStatus("Success")
+                view.categoryList(result)
+
+            }, onFailed = {
+
+                view.serverStatus("Failed")
+            })
+
+        }
+
+    }//fun end
+
+    fun onDestroy(){
+        scopeIO.cancel()
+        scopeMain.cancel()
     }
-
-
 }

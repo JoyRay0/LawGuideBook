@@ -6,6 +6,8 @@ import com.rk_softwares.lawguidebook.Model.ChatMessage
 import com.rk_softwares.lawguidebook.Model.ChatModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,9 +28,12 @@ class ChatPresenter(
     private val model = ChatModel(db, cache)
     private var aiMessage : String = ""
 
+    private val scopeIO = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
     fun getMessages(){
 
-        CoroutineScope(Dispatchers.Main).launch {
+        scopeMain.launch {
 
             val messages = withContext(Dispatchers.IO){
 
@@ -49,7 +54,7 @@ class ChatPresenter(
 
         view.messageStatus("pending")
 
-        CoroutineScope(Dispatchers.IO).launch{
+        scopeIO.launch{
 
             model.dbUserInsert(message)
 
@@ -64,7 +69,7 @@ class ChatPresenter(
 
                 model.dbAiInsert(msg = aiMessage)
 
-                CoroutineScope(Dispatchers.Main).launch{
+                scopeMain.launch{
 
                     view.messages(model.getAllMessage())
                     view.messageStatus("success")
@@ -79,7 +84,7 @@ class ChatPresenter(
 
     fun deleteMessage(id : Int){
 
-        CoroutineScope(Dispatchers.IO).launch{
+        scopeIO.launch{
 
             val deleted = model.dbDeleteSingleMessage(id)
 
@@ -104,7 +109,7 @@ class ChatPresenter(
 
     fun deleteAllMessages(){
 
-        CoroutineScope(Dispatchers.IO).launch {
+        scopeIO.launch {
 
             model.dbDeleteAllMessage()
 
@@ -141,6 +146,11 @@ class ChatPresenter(
 
         }
 
+    }
+
+    fun onDestroy(){
+        scopeIO.cancel()
+        scopeMain.cancel()
     }
 
 
