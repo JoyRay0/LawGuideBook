@@ -52,7 +52,9 @@
             android:name=".View.Act_answer"
             android:exported="false"
             android:label="@string/title_activity_act_answer"
-            android:theme="@style/Theme.LawGuideBook" />
+            android:theme="@style/Theme.LawGuideBook"
+            android:launchMode="singleTop"
+            />
         <activity
             android:name=".View.Act_splash"
             android:exported="true"
