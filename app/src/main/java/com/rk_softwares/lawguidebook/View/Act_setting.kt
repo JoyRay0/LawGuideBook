@@ -89,10 +89,6 @@ class Act_setting : ComponentActivity() {
 
             }
 
-            val internet = InternetChecker.liveInternetStatus(this)
-
-            Toast.makeText(this,if (internet) "On" else "Off", Toast.LENGTH_SHORT).show()
-
             LawGuideBookTheme {
 
                 SettingFullScreen(
