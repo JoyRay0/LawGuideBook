@@ -1,11 +1,9 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.razzaghi.compose_loading_dots.LoadingWavy
 import com.razzaghi.compose_loading_dots.core.rememberDotsLoadingController
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
@@ -51,6 +48,9 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.CacheHelper
+import com.rk_softwares.lawguidebook.Helper.ComposeHelper
+import com.rk_softwares.lawguidebook.Helper.InternetChecker
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.ChatMessage
@@ -58,18 +58,20 @@ import com.rk_softwares.lawguidebook.Presenter.ChatPresenter
 import com.rk_softwares.lawguidebook.Presenter.ChatView
 import com.rk_softwares.lawguidebook.R
 
-class Act_ai_chat : ComponentActivity(), ChatView{//class=====================================
+class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
     private lateinit var chatDatabase: ChatDatabase
     private lateinit var cacheHelper: CacheHelper
-
     private lateinit var chatPresenter: ChatPresenter
+
+    private lateinit var internetChecker: InternetChecker
 
     //init---------------------------
 
     private val chatList = mutableStateListOf<ChatMessage>()
     private var messageStatus = mutableStateOf("")
     private var cacheStatus = mutableStateOf("")
+    private var isInternet = mutableStateOf(false)
 
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -84,13 +86,20 @@ class Act_ai_chat : ComponentActivity(), ChatView{//class=======================
 
             init()
 
+            internetChecker.onStart()
+
             var messageId by remember { mutableIntStateOf(0) }
             var userMessage by remember { mutableStateOf("") }
             val clipBoardManager = LocalClipboardManager.current
-            //val scope = rememberCoroutineScope()
 
             chatPresenter.getCache("alert_message")
             chatPresenter.getMessages()
+
+            LaunchedEffect(isInternet.value) {
+
+                chatPresenter.sendUserMessageToServer()
+
+            }
 
             LawGuideBookTheme {
 
@@ -112,8 +121,7 @@ class Act_ai_chat : ComponentActivity(), ChatView{//class=======================
                                        },
                     sendClick = {
 
-                        chatPresenter.sendMessage(message = userMessage, uMessage = ChatMessage(
-                            user_message = userMessage))
+                        chatPresenter.userSendMessage(message = userMessage)
 
                     },
                     userCheckedMessage = if (cacheStatus.value == "showed") true else false ,
@@ -132,12 +140,10 @@ class Act_ai_chat : ComponentActivity(), ChatView{//class=======================
                         }
 
                     },
-                    resultAvailableStatus = messageStatus.value
-
+                    resultAvailableStatus = messageStatus.value,
+                    internet = isInternet.value
 
                 )
-
-                Log.d("user_message", userMessage)
 
             }
 
@@ -156,7 +162,14 @@ class Act_ai_chat : ComponentActivity(), ChatView{//class=======================
         chatDatabase = ChatDatabase(this)
         cacheHelper = CacheHelper(this, "ai_chat")
         chatPresenter = ChatPresenter(this, chatDatabase, cacheHelper)
+        internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        chatPresenter.onDestroy()
+        internetChecker.onStop()
     }
 
     override fun messages(messages: List<ChatMessage>) {
@@ -180,7 +193,11 @@ class Act_ai_chat : ComponentActivity(), ChatView{//class=======================
         cacheStatus.value = status
     }
 
-}
+    override fun isInternet(internet: Boolean) {
+        isInternet.value = internet
+    }
+
+}//class=====================================
 
 
 @Preview(showBackground = true)
@@ -196,12 +213,16 @@ private fun ChatFullScreen(
     userCheckedMessage : Boolean = true,
     alertCloseClick: () -> Unit = {},
     copyClick: () -> Unit = {},
-    resultAvailableStatus : String = ""
+    resultAvailableStatus : String = "",
+    internet : Boolean = false
 ) {
 
     val lazyState = rememberLazyListState()
     var isDeleteDialogVisible by remember { mutableStateOf(false) }
     var isPopUpMenuVisible by remember { mutableStateOf(false) }
+    var isInternetDialogVisible by remember { mutableStateOf(false) }
+
+    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
         topBar = { Toolbar(
@@ -248,7 +269,7 @@ private fun ChatFullScreen(
                 LazyColumn(
 
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(5.dp),
                     state = lazyState,
                     reverseLayout = true
@@ -331,6 +352,18 @@ private fun ChatFullScreen(
                         .fillMaxWidth()
                         .align(Alignment.Center),
                     alertCloseClick = { alertCloseClick() }
+                )
+
+            }
+
+            if (isInternetDialogVisible){
+
+                ComposeHelper.InternetDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    closeClick = { isInternetDialogVisible = false },
+                    openClick = { isInternetDialogVisible = false }
                 )
 
             }
