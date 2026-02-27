@@ -1,7 +1,6 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -26,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,17 +48,28 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Model.AnswerData
+import com.rk_softwares.lawguidebook.Presenter.Answer
+import com.rk_softwares.lawguidebook.Presenter.AnswerPresenter
 import com.rk_softwares.lawguidebook.R
 
-class Act_answer : ComponentActivity() {
+class Act_answer : ComponentActivity(), Answer, InternetStatus {//class======================================================
+
+    //init
+    private lateinit var presenter: AnswerPresenter
+    private lateinit var internetChecker: InternetChecker
+    private var answerData = mutableStateOf("")
+    private var isInternet = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            
-            var toolBarText by remember { mutableStateOf("") }
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
@@ -66,12 +77,23 @@ class Act_answer : ComponentActivity() {
                 darkIcons = false
             )
 
-            toolBarText = intent.getStringExtra(KeyHelper.sendQuestion_IntentKey()) ?: ""
+            init()
 
-            val internet = InternetChecker.liveInternetStatus(this)
+            var toolBarText by remember { mutableStateOf("") }
 
-            Toast.makeText(this,if (internet) "On" else "Off", Toast.LENGTH_SHORT).show()
+            if (savedInstanceState == null){
 
+                toolBarText = intent.getStringExtra(KeyHelper.sendQuestion_IntentKey()) ?: ""
+
+            }
+
+            LaunchedEffect(isInternet.value) {
+
+                presenter.answerFromServer(toolBarText)
+
+            }
+
+            internetChecker.onStart()
 
             LawGuideBookTheme {
                 AnswerFullScreen(
@@ -79,7 +101,9 @@ class Act_answer : ComponentActivity() {
                         finish()
                         toolBarText = ""
                     },
-                    toolbarTitle = toolBarText
+                    toolbarTitle = toolBarText,
+                    answer = answerData.value,
+                    internet = isInternet.value
                 )
 
             }
@@ -93,34 +117,53 @@ class Act_answer : ComponentActivity() {
 
         }
     }//on create==============================================
-}//class======================================================
+
+    private fun init(){
+        presenter = AnswerPresenter(this)
+        internetChecker = InternetChecker(this, this)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        internetChecker.onStop()
+        presenter.onDestroy()
+    }
+
+    override fun answer(answer : AnswerData) {
+        answerData.value = answer.answer
+
+    }
+
+    override fun serverStatus(message: String) {
+
+        //ShortMessageHelper.toast(this, message)
+
+    }
+
+    override fun isInternet(internet: Boolean) {
+
+        isInternet.value = internet
+
+    }
+
+}
 
 
 @Preview(showBackground = true)
 @Composable
 private fun AnswerFullScreen(
     backClick: () -> Unit = {},
-    toolbarTitle: String = ""
+    toolbarTitle: String = "",
+    answer : String = "",
+    internet : Boolean = false
 
 ) {
 
-    val text = """
-        
-         শব্দ গুলো দেখে সকলেই অবাক হয়েছে, এটা বলা বাহুল্য। 
-         অনেকেই ভাবছেন, এ সব শব্দের বেশিরভাগটাই নিজে থেকে বানানো। 
-         তবে **[সত্যটা](https://www.google.com)** হলো, এর একটাও বানানো নয়। সব গুলোই বাংলা ভাষার অংশ। 
-         উৎপত্তি অনুসারে বাংলাভাষার যে শ্রেনীবিভাগ রয়েছে, সেই **পাঁচটি** শ্রেনী বিভাগের ফলেই জন্ম নিয়েছে এই সকল শব্দ, যার অনেকগুলোই আপনি আপনার এই পর্যন্ত জীবনে একবারও শোনেননি।
-                    
-         [Google](https://www.google.com)
-                    
-         | Key | First Name | Last Name |
-         |---|------|---------|
-         | 1 | Joy | Ray |
-         | 2 | Arjun | Ray |
-        
-    """.trimIndent()
-
     var textZoom by remember { mutableIntStateOf(0) }
+    var isInternetDialogVisible by remember { mutableStateOf(false) }
+
+    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
         topBar = {Toolbar(
@@ -147,7 +190,7 @@ private fun AnswerFullScreen(
             ) {
 
                 MarkdownText(
-                    text = text,
+                    text = answer,
                     zoomCount = textZoom,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -159,31 +202,46 @@ private fun AnswerFullScreen(
 
             }//column
 
-            ZoomInOut(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .align(Alignment.BottomEnd),
-                textZoom = textZoom,
-                zoomInClick = {
+            if (answer.isNotEmpty()){
 
-                    if (textZoom > -1 && textZoom < 22){
+                ZoomInOut(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.BottomEnd),
+                    textZoom = textZoom,
+                    zoomInClick = {
 
-                        textZoom++
+                        if (textZoom > -1 && textZoom < 22){
+
+                            textZoom++
+
+                        }
+
+                    },
+                    zoomOutClick = {
+
+                        if (textZoom > -1 && textZoom <= 22){
+
+                            textZoom--
+
+                        }
 
                     }
+                )
 
-                },
-                zoomOutClick = {
+            }
 
-                    if (textZoom > -1 && textZoom <= 22){
+            if (isInternetDialogVisible){
 
-                        textZoom--
+                ComposeHelper.InternetDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    closeClick = { isInternetDialogVisible = false },
+                    openClick = { isInternetDialogVisible = false }
+                )
 
-                    }
-
-                }
-            )
-
+            }
 
         }//box
 

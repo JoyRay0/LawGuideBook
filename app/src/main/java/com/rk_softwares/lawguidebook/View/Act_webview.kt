@@ -22,32 +22,46 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.R
 
-class Act_webview : ComponentActivity() {
+class Act_webview : ComponentActivity(), InternetStatus {//class========================================
+
+    private lateinit var internetChecker: InternetChecker
+
+    //init-----
+
+    private var isInternet = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            var intentText by remember { mutableStateOf("") }
-            var websiteLink by remember { mutableStateOf("") }
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
                 darkIcons = false
             )
+
+            init()
+
+            var intentText by remember { mutableStateOf("") }
+            var websiteLink by remember { mutableStateOf("") }
+
+            internetChecker.onStart()
 
             intentText = intent.getStringExtra(KeyHelper.otherApp_privacy_IntentKey()) ?: ""
 
@@ -61,9 +75,6 @@ class Act_webview : ComponentActivity() {
 
             }
 
-            val internet = InternetChecker.liveInternetStatus(this)
-
-            Toast.makeText(this,if (internet) "On" else "Off", Toast.LENGTH_SHORT).show()
 
             LawGuideBookTheme {
 
@@ -73,7 +84,8 @@ class Act_webview : ComponentActivity() {
                         intentText = ""
                         websiteLink = ""
                     },
-                    websiteLink = websiteLink
+                    websiteLink = websiteLink,
+                    internet = isInternet.value
                 )
 
             }
@@ -85,22 +97,42 @@ class Act_webview : ComponentActivity() {
             }
         }
     }//on create=================================
-}//class========================================
+
+    private fun init(){
+
+        internetChecker = InternetChecker(this, this)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        internetChecker.onStop()
+    }
+
+    override fun isInternet(internet: Boolean) {
+        isInternet.value = internet
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 private fun WebViewFullScreen(
     backClick: () -> Unit = {},
     websiteLink : String = "",
-
+    internet : Boolean = false
 ) {
+    val context = LocalContext.current
+    var isInternetDialogVisible by remember { mutableStateOf(false) }
+    val webview = remember { WebView(context) }
+
+    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
         topBar = { ToolBar( backClick = {backClick()} ) },
         modifier = Modifier.fillMaxSize())
     { innerPadding ->
 
-        Column(
+        Box(
 
             modifier = Modifier
                 .fillMaxSize()
@@ -108,9 +140,17 @@ private fun WebViewFullScreen(
 
         ) {
 
-            AndroidView(
-                factory = { context ->
+            LaunchedEffect(internet) {
 
+                webview.loadUrl(websiteLink)
+
+            }
+
+            AndroidView(
+
+                factory = { webview},
+
+                /*
                     val webView = WebView(context)
 
                     //webView.settings.javaScriptEnabled = true
@@ -119,11 +159,24 @@ private fun WebViewFullScreen(
 
                     webView
                 },
+
+                 */
                 modifier = Modifier.fillMaxSize()
             )
 
+            if (isInternetDialogVisible){
 
-        }//column
+                ComposeHelper.InternetDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    closeClick = { isInternetDialogVisible = false },
+                    openClick = { isInternetDialogVisible = false }
+                )
+
+            }
+
+        }//box
 
     }//scaffold
 

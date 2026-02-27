@@ -1,6 +1,7 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -33,29 +34,33 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
-import com.rk_softwares.lawguidebook.model.ItemList
+import com.rk_softwares.lawguidebook.Model.Data
+import com.rk_softwares.lawguidebook.Presenter.QuestionPresenter
+import com.rk_softwares.lawguidebook.Presenter.Questions
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class Act_question : ComponentActivity() {
+class Act_question : ComponentActivity(), Questions, InternetStatus {//class=======================================================
 
+    //init------
     private lateinit var bookmarkDatabase: BookmarkDatabase
+    private val questionsList = mutableStateListOf<Data>()
+    private lateinit var presenter : QuestionPresenter
+    private lateinit var internetChecker: InternetChecker
+
+    private var isInternet = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            init()
-
-            var toolbarText by remember { mutableStateOf("") }
-            val questionList = remember { mutableStateListOf<ItemList>() }
-            val scope = rememberCoroutineScope()
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
@@ -63,21 +68,19 @@ class Act_question : ComponentActivity() {
                 darkIcons = false
             )
 
-            questionList.clear()
-            questionList.add(ItemList(question = "সরণ কাকে বলে? কত প্রকার ও কি কি?"))
-            questionList.add(ItemList(question = "কেন্দ্রীয় প্রবণতা কাকে বলে? কেন এটি পরিসংখ্যানের প্রাণকেন্দ্র?"))
-            questionList.add(ItemList(question = "দর্শন কাকে বলে? কত প্রকার ও কি কি?"))
-            questionList.add(ItemList(question = "রাষ্ট্রবিজ্ঞান কাকে বলে?"))
-            questionList.add(ItemList(question = "বিশ্বের সর্বকালের সেরা ফুটবলার কে? ২০২৫"))
-            questionList.add(ItemList(question = "বাক্য কাকে বলে? বাক্যের প্রকারভেদ?"))
-            questionList.add(ItemList(question = "কারক ও বিভক্তি কাকে বলে?"))
+            init()
 
+            internetChecker.onStart()
+
+            var toolbarText by remember { mutableStateOf("") }
 
             toolbarText = intent.getStringExtra(KeyHelper.sendTitle_IntentKey()) ?: ""
 
-            val internet = InternetChecker.liveInternetStatus(this)
+            LaunchedEffect(isInternet.value) {
 
-            Toast.makeText(this,if (internet) "On" else "Off", Toast.LENGTH_SHORT).show()
+                presenter.questionsFromServer(toolbarText)
+
+            }
 
             LawGuideBookTheme {
 
@@ -87,7 +90,7 @@ class Act_question : ComponentActivity() {
                         finish()
                     },
                     toolbarTitle = toolbarText,
-                    questionList = questionList,
+                    questionList = questionsList,
                     questionClick = {
 
                         IntentHelper.dataIntent(
@@ -98,21 +101,8 @@ class Act_question : ComponentActivity() {
                         )
 
                     },
-                    bookmarkClick = { item ->
-
-                        scope.launch {
-
-                            withContext(Dispatchers.IO){
-
-                                bookmarkDatabase.insert(item)
-
-                            }
-
-                            Toast.makeText(this@Act_question, "সেভ হয়েছে", Toast.LENGTH_SHORT).show()
-
-                        }
-
-                    }
+                    bookmarkClick = { item -> presenter.dbInsert(item)},
+                    internet = isInternet.value
                 )
 
             }
@@ -129,15 +119,41 @@ class Act_question : ComponentActivity() {
     private fun init(){
 
         bookmarkDatabase = BookmarkDatabase(this)
+        presenter = QuestionPresenter(this, bookmarkDatabase)
+        internetChecker = InternetChecker(this, this)
 
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        bookmarkDatabase.closeDB()
+        presenter.onDestroy()
+        internetChecker.onStop()
     }
 
-}//class=======================================================
+
+    override fun questionList(list: List<Data>) {
+
+        questionsList.clear()
+        questionsList.addAll(list)
+
+
+    }
+
+    override fun serverStatus(message: String) {
+
+        Log.d("status", message)
+
+    }
+
+    override fun dbStatus(status: String) {
+        Toast.makeText(this,status , Toast.LENGTH_SHORT).show()
+    }
+
+    override fun isInternet(internet: Boolean) {
+        isInternet.value = internet
+    }
+
+}
 
 
 @Preview(showBackground = true)
@@ -145,13 +161,17 @@ class Act_question : ComponentActivity() {
 private fun QuestionFullScreen(
     backClick : () -> Unit = {},
     toolbarTitle :  String = "",
-    questionList : List<ItemList> = emptyList(),
+    questionList : List<Data> = emptyList(),
     questionClick : (String) -> Unit = {},
-    bookmarkClick : (String) -> Unit = {}
+    bookmarkClick : (String) -> Unit = {},
+    internet : Boolean = false
 
 ) {
 
     val lazyState = rememberLazyListState()
+    var isInternetDialogVisible by remember { mutableStateOf(false) }
+
+    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
         topBar = { Toolbar(
@@ -162,7 +182,7 @@ private fun QuestionFullScreen(
         modifier = Modifier.fillMaxSize())
     { innerPadding ->
 
-        Column(
+        Box(
 
             modifier = Modifier
                 .fillMaxSize()
@@ -170,31 +190,52 @@ private fun QuestionFullScreen(
 
         ) {
 
+            Column(
 
-            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                state = lazyState,
-                contentPadding = PaddingValues(5.dp)
+                    .fillMaxWidth()
 
-            ) { 
-                
-                items(
-                    items = questionList,
-                    key = { it.question }
-                ){ it ->
+            ) {
 
-                    Item(
-                        title = it.question,
-                        titleClick = { questionClick(it.question) },
-                        bookmarkTitleClick = { bookmarkClick(it.question) }
-                    )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    state = lazyState,
+                    contentPadding = PaddingValues(5.dp)
+
+                ) {
+
+                    items(
+                        items = questionList,
+                        key = { it.question }
+                    ){ it ->
+
+                        Item(
+                            title = it.question,
+                            titleClick = { questionClick(it.question) },
+                            bookmarkTitleClick = { bookmarkClick(it.question) }
+                        )
+
+                    }
 
                 }
-                
+
+            }//column
+
+            if (isInternetDialogVisible){
+
+                ComposeHelper.InternetDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    closeClick = { isInternetDialogVisible = false },
+                    openClick = { isInternetDialogVisible = false }
+                )
+
             }
 
-        }//column
+        }//box
 
     }//scaffold
 
