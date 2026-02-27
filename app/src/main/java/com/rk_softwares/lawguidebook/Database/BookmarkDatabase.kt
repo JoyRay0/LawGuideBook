@@ -46,6 +46,7 @@ class BookmarkDatabase
 
             db.insert(TABLE_NAME, null, cv)
 
+
         }catch (e : Exception){
             e.printStackTrace()
         }
@@ -90,6 +91,7 @@ class BookmarkDatabase
         return try {
 
             db.delete(TABLE_NAME, "question = ?", arrayOf(question)) > 0
+
 
         }catch (e : Exception){
 
