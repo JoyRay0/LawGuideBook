@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Presenter
 
+import android.util.Log
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.CacheHelper
 import com.rk_softwares.lawguidebook.Model.ChatMessage
@@ -26,7 +27,6 @@ class ChatPresenter(
     ) {
 
     private val model = ChatModel(db, cache)
-    private var aiMessage : String = ""
 
     private val scopeIO = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -47,10 +47,9 @@ class ChatPresenter(
 
     }
 
-    fun sendMessage(
+    fun userSendMessage(
         message : String,
-        uMessage : ChatMessage? = null,
-        ){
+    ){
 
         view.messageStatus("pending")
 
@@ -58,14 +57,10 @@ class ChatPresenter(
 
             model.dbUserInsert(message)
 
-            withContext(Dispatchers.Main){
+            model.sendMessageToServer(userMessage = ChatMessage(user_message = message), onSuccess = { item ->
+                val aiMessage = item.ai_message
 
-                view.messages(model.getAllMessage())
-
-            }
-
-            model.sendMessageToServer(userMessage = uMessage, onSuccess = { item ->
-                aiMessage = item.ai_message
+                //Log.d("ai", aiMessage)
 
                 model.dbAiInsert(msg = aiMessage)
 
@@ -74,9 +69,17 @@ class ChatPresenter(
                     view.messages(model.getAllMessage())
                     view.messageStatus("success")
 
+
+
                 }
 
             })
+
+            withContext(Dispatchers.Main){
+
+                view.messages(model.getAllMessage())
+
+            }
 
         }
 
