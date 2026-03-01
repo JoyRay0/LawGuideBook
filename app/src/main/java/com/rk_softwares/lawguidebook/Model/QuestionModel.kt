@@ -40,7 +40,7 @@ class QuestionModel(
 
     }
 
-    suspend fun allQuestions(
+    fun allQuestions(
         qData : Data? = null,
         onSuccess : (List<Data>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}

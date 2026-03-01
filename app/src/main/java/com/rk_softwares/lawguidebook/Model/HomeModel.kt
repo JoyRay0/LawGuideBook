@@ -1,6 +1,7 @@
 package com.rk_softwares.lawguidebook.Model
 
 import com.google.gson.Gson
+import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
 import okhttp3.Call
@@ -14,6 +15,12 @@ import okhttp3.Response
 import okio.IOException
 import java.lang.Exception
 
+data class Home(
+    val status : String = "",
+    val message : String = "",
+    val items : List<Items> = emptyList()
+)
+
 data class Items(
     val image : String = "",
     val title : String = "",
@@ -23,14 +30,14 @@ data class Items(
 )
 
 class HomeModel(
-    private val historyDB : HistoryDatabase
+    private val historyDB : HistoryDatabase,
+    private val bookmarkDB : BookmarkDatabase
 ) {
 
-    private val gridList = mutableListOf<Items>()
-    private val searchList = mutableListOf<Items>()
+    private val bookmarkList = mutableListOf<Items>()
     private val historyList = mutableListOf<Items>()
 
-    fun getAllHistory() : List<Items>{
+    fun dbGetAllHistory() : List<Items>{
 
         val data = historyDB.getAll()
 
@@ -47,20 +54,42 @@ class HomeModel(
 
     }
 
-    fun dbDeleteAll(){
+    fun dbHistoryDeleteAll(){
 
         historyDB.deleteAll()
 
     }
 
+    fun dbGetAllBookmark() : List<Items>{
 
-    suspend fun categoryServer(
-        items : Items? = null,
+        val data = bookmarkDB.getAll()
+
+        bookmarkList.clear()
+        bookmarkList.addAll(data)
+
+        return bookmarkList
+    }
+
+    fun dbAddBookmark(title: String){
+
+        bookmarkDB.insert(title)
+
+    }
+
+    fun dbBookmarkDeleteOne(title: String) : Boolean{
+
+        return bookmarkDB.deleteOne(title)
+
+    }
+
+
+    fun categoryServer(
+        //items : Items? = null,
         onSuccess : (List<Items>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
-        if (items == null) return
+        //if (items == null) return
 
         val client = OkHttpClient()
 
@@ -87,10 +116,17 @@ class HomeModel(
 
                     try {
 
-                        val item_message = gson.fromJson(data, Items::class.java)
+                        val data = gson.fromJson(data, Home::class.java)
 
-                        onSuccess(listOf(item_message))
-                        onFailed(false)
+                        if (data.status == "Success"){
+
+                            onSuccess(data.items)
+                            onFailed(false)
+
+                        }else{
+
+                            onFailed(true)
+                        }
 
 
                     }catch (e : Exception){
@@ -113,7 +149,7 @@ class HomeModel(
 
     }
 
-    suspend fun searchDataToServer(
+    fun searchDataToServer(
         items : Items? = null,
         onSuccess : (List<Items>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
@@ -150,11 +186,16 @@ class HomeModel(
 
                     try {
 
-                        val item_message = gson.fromJson(data, Items::class.java)
+                        val data = gson.fromJson(data, Home::class.java)
 
-                        onSuccess(listOf(item_message))
-                        onFailed(false)
+                        if (data.status == "Success"){
 
+                            onSuccess(data.items)
+                            onFailed(false)
+
+                        }else{
+                            onFailed(true)
+                        }
 
                     }catch (e : Exception){
 

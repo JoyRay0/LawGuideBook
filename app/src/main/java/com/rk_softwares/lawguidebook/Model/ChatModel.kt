@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Model
 
+import android.util.Log
 import com.google.gson.Gson
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
@@ -88,7 +89,7 @@ class ChatModel(
 
     }
 
-    suspend fun sendMessageToServer(
+    fun sendMessageToServer(
         userMessage: ChatMessage? = null,
         onFailed : (Boolean) -> Unit = {},
         onSuccess : (ChatMessage) -> Unit = {},
@@ -114,6 +115,7 @@ class ChatModel(
 
                 onFailed(true)
 
+                Log.d("failed", e.toString())
 
             }
 
@@ -128,6 +130,8 @@ class ChatModel(
                         val item_message = gson.fromJson(data, ChatMessage::class.java)
 
                         //if (item_message.status == "success") onResultAvailable(true)
+
+                        //Log.d("message", item_message.user_message)
 
                         onSuccess(item_message)
                         onFailed(false)

@@ -33,7 +33,7 @@ data class AnswerData(
 
 class AnswerModel {
 
-    suspend fun answer(
+    fun answer(
         answerData : AnswerData? = null,
         onSuccess : (AnswerData) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
