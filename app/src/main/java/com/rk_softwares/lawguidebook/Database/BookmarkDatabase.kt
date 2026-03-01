@@ -3,6 +3,7 @@ package com.rk_softwares.lawguidebook.Database
 import android.content.*
 import android.database.Cursor
 import android.database.sqlite.*
+import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.model.ItemList
 
 class BookmarkDatabase
@@ -53,13 +54,13 @@ class BookmarkDatabase
 
     }
 
-    fun getAll() : List<ItemList>{
+    fun getAll() : List<Items>{
 
         val db = dbOpen()
 
         var cursor : Cursor? = null
 
-        val list : MutableList<ItemList> = mutableListOf()
+        val list : MutableList<Items> = mutableListOf()
 
         try {
 
@@ -69,7 +70,7 @@ class BookmarkDatabase
 
                 val question = cursor.getString(cursor.getColumnIndexOrThrow("question"))
 
-                list.add(ItemList(question = question))
+                list.add(Items(question = question))
 
             }
 
