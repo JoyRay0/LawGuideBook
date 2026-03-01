@@ -95,11 +95,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
             chatPresenter.getCache("alert_message")
             chatPresenter.getMessages()
 
-            LaunchedEffect(isInternet.value) {
 
-                chatPresenter.sendUserMessageToServer()
-
-            }
 
             LawGuideBookTheme {
 
@@ -147,6 +143,11 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
             }
 
+            LaunchedEffect(isInternet.value) {
+
+
+            }
+
             BackHandler{
 
                 userMessage = ""
@@ -181,6 +182,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
     override fun messageStatus(status: String) {
         messageStatus.value = status
+
     }
 
     override fun deleteStatus(isDeleted: Boolean, message: String) {
