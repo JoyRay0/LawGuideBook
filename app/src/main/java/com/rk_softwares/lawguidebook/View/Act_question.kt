@@ -39,6 +39,7 @@ import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.Data
 import com.rk_softwares.lawguidebook.Presenter.QuestionPresenter
@@ -57,6 +58,8 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
     private lateinit var internetChecker: InternetChecker
 
     private var isInternet = mutableStateOf(false)
+
+    private var serverStatus = mutableStateOf("Pending")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +105,8 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
                     },
                     bookmarkClick = { item -> presenter.dbInsert(item)},
-                    internet = isInternet.value
+                    internet = isInternet.value,
+                    serverStatus = serverStatus.value
                 )
 
             }
@@ -136,12 +140,12 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
         questionsList.clear()
         questionsList.addAll(list)
 
-
     }
 
     override fun serverStatus(message: String) {
 
-        Log.d("status", message)
+        serverStatus.value = message
+        //ShortMessageHelper.toast(this, message)
 
     }
 
@@ -164,7 +168,8 @@ private fun QuestionFullScreen(
     questionList : List<Data> = emptyList(),
     questionClick : (String) -> Unit = {},
     bookmarkClick : (String) -> Unit = {},
-    internet : Boolean = false
+    internet : Boolean = false,
+    serverStatus : String = "Pending"
 
 ) {
 
@@ -193,29 +198,46 @@ private fun QuestionFullScreen(
             Column(
 
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
 
             ) {
 
 
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxSize(),
                     state = lazyState,
-                    contentPadding = PaddingValues(5.dp)
 
                 ) {
 
-                    items(
-                        items = questionList,
-                        key = { it.question }
-                    ){ it ->
+                    if (serverStatus == "Pending"){
 
-                        Item(
-                            title = it.question,
-                            titleClick = { questionClick(it.question) },
-                            bookmarkTitleClick = { bookmarkClick(it.question) }
-                        )
+                        items(17){
+
+                            ComposeHelper.SkeletonLoading(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(7.dp),
+                                shape = 12.dp,
+                                innerPadding = 22.dp
+                            )
+
+                        }
+
+                    }else{
+
+                        items(
+                            items = questionList,
+                            key = { it.question }
+                        ){ it ->
+
+                            Item(
+                                title = it.question,
+                                titleClick = { questionClick(it.question) },
+                                bookmarkTitleClick = { bookmarkClick(it.question) }
+                            )
+
+                        }
 
                     }
 
