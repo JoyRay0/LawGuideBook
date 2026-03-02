@@ -40,12 +40,15 @@ class QuestionPresenter(
 
             }
 
-
         }
 
     }
 
     fun questionsFromServer(category : String){
+
+        if (category.isEmpty()) return
+
+        view.serverStatus("Pending")
 
         scopeIO.launch{
 
@@ -61,11 +64,15 @@ class QuestionPresenter(
 
                 }
 
-            }, onFailed = {
+            }, onFailed = { isFailed ->
 
-                scopeMain.launch {
+                if (isFailed){
 
-                    view.serverStatus("Failed")
+                    scopeMain.launch {
+
+                        view.serverStatus("Failed")
+
+                    }
 
                 }
 

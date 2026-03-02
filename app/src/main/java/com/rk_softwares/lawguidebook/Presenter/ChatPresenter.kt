@@ -51,16 +51,17 @@ class ChatPresenter(
         message : String,
     ){
 
+        if (message.isEmpty()) return
+
         view.messageStatus("pending")
 
         scopeIO.launch{
 
             model.dbUserInsert(message)
 
-            model.sendMessageToServer(userMessage = ChatMessage(user_message = message), onSuccess = { item ->
+            model.sendMessageToServer(userMessage = ChatMessage(user_message = message),
+                onSuccess = { item ->
                 val aiMessage = item.ai_message
-
-                //Log.d("ai", aiMessage)
 
                 model.dbAiInsert(msg = aiMessage)
 
@@ -69,7 +70,17 @@ class ChatPresenter(
                     view.messages(model.getAllMessage())
                     view.messageStatus("success")
 
+                }
 
+            }, onFailed = { isFailed ->
+
+                if (isFailed){
+
+                    scopeMain.launch{
+
+                        view.messageStatus("Failed")
+
+                    }
 
                 }
 

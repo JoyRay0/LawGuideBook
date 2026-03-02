@@ -25,14 +25,14 @@ class AnswerPresenter(
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
     fun answerFromServer(question : String){
 
-        CoroutineScope(Dispatchers.IO).launch {
+        scopeIO.launch {
 
             model.answer(
                 answerData = AnswerData(question = question),
 
                 onSuccess = { result ->
 
-                    CoroutineScope(Dispatchers.Main).launch {
+                    scopeMain.launch {
 
                         view.serverStatus("Success")
                         view.answer(result)
@@ -40,11 +40,15 @@ class AnswerPresenter(
                     }
 
                 },
-                onFailed = {
+                onFailed = { isFailed ->
 
-                    CoroutineScope(Dispatchers.Main).launch {
+                    if (isFailed){
 
-                        view.serverStatus("Failed")
+                        scopeMain.launch {
+
+                            view.serverStatus("Failed")
+
+                        }
 
                     }
 
