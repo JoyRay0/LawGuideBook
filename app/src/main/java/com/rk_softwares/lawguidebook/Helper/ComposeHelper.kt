@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +39,8 @@ fun FullView(){
     ) {
 
         ComposeHelper.InternetDialog()
+
+        ComposeHelper.SkeletonLoading()
 
     }//column
 
@@ -156,6 +159,35 @@ object ComposeHelper {
             }//column
 
         }//box
+
+    }//fun end
+
+    @Composable
+    fun SkeletonLoading(
+        modifier: Modifier = Modifier,
+        shape : Dp = 0.dp,
+        innerPadding : Dp = 10.dp
+    ){
+
+        Box(
+
+            modifier = modifier
+                .fillMaxWidth()
+
+
+        ){
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(shape))
+                    .background(color = Color(0xFFFAE2E2))
+                    .padding(innerPadding )
+            )
+            
+
+        }
+
 
     }//fun end
 
