@@ -4,7 +4,6 @@ import android.content.*
 import android.database.Cursor
 import android.database.sqlite.*
 import com.rk_softwares.lawguidebook.Model.Items
-import com.rk_softwares.lawguidebook.model.ItemList
 
 class HistoryDatabase(
     val context: Context

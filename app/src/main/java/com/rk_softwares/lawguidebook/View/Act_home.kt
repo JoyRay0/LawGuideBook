@@ -2,6 +2,7 @@ package com.rk_softwares.lawguidebook.View
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -72,7 +73,6 @@ import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.HomePresenter
-import com.rk_softwares.lawguidebook.model.ItemList
 import com.rk_softwares.lawguidebook.R
 
 class Act_home : ComponentActivity(), Home, InternetStatus {
@@ -106,14 +106,14 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             internetChecker.onStart()
 
             var isSearchScreenList by remember { mutableStateOf(true) }
-            var inputFiledData by remember { mutableStateOf("") }
+            var historyData by remember { mutableIntStateOf(0) }
 
+            LaunchedEffect(historyData) {
 
-            presenter.getAllHistory()
-            presenter.getAllBookmark()
+                presenter.getAllHistory()
 
+            }
 
-            //var isHome by remember { mutableStateOf(false) }
 
             LawGuideBookTheme {
 
@@ -121,14 +121,16 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     searchList = searchList,
                     historyList = historyList,
                     searchScreenBool = { isSearchScreenList = it },
-                    searchInput = { inputFiledData = it },
-                    searchClick = {
-                        presenter.searchAndHistoryToServer(inputFiledData)
-                                  },
-                    historyTitleClick = {
-                        presenter.searchAndHistoryToServer(inputFiledData)
 
-                    },
+                    searchClick = {
+                        presenter.searchAndHistoryToServer(it)
+                        Log.d("input", it)
+                        historyData++
+                                  },
+                    historyTitleClick = { presenter.searchAndHistoryToServer(it) },
+                    historyClick = {
+
+                        historyData++ },
                     searchItemClick = {
 
                         IntentHelper.dataIntent(
@@ -195,10 +197,26 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                     },
                     internet = isInternet.value,
-                    navCategoryClick = { presenter.categoryItemFromServer()},
-                    navHomeClick = {},
-                    serverStatus = serverStatus.value
+                    navCategoryClick = {
+                        presenter.categoryItemFromServer()
+                        historyList.clear()
+                        searchList.clear()
+                        bookmarkList.clear()
+                                       },
+                    navHomeClick = {
 
+                        historyList.clear()
+                        searchList.clear()
+                        bookmarkList.clear()
+
+                    },
+                    navBookmark = {
+                        presenter.getAllBookmark()
+                        historyList.clear()
+                        searchList.clear()
+                        bookmarkList.clear()
+                                  },
+                    serverStatus = serverStatus.value
 
                 )
 
@@ -227,28 +245,29 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         internetChecker.onStop()
     }
 
-    override fun historyList(list: List<Items>) {
+    override fun onHistoryList(list: List<Items>) {
         historyList.clear()
         historyList.addAll(list)
     }
 
-    override fun searchList(list: List<Items>) {
+    override fun onSearchList(list: List<Items>) {
         searchList.clear()
         searchList.addAll(list)
     }
 
-    override fun categoryList(list: List<Items>) {
+    override fun onCategoryList(list: List<Items>) {
         categoryList.clear()
         categoryList.addAll(list)
     }
 
-    override fun bookmarkList(list: List<Items>) {
+    override fun onBookmarkList(list: List<Items>) {
         bookmarkList.clear()
         bookmarkList.addAll(list)
     }
 
     override fun serverStatus(message: String) {
         serverStatus.value = message
+        ShortMessageHelper.toast(this, message)
     }
 
     override fun message(status: String) {
@@ -268,9 +287,10 @@ private fun HomeFullScreen(
     searchList : MutableList<Items> = mutableListOf(),
     historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool: (Boolean) -> Unit = {},
-    searchInput: (String) -> Unit = {},
-    searchClick: () -> Unit = {},
-    historyTitleClick: () -> Unit = {},
+    //searchInput: (String) -> Unit = {},
+    searchClick: (String) -> Unit = {},
+    historyTitleClick: (String) -> Unit = {},
+    historyClick: () -> Unit = {},
     searchItemClick: (String) -> Unit = {},
     gridClick: (String) -> Unit = {},
     gridList : List<Items> = emptyList(),
@@ -285,7 +305,8 @@ private fun HomeFullScreen(
     internet: Boolean = false,
     navCategoryClick : () -> Unit = {},
     navHomeClick : () -> Unit = {},
-    serverStatus : String = ""
+    navBookmark : () -> Unit = {},
+    serverStatus : String = "",
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -321,6 +342,10 @@ private fun HomeFullScreen(
 
                     navCategoryClick()
 
+                }else if (screen == 3){
+
+                    navBookmark()
+
                 }
 
             }
@@ -343,9 +368,10 @@ private fun HomeFullScreen(
                     searchList = searchList,
                     historyList = historyList,
                     searchScreenBool = { searchScreenBool( it ) },
-                    searchInput = { searchInput(it) },
-                    searchClick = { searchClick()},
-                    historyTitleClick = {historyTitleClick()},
+                    //searchInput = { searchInput(it) },
+                    searchClick = { searchClick(it)},
+                    historyTitleClick = {historyTitleClick(it)},
+                    historyClick = {historyClick()},
                     searchItemClick = {searchItemClick(it)},
                     searchBookmarkClick = { searchBookmarkClick(it) }
 
@@ -956,9 +982,10 @@ private fun SearchScreen(
     searchList : MutableList<Items> = mutableListOf(),
     historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool : (Boolean) -> Unit = {},
-    searchInput : (String) -> Unit = {},
-    searchClick: () -> Unit = {},
-    historyTitleClick: () -> Unit = {},
+    //searchInput : (String) -> Unit = {},
+    searchClick: (String) -> Unit = {},
+    historyTitleClick: (String) -> Unit = {},
+    historyClick: () -> Unit = {},
     searchItemClick : (String) -> Unit = {},
     searchBookmarkClick: (String) -> Unit = {}
     ) {
@@ -1020,7 +1047,7 @@ private fun SearchScreen(
                         title = it.question,
                         titleData = { historyTitle.value = it },
                         titleClick = {
-                            historyTitleClick()
+                            historyTitleClick(historyTitle.value)
                             isSearchDataVisible = true
                         }
                     )
@@ -1076,13 +1103,16 @@ private fun SearchScreen(
         }
 
         SearchBarHelper(
-            search = { searchInput(it) },
+            //search = { searchInput(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            historyClick = { isSearchDataVisible = !isSearchDataVisible },
+            historyClick = {
+                isSearchDataVisible = !isSearchDataVisible
+                           historyClick()
+                           },
             historyTitle = historyTitle,
-            searchClick = {searchClick()}
+            searchClick = {searchClick(it)}
         )
 
     }//box
@@ -1093,11 +1123,11 @@ private fun SearchScreen(
 @Preview(showBackground = true)
 @Composable
 private fun SearchBarHelper(
-    search: (String) -> Unit = {},
+    //search: (String) -> Unit = {},
     historyClick: () -> Unit = {},
     historyTitle: MutableState<String> = mutableStateOf(""),
     modifier: Modifier = Modifier,
-    searchClick : () -> Unit = {}
+    searchClick : (String) -> Unit = {}
 ) {
 
     var searchFiled by remember { mutableStateOf("") }
@@ -1158,7 +1188,6 @@ private fun SearchBarHelper(
 
                         modifier = Modifier
                             .fillMaxWidth()
-
                             .align(Alignment.CenterVertically)
 
                     ) {
@@ -1192,9 +1221,7 @@ private fun SearchBarHelper(
                             keyboardActions = KeyboardActions(
                                 onSearch = {
 
-                                    searchClick()
-
-                                    if (searchFiled.isNotEmpty()) search(searchFiled) //sending search data to other functions
+                                    searchClick(searchFiled)  //sending search data to other functions
 
                                     keyboardController?.hide()
 
@@ -1303,7 +1330,7 @@ private fun QuestionItem(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                .border(width = 1.dp, color = Color(0xFFFFDCDC), shape = RoundedCornerShape(12.dp))
                 .clip(shape = RoundedCornerShape(12.dp))
                 .combinedClickable(
 
@@ -1332,7 +1359,7 @@ private fun QuestionItem(
                     }
                 )
 
-                .background(color = Color(0xFFFFFFFF))
+                //.background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
                 .align(Alignment.Center)
 
@@ -1435,7 +1462,7 @@ private fun HistoryItem(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                .border(width = 1.dp, color = Color(0xFFFFD3D3), shape = RoundedCornerShape(12.dp))
                 .clip(shape = RoundedCornerShape(12.dp))
                 .combinedClickable(
 
@@ -1447,7 +1474,7 @@ private fun HistoryItem(
                     }
                 )
 
-                .background(color = Color(0xFFFFFFFF))
+                //.background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
                 .align(Alignment.Center)
 

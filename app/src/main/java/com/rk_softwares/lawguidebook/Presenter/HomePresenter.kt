@@ -13,10 +13,10 @@ import kotlinx.coroutines.withContext
 
 interface Home{
 
-    fun historyList (list : List<Items>)
-    fun searchList (list: List<Items>)
-    fun categoryList (list: List<Items>)
-    fun bookmarkList (list: List<Items>)
+    fun onHistoryList (list : List<Items>)
+    fun onSearchList (list: List<Items>)
+    fun onCategoryList (list: List<Items>)
+    fun onBookmarkList (list: List<Items>)
 
     fun serverStatus(message : String)
     fun message(status : String)
@@ -44,7 +44,7 @@ class HomePresenter(
                 homeModel.dbGetAllHistory()
             }
 
-            view.historyList(items)
+            view.onHistoryList(items)
 
         }
 
@@ -58,7 +58,7 @@ class HomePresenter(
 
             withContext(Dispatchers.Main){
 
-                view.bookmarkList(data)
+                view.onBookmarkList(data)
 
             }
 
@@ -77,7 +77,7 @@ class HomePresenter(
             withContext(Dispatchers.Main){
 
                 view.message("সেভ হয়েছে")
-                view.bookmarkList(homeModel.dbGetAllBookmark())
+                view.onBookmarkList(homeModel.dbGetAllBookmark())
 
             }
 
@@ -98,7 +98,7 @@ class HomePresenter(
                 withContext(Dispatchers.Main){
 
                     view.message("ডিলিট হয়েছে")
-                    view.bookmarkList(homeModel.dbGetAllBookmark())
+                    view.onBookmarkList(homeModel.dbGetAllBookmark())
 
                 }
 
@@ -124,7 +124,7 @@ class HomePresenter(
 
             withContext(Dispatchers.Main){
 
-                view.historyList(homeModel.dbGetAllHistory())
+                view.onHistoryList(homeModel.dbGetAllHistory())
 
             }
 
@@ -135,7 +135,7 @@ class HomePresenter(
                 scopeMain.launch{
 
                     view.serverStatus("Success")
-                    view.searchList(result)
+                    view.onSearchList(result)
 
                 }
 
@@ -168,7 +168,7 @@ class HomePresenter(
                 scopeMain.launch {
 
                     view.serverStatus("Success")
-                    view.categoryList(result)
+                    view.onCategoryList(result)
 
                 }
 
