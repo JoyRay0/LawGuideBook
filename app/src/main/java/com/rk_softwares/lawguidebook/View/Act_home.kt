@@ -62,28 +62,38 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
-import com.rk_softwares.lawguidebook.model.GridList
+import com.rk_softwares.lawguidebook.Model.Items
+import com.rk_softwares.lawguidebook.Presenter.Home
+import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.model.ItemList
 import com.rk_softwares.lawguidebook.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class Act_home : ComponentActivity() {
+class Act_home : ComponentActivity(), Home, InternetStatus {
 
     private lateinit var historyDB : HistoryDatabase
-
     private lateinit var bookmarkDatabase: BookmarkDatabase
+    private lateinit var presenter: HomePresenter
+
+    private lateinit var internetChecker: InternetChecker
+
+    //init-----
+    private var isInternet = mutableStateOf(false)
+    private val searchList = mutableStateListOf<Items>()
+    private val historyList = mutableStateListOf<Items>()
+    private val categoryList = mutableStateListOf<Items>()
+    private val bookmarkList = mutableStateListOf<Items>()
+    private var serverStatus = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            init()
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
@@ -91,101 +101,19 @@ class Act_home : ComponentActivity() {
                 darkIcons = false
             )
 
-            val searchList = remember { mutableStateListOf<ItemList>() }
-            val historyList = remember { mutableStateListOf<ItemList>() }
+            init()
+
+            internetChecker.onStart()
+
             var isSearchScreenList by remember { mutableStateOf(true) }
             var inputFiledData by remember { mutableStateOf("") }
-            val list = remember { mutableStateListOf<GridList>() }
-            val bookmarkQuestionList = remember { mutableStateListOf<ItemList>() }
-            val scope = rememberCoroutineScope()
-            var bookmarkReloadDB by remember { mutableIntStateOf(0) }
-            var historyReloadDB by remember { mutableIntStateOf(0) }
 
-            list.clear()
-            list.add(GridList(
 
-                image = "https://rksoftwares.fun/All_app/cdn/images/ad.png",
-                title = "আইন"
-            ))
+            presenter.getAllHistory()
+            presenter.getAllBookmark()
 
-            list.add(GridList(
 
-                image = "https://rksoftwares.fun/All_app/cdn/images/education.png",
-                title = "পুলিশ স্টেশন"
-            ))
-
-            list.add(GridList(
-
-                image = "https://rksoftwares.fun/All_app/cdn/images/agriculture.png",
-                title = "জমি"
-            ))
-
-            list.add(GridList(
-
-                image = "https://rksoftwares.fun/All_app/cdn/images/food.png",
-                title = "লোডিং"
-            ))
-
-            LaunchedEffect(bookmarkReloadDB) {
-
-                val item = withContext(Dispatchers.IO){
-
-                    bookmarkDatabase.getAll()
-
-                }
-
-                bookmarkQuestionList.clear()
-                bookmarkQuestionList.addAll(item)
-
-            }
-
-            if (isSearchScreenList){
-
-                searchList.clear()
-                searchList.add(ItemList(question = "সরণ কাকে বলে? কত প্রকার ও কি কি?"))
-                searchList.add(ItemList(question = "কেন্দ্রীয় প্রবণতা কাকে বলে? কেন এটি পরিসংখ্যানের প্রাণকেন্দ্র?"))
-                searchList.add(ItemList(question = "দর্শন কাকে বলে? কত প্রকার ও কি কি?"))
-                searchList.add(ItemList(question = "রাষ্ট্রবিজ্ঞান কাকে বলে?"))
-                searchList.add(ItemList(question = "বিশ্বের সর্বকালের সেরা ফুটবলার কে? ২০২৫"))
-                searchList.add(ItemList(question = "বাক্য কাকে বলে? বাক্যের প্রকারভেদ?"))
-                searchList.add(ItemList(question = "কারক ও বিভক্তি কাকে বলে?"))
-
-            }else{
-
-                LaunchedEffect(historyReloadDB) {
-
-                    val historyItem = withContext(Dispatchers.IO){
-
-                        historyDB.getAll()
-
-                    }
-
-                    historyList.clear()
-                    historyList.addAll(historyItem)
-
-                }
-
-            }
-
-            if (inputFiledData.isNotEmpty()){
-
-                LaunchedEffect(inputFiledData) {
-
-                    withContext(Dispatchers.IO){
-
-                        historyDB.inset(inputFiledData)
-
-                    }
-
-                }
-
-            }
-
-            val internet = InternetChecker.liveInternetStatus(this)
-
-            Toast.makeText(this,if (internet) "On" else "Off", Toast.LENGTH_SHORT).show()
-
-            var isHome by remember { mutableStateOf(false) }
+            //var isHome by remember { mutableStateOf(false) }
 
             LawGuideBookTheme {
 
@@ -195,9 +123,12 @@ class Act_home : ComponentActivity() {
                     searchScreenBool = { isSearchScreenList = it },
                     searchInput = { inputFiledData = it },
                     searchClick = {
-                        historyReloadDB++
+                        presenter.searchAndHistoryToServer(inputFiledData)
+                                  },
+                    historyTitleClick = {
+                        presenter.searchAndHistoryToServer(inputFiledData)
+
                     },
-                    historyTitleClick = {},
                     searchItemClick = {
 
                         IntentHelper.dataIntent(
@@ -219,30 +150,19 @@ class Act_home : ComponentActivity() {
 
 
                     },
-                    gridList = list,
+                    gridList = categoryList,
                     settingClick = {
 
                         startActivity(Intent(this, Act_setting::class.java))
                         finishAffinity()
                     },
-                    bookmarkClick = { item ->
+                    searchBookmarkClick = { item ->
 
-                        scope.launch {
-
-                            withContext(Dispatchers.IO){
-
-                                bookmarkDatabase.insert(item)
-
-                            }
-                            bookmarkReloadDB++
-
-                            Toast.makeText(this@Act_home, "সেভ হয়েছে", Toast.LENGTH_SHORT).show()
-
-                        }
+                        presenter.insertBookmark(item)
 
                     },
 
-                    bookmarkList = bookmarkQuestionList,
+                    bookmarkList = bookmarkList,
                     bookmarkQuestionClick = {
 
                         IntentHelper.dataIntent(
@@ -256,23 +176,7 @@ class Act_home : ComponentActivity() {
 
                     deleteBookmarkClick = { item ->
 
-                        scope.launch {
-
-                           val deleted = withContext(Dispatchers.IO){
-
-                               bookmarkDatabase.deleteOne(item)
-
-                            }
-
-                            if (deleted){
-
-                                bookmarkReloadDB++
-
-                                Toast.makeText(this@Act_home, "ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
-
-                            }
-
-                        }
+                        presenter.deleteOneBookmarkItem(item)
 
                     },
                     aiChatClick = {
@@ -280,7 +184,7 @@ class Act_home : ComponentActivity() {
                         IntentHelper.normalIntent(this, Act_ai_chat::class.java)
 
                     },
-                    moreClick = {
+                    aiChatMoreClick = {
 
                         IntentHelper.normalIntent(this, Act_calculation::class.java)
 
@@ -289,7 +193,11 @@ class Act_home : ComponentActivity() {
 
                         Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
 
-                    }
+                    },
+                    internet = isInternet.value,
+                    navCategoryClick = { presenter.categoryItemFromServer()},
+                    navHomeClick = {},
+                    serverStatus = serverStatus.value
 
 
                 )
@@ -305,12 +213,50 @@ class Act_home : ComponentActivity() {
 
         bookmarkDatabase = BookmarkDatabase(this)
 
+        presenter = HomePresenter(this, historyDB, bookmarkDatabase)
+
+        internetChecker = InternetChecker(this, this)
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
         historyDB.closeDB()
         bookmarkDatabase.closeDB()
+        presenter.onDestroy()
+        internetChecker.onStop()
+    }
+
+    override fun historyList(list: List<Items>) {
+        historyList.clear()
+        historyList.addAll(list)
+    }
+
+    override fun searchList(list: List<Items>) {
+        searchList.clear()
+        searchList.addAll(list)
+    }
+
+    override fun categoryList(list: List<Items>) {
+        categoryList.clear()
+        categoryList.addAll(list)
+    }
+
+    override fun bookmarkList(list: List<Items>) {
+        bookmarkList.clear()
+        bookmarkList.addAll(list)
+    }
+
+    override fun serverStatus(message: String) {
+        serverStatus.value = message
+    }
+
+    override fun message(status: String) {
+        ShortMessageHelper.toast(this, status)
+    }
+
+    override fun isInternet(internet: Boolean) {
+        isInternet.value = internet
     }
 
 }// class====================================================
@@ -319,26 +265,33 @@ class Act_home : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 private fun HomeFullScreen(
-    searchList : MutableList<ItemList> = mutableListOf(),
-    historyList : MutableList<ItemList> = mutableListOf(),
+    searchList : MutableList<Items> = mutableListOf(),
+    historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool: (Boolean) -> Unit = {},
     searchInput: (String) -> Unit = {},
     searchClick: () -> Unit = {},
     historyTitleClick: () -> Unit = {},
     searchItemClick: (String) -> Unit = {},
     gridClick: (String) -> Unit = {},
-    gridList : List<GridList> = emptyList(),
+    gridList : List<Items> = emptyList(),
     settingClick : () -> Unit = {},
-    bookmarkClick: (String) -> Unit = {},
-    bookmarkList: List<ItemList> = emptyList(),
+    searchBookmarkClick: (String) -> Unit = {},
+    bookmarkList: List<Items> = emptyList(),
     bookmarkQuestionClick: (String) -> Unit = {},
     deleteBookmarkClick : (String) -> Unit = {},
     aiChatClick: () -> Unit = {},
-    moreClick: () -> Unit = {},
-    calculationName : (String) -> Unit = {}
+    aiChatMoreClick: () -> Unit = {},
+    calculationName : (String) -> Unit = {},
+    internet: Boolean = false,
+    navCategoryClick : () -> Unit = {},
+    navHomeClick : () -> Unit = {},
+    serverStatus : String = ""
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
+    var isInternetDialogVisible by remember { mutableStateOf(false) }
+
+    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
 
@@ -358,19 +311,34 @@ private fun HomeFullScreen(
 
         ) {
 
+            LaunchedEffect(screen) {
+
+                if (screen == 0){
+
+                    navHomeClick()
+
+                }else if (screen == 1){
+
+                    navCategoryClick()
+
+                }
+
+            }
+            
             when(screen){       //navigation switch
 
-                0 -> HomeScreen(
-                    aiChatClick = {aiChatClick()},
-                    moreClick = { moreClick() },
-                    calculationName = {calculationName(it)}
+                0 ->
+                    HomeScreen(
+                        aiChatClick = { aiChatClick() },
+                        moreClick = { aiChatMoreClick() },
+                        calculationName = { calculationName(it) })
 
-
-                )
-                1 -> ListScreen(
-                    gridClick = { gridClick(it) },
-                    list = gridList
-                )
+                1 ->
+                    ListScreen(
+                        gridClick = { gridClick(it) }
+                        , list = gridList,
+                        serverStatus = serverStatus
+                        )
                 2 -> SearchScreen(
                     searchList = searchList,
                     historyList = historyList,
@@ -379,7 +347,7 @@ private fun HomeFullScreen(
                     searchClick = { searchClick()},
                     historyTitleClick = {historyTitleClick()},
                     searchItemClick = {searchItemClick(it)},
-                    bookmarkClick = { bookmarkClick(it) }
+                    searchBookmarkClick = { searchBookmarkClick(it) }
 
                 )
                 3 -> BookmarkScreen(
@@ -390,8 +358,19 @@ private fun HomeFullScreen(
 
             }
 
+            if (isInternetDialogVisible){
+
+                ComposeHelper.InternetDialog(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    closeClick = { isInternetDialogVisible = false },
+                    openClick = { isInternetDialogVisible = false }
+                )
+
+            }
+
         }//box
-        
 
     }//scaffold
 
@@ -640,13 +619,13 @@ private fun AiChatBot(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(14.dp))
-                .clickable { aiChatClick() }
                 .border(
-                    width = (1.5).dp,
-                    color = Color(0xFF2196F3),
+                    width = 1.dp,
+                    color = Color(0xFF7FC5FC),
                     shape = RoundedCornerShape(14.dp)
                 )
+                .clip(shape = RoundedCornerShape(14.dp))
+                .clickable { aiChatClick() }
                 .padding(10.dp)
 
 
@@ -786,9 +765,9 @@ private fun Calculator(
 
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(15.dp))
                                 .clip(shape = RoundedCornerShape(15.dp))
                                 .clickable{ calculationName(name) }
-                                .border(width = 1.dp, color = Color(0xFF9C27B0), shape = RoundedCornerShape(15.dp))
                                 .align(Alignment.Center)
                                 .padding(10.dp)
 
@@ -836,10 +815,10 @@ private fun Calculator(
 @Preview(showBackground = true)
 @Composable
 private fun ListScreen(
-    list: List<GridList> = emptyList(),
-    gridClick : (String) -> Unit = {}
+    list: List<Items> = emptyList(),
+    gridClick : (String) -> Unit = {},
+    serverStatus : String = ""
 ) {
-
 
     Box(
 
@@ -856,19 +835,37 @@ private fun ListScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            
-           items(
-               items = list,
-               key = { it.title }
-           ){ it ->
 
-               ListGridHelper(
-                   gridImageUrl = it.image,
-                   gridText = it.title,
-                   onGridClick = { gridClick(it.title) }
-               )
+            if (serverStatus == "Pending"){
 
-           }
+                items(17){
+
+                    ComposeHelper.SkeletonLoading(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        shape = 14.dp,
+                        innerPadding = 60.dp
+                    )
+
+                }
+
+            }else{
+
+                items(
+                    items = list,
+                    key = { it.title }
+                ){ it ->
+
+                    ListGridHelper(
+                        gridImageUrl = it.image,
+                        gridText = it.title,
+                        onGridClick = { gridClick(it.title) }
+                    )
+
+                }
+
+            }
 
         }
 
@@ -897,7 +894,7 @@ private fun ListGridHelper(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(14.dp))
+                .border(width = 1.dp, color = Color(0xFFFDE5E5), shape = RoundedCornerShape(14.dp))
                 .clip(shape = RoundedCornerShape(14.dp))
                 .clickable { onGridClick() }
                 .background(color = Color(0xFFFFFFFF))
@@ -956,14 +953,14 @@ private fun ListGridHelper(
 @Preview(showBackground = true)
 @Composable
 private fun SearchScreen(
-    searchList : MutableList<ItemList> = mutableListOf(),
-    historyList : MutableList<ItemList> = mutableListOf(),
+    searchList : MutableList<Items> = mutableListOf(),
+    historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool : (Boolean) -> Unit = {},
     searchInput : (String) -> Unit = {},
     searchClick: () -> Unit = {},
     historyTitleClick: () -> Unit = {},
     searchItemClick : (String) -> Unit = {},
-    bookmarkClick: (String) -> Unit = {}
+    searchBookmarkClick: (String) -> Unit = {}
     ) {
 
     val lazyState = rememberLazyListState()
@@ -1005,7 +1002,7 @@ private fun SearchScreen(
                     QuestionItem(
                         title = it.question,
                         titleClick = { searchItemClick(it.question) },
-                        bookmarkClick = { bookmarkClick(it.question) },
+                        bookmarkClick = { searchBookmarkClick(it.question) },
                         blockBookmarkIcon = "visible"
 
                     )
@@ -1487,7 +1484,7 @@ private fun HistoryItem(
 @Preview(showBackground = true)
 @Composable
 private fun BookmarkScreen(
-    bookmarkList: List<ItemList> = emptyList(),
+    bookmarkList: List<Items> = emptyList(),
     titleClick: (String) -> Unit = {},
     deleteClick: (String) -> Unit = {}
 ) {
