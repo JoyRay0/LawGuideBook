@@ -10,14 +10,24 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
         android:theme="@style/Theme.LawGuideBook">
         <activity
+            android:name=".View.Act_lawwebsites"
+            android:exported="false"
+            android:label="@string/title_activity_act_lawwebsites"
+            android:theme="@style/Theme.LawGuideBook" />
+        <activity
             android:name=".View.Act_calculation"
+            android:exported="false"
+            android:label="@string/title_activity_act_calculation"
+            android:theme="@style/Theme.LawGuideBook" />
+        <activity
+            android:name=".View.Act_calculation_item"
             android:exported="false"
             android:label="@string/title_activity_act_calculation"
             android:theme="@style/Theme.LawGuideBook" />
@@ -26,8 +36,7 @@
             android:exported="false"
             android:label="@string/title_activity_act_ai_chat"
             android:theme="@style/Theme.LawGuideBook"
-            android:windowSoftInputMode="adjustResize"
-            />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".View.Act_home"
             android:exported="false"
@@ -46,15 +55,14 @@
         <activity
             android:name=".View.Act_question"
             android:exported="false"
-            android:label="@string/title_activity_main"
+            android:label="@string/title_activity_act_question"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_answer"
             android:exported="false"
             android:label="@string/title_activity_act_answer"
-            android:theme="@style/Theme.LawGuideBook"
             android:launchMode="singleTop"
-            />
+            android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_splash"
             android:exported="true"
