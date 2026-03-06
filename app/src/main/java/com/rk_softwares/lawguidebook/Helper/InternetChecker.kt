@@ -11,7 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 interface InternetStatus{
-    fun isInternet(internet : Boolean = false)
+    fun isInternet(internet : Boolean)
 }
 
 class InternetChecker(
