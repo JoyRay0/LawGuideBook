@@ -1,50 +1,61 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
-import android.webkit.*
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.unit.sp
+import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
+import com.rk_softwares.lawguidebook.Helper.InternetStatus
+import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Model.WebsiteData
+import com.rk_softwares.lawguidebook.Presenter.LawWebsitePresenter
+import com.rk_softwares.lawguidebook.Presenter.LawWebsites
+import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
-import com.rk_softwares.lawguidebook.Helper.InternetChecker
-import com.rk_softwares.lawguidebook.Helper.InternetStatus
-import com.rk_softwares.lawguidebook.Helper.KeyHelper
-import com.rk_softwares.lawguidebook.Helper.ThemeHelper
-import com.rk_softwares.lawguidebook.R
 
-class Act_webview : ComponentActivity(), InternetStatus {//class========================================
+class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
-    private lateinit var internetChecker: InternetChecker
+    private lateinit var presenter: LawWebsitePresenter
 
-    //init-----
-
+    //init------
     private var isInternet = mutableStateOf(false)
+    private val websiteLink = mutableStateListOf<WebsiteData>()
+    private var serverStatus = mutableStateOf("")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,79 +69,55 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
 
             init()
 
-            var intentText by remember { mutableStateOf("") }
-            var websiteLink by remember { mutableStateOf("") }
-
-            internetChecker.onStart()
-
-            intentText = intent.getStringExtra(KeyHelper.otherApp_privacy_IntentKey()) ?: ""
-
-            if (intentText == "other_apps"){
-
-                websiteLink = "https://sites.google.com/view/rk-softwares-official-site"
-
-            }else{
-
-                websiteLink = "https://sites.google.com/view/lawguidebookapp/home"
-
-            }
-
-
             LawGuideBookTheme {
-
-                WebViewFullScreen(
-                    backClick = {
-                        finish()
-                        intentText = ""
-                        websiteLink = ""
-                    },
-                    websiteLink = websiteLink,
+                LawWebsitesFullScreen(
+                    backClick = { finish() },
                     internet = isInternet.value
                 )
-
-            }
-
-            BackHandler{
-                finish()
-                intentText = ""
-                websiteLink = ""
             }
         }
-    }//on create=================================
+    }//on create===============================================
 
     private fun init(){
-
-        internetChecker = InternetChecker(this, this)
-
+        presenter = LawWebsitePresenter(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        internetChecker.onStop()
     }
 
     override fun isInternet(internet: Boolean) {
         isInternet.value = internet
     }
-}
+
+    override fun websiteList(list: List<WebsiteData>) {
+        websiteLink.addAll(list)
+    }
+
+    override fun serverStatus(status: String) {
+        serverStatus.value = status
+    }
+}//class=======================================================
+
 
 @Preview(showBackground = true)
 @Composable
-private fun WebViewFullScreen(
+private fun LawWebsitesFullScreen(
     backClick: () -> Unit = {},
-    websiteLink : String = "",
-    internet : Boolean = false
-) {
-    val context = LocalContext.current
+    internet: Boolean = false
+){
+
     var isInternetDialogVisible by remember { mutableStateOf(false) }
-    val webview = remember { WebView(context) }
 
     if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
 
     Scaffold(
-        topBar = { ToolBar( backClick = {backClick()} ) },
-        modifier = Modifier.fillMaxSize())
-    { innerPadding ->
+        topBar = { Toolbar(
+            backClick = { backClick() }
+        ) },
+        modifier = Modifier.fillMaxSize()
+
+    ) { innerPadding ->
 
         Box(
 
@@ -140,33 +127,16 @@ private fun WebViewFullScreen(
 
         ) {
 
-            LaunchedEffect(internet) {
+            Column(
 
-                if (internet){
+                modifier = Modifier
+                    .fillMaxSize()
 
-                    webview.loadUrl(websiteLink)
+            ) {
 
-                }
 
-            }
 
-            AndroidView(
-
-                factory = { webview},
-
-                /*
-                    val webView = WebView(context)
-
-                    //webView.settings.javaScriptEnabled = true
-                    webView.webViewClient = WebViewClient()
-                    webView.loadUrl(websiteLink)
-
-                    webView
-                },
-
-                 */
-                modifier = Modifier.fillMaxSize()
-            )
+            }//column
 
             if (isInternetDialogVisible){
 
@@ -186,10 +156,11 @@ private fun WebViewFullScreen(
 
 }//fun end
 
-
 @Preview(showBackground = true)
 @Composable
-private fun ToolBar(backClick : () -> Unit = {}) {
+private fun Toolbar(
+    backClick : () -> Unit = {},
+) {
 
     Box(
 

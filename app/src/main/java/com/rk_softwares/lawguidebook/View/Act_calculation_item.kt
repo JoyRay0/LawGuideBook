@@ -33,8 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
+import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
+import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
@@ -42,11 +44,11 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.Calculation
 import com.rk_softwares.lawguidebook.Presenter.CalculationItemPresenter
-import com.rk_softwares.lawguidebook.Presenter.CalculationView
+import com.rk_softwares.lawguidebook.Presenter.CalculationItemView
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 
-class Act_calculation : ComponentActivity(), InternetStatus, CalculationView {
+class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationItemView {
 
     private lateinit var internetChecker: InternetChecker
     private lateinit var presenter: CalculationItemPresenter
@@ -82,12 +84,16 @@ class Act_calculation : ComponentActivity(), InternetStatus, CalculationView {
 
             LawGuideBookTheme {
 
-                CalculationFullScreen(
+                CalculationItemFullScreen(
                     backClick = { finish() },
                     internet = isInternet.value,
                     calculationList = calculationList,
                     serverStatus = serverStatus.value,
                     itemClick = {
+
+                        IntentHelper.dataIntent(this,
+                            Act_calculation::class.java,
+                            KeyHelper.calculationTitle_IntentKey(), it)
 
                     }
                 )
@@ -130,7 +136,7 @@ class Act_calculation : ComponentActivity(), InternetStatus, CalculationView {
 
 @Preview(showBackground = true)
 @Composable
-private fun CalculationFullScreen(
+private fun CalculationItemFullScreen(
     backClick: () -> Unit = {},
     internet : Boolean = false,
     calculationList : List<Calculation> = emptyList(),
@@ -180,7 +186,7 @@ private fun CalculationFullScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(7.dp),
-                                shape = 14.dp,
+                                shape = 12.dp,
                                 innerPadding = 48.dp
                             )
 
@@ -293,9 +299,9 @@ private fun Item(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 1.dp, color = Color(0xFFFCD0D0), shape = RoundedCornerShape(14.dp))
-                .clip(shape = RoundedCornerShape(14.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
                 .clickable{ itemClick() }
+                .border(width = 1.dp, color = Color(0xFFFCD0D0), shape = RoundedCornerShape(12.dp))
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
 

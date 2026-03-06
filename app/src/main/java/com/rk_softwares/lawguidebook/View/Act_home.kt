@@ -2,7 +2,6 @@ package com.rk_softwares.lawguidebook.View
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,7 +35,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +122,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                     searchClick = {
                         presenter.searchAndHistoryToServer(it)
-                        Log.d("input", it)
+
                         historyData++
                                   },
                     historyTitleClick = { presenter.searchAndHistoryToServer(it) },
@@ -188,7 +186,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     },
                     aiChatMoreClick = {
 
-                        IntentHelper.normalIntent(this, Act_calculation::class.java)
+                        IntentHelper.normalIntent(this, Act_calculation_item::class.java)
 
                     },
                     calculationName = {
@@ -205,6 +203,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                                        },
                     navHomeClick = {
 
+                        presenter.homeItemFromServer()
                         historyList.clear()
                         searchList.clear()
                         bookmarkList.clear()
@@ -216,7 +215,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                         searchList.clear()
                         bookmarkList.clear()
                                   },
-                    serverStatus = serverStatus.value
+                    serverStatus = serverStatus.value,
+                    categoryRetryClick = {
+                        presenter.categoryItemFromServer()
+                    },
+                    lawWebsiteClick = { IntentHelper.normalIntent(this, Act_lawwebsites::class.java) }
 
                 )
 
@@ -287,7 +290,6 @@ private fun HomeFullScreen(
     searchList : MutableList<Items> = mutableListOf(),
     historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool: (Boolean) -> Unit = {},
-    //searchInput: (String) -> Unit = {},
     searchClick: (String) -> Unit = {},
     historyTitleClick: (String) -> Unit = {},
     historyClick: () -> Unit = {},
@@ -307,6 +309,8 @@ private fun HomeFullScreen(
     navHomeClick : () -> Unit = {},
     navBookmark : () -> Unit = {},
     serverStatus : String = "",
+    categoryRetryClick: () -> Unit = {},
+    lawWebsiteClick: () -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -334,18 +338,11 @@ private fun HomeFullScreen(
 
             LaunchedEffect(screen) {
 
-                if (screen == 0){
+                when (screen) {
 
-                    navHomeClick()
-
-                }else if (screen == 1){
-
-                    navCategoryClick()
-
-                }else if (screen == 3){
-
-                    navBookmark()
-
+                    0 -> { navHomeClick() }
+                    1 -> { navCategoryClick() }
+                    3 -> { navBookmark() }
                 }
 
             }
@@ -356,19 +353,22 @@ private fun HomeFullScreen(
                     HomeScreen(
                         aiChatClick = { aiChatClick() },
                         moreClick = { aiChatMoreClick() },
-                        calculationName = { calculationName(it) })
+                        calculationName = { calculationName(it) },
+                        lawWebsiteClick = { lawWebsiteClick() }
+                        )
 
                 1 ->
                     ListScreen(
                         gridClick = { gridClick(it) }
                         , list = gridList,
-                        serverStatus = serverStatus
+                        serverStatus = serverStatus,
+                        internet = internet,
+                        categoryRetryClick = { categoryRetryClick() }
                         )
                 2 -> SearchScreen(
                     searchList = searchList,
                     historyList = historyList,
                     searchScreenBool = { searchScreenBool( it ) },
-                    //searchInput = { searchInput(it) },
                     searchClick = { searchClick(it)},
                     historyTitleClick = {historyTitleClick(it)},
                     historyClick = {historyClick()},
@@ -596,7 +596,8 @@ private fun BottomNavHelper(
 private fun HomeScreen(
     aiChatClick: () -> Unit = {},
     moreClick: () -> Unit = {},
-    calculationName : (String) -> Unit = {}
+    calculationName : (String) -> Unit = {},
+    lawWebsiteClick : () -> Unit = {}
 ) {
 
     Box(
@@ -609,7 +610,7 @@ private fun HomeScreen(
         Column(
 
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxWidth()
 
         ) {
 
@@ -619,6 +620,74 @@ private fun HomeScreen(
                 moreClick = { moreClick() },
                 calculationName = { calculationName(it) }
             )
+
+            //law website btn
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp)
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .clickable{ lawWebsiteClick() }
+                        .border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
+                        .padding(7.dp)
+
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(3.dp)
+                            .align(Alignment.CenterStart)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_website),
+                            contentDescription = "Forward",
+                            tint = Color(0xFFB07B7B),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .size(20.dp)
+                                .align(Alignment.CenterVertically)
+
+                        )
+
+                        Spacer(modifier = Modifier.width(15.dp))
+
+                        Text(text = "আইনি ওয়েবসাইট",
+                            fontSize = 15.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Start,
+                            color = Color(0xFF000000),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.CenterVertically)
+                        )
+
+                    }//row
+
+                    Icon( painter = painterResource(R.drawable.ic_right),
+                        contentDescription = "Forward",
+                        tint = Color(0xFFB07B7B),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(3.dp)
+                            .align(Alignment.CenterEnd)
+
+                    )
+
+                }//box
+
+            }//box
+            //law website btn
 
         }//column
 
@@ -648,9 +717,9 @@ private fun AiChatBot(
                 .border(
                     width = 1.dp,
                     color = Color(0xFF7FC5FC),
-                    shape = RoundedCornerShape(14.dp)
+                    shape = RoundedCornerShape(12.dp)
                 )
-                .clip(shape = RoundedCornerShape(14.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
                 .clickable { aiChatClick() }
                 .padding(10.dp)
 
@@ -791,8 +860,8 @@ private fun Calculator(
 
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(15.dp))
-                                .clip(shape = RoundedCornerShape(15.dp))
+                                .border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(12.dp))
+                                .clip(shape = RoundedCornerShape(12.dp))
                                 .clickable{ calculationName(name) }
                                 .align(Alignment.Center)
                                 .padding(10.dp)
@@ -843,7 +912,9 @@ private fun Calculator(
 private fun ListScreen(
     list: List<Items> = emptyList(),
     gridClick : (String) -> Unit = {},
-    serverStatus : String = ""
+    serverStatus : String = "",
+    internet: Boolean = false,
+    categoryRetryClick : () -> Unit = {}
 ) {
 
     Box(
@@ -858,6 +929,7 @@ private fun ListScreen(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(5.dp),
             state = lazyState,
+            userScrollEnabled = if (serverStatus == "Pending") false else true,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -870,7 +942,7 @@ private fun ListScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
-                        shape = 14.dp,
+                        shape = 12.dp,
                         innerPadding = 60.dp
                     )
 
@@ -894,6 +966,28 @@ private fun ListScreen(
             }
 
         }
+
+        /*
+        if (internet && list.isEmpty()){
+
+            Text(text = "পুনরায় চেষ্টা করুন",
+                fontFamily = BanglaFont.font(),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF595151),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(10.dp))
+                    .clickable{ categoryRetryClick() }
+                    .border(width = 1.dp, color = Color(0xFFC7A1A1), shape = RoundedCornerShape(10.dp))
+                    .padding(10.dp)
+                    .align(Alignment.Center)
+                )
+
+        }
+
+         */
 
     }//box
 
@@ -920,8 +1014,8 @@ private fun ListGridHelper(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 1.dp, color = Color(0xFFFDE5E5), shape = RoundedCornerShape(14.dp))
-                .clip(shape = RoundedCornerShape(14.dp))
+                .border(width = 1.dp, color = Color(0xFFFDE5E5), shape = RoundedCornerShape(12.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
                 .clickable { onGridClick() }
                 .background(color = Color(0xFFFFFFFF))
 
@@ -982,7 +1076,6 @@ private fun SearchScreen(
     searchList : MutableList<Items> = mutableListOf(),
     historyList : MutableList<Items> = mutableListOf(),
     searchScreenBool : (Boolean) -> Unit = {},
-    //searchInput : (String) -> Unit = {},
     searchClick: (String) -> Unit = {},
     historyTitleClick: (String) -> Unit = {},
     historyClick: () -> Unit = {},
@@ -1103,7 +1196,6 @@ private fun SearchScreen(
         }
 
         SearchBarHelper(
-            //search = { searchInput(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
@@ -1123,7 +1215,6 @@ private fun SearchScreen(
 @Preview(showBackground = true)
 @Composable
 private fun SearchBarHelper(
-    //search: (String) -> Unit = {},
     historyClick: () -> Unit = {},
     historyTitle: MutableState<String> = mutableStateOf(""),
     modifier: Modifier = Modifier,

@@ -50,16 +50,21 @@ import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Model.Items
+import com.rk_softwares.lawguidebook.Presenter.Home
+import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class Act_setting : ComponentActivity() {
+class Act_setting : ComponentActivity(), Home {
 
     private val appPackageName = "com.rk_softwares.lawguidebook"
-
     private lateinit var historyDatabase: HistoryDatabase
+
+    private lateinit var presenter: HomePresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,27 +72,11 @@ class Act_setting : ComponentActivity() {
 
             init()
 
-            var isSearchHistoryDeleted by remember { mutableStateOf(false) }
-
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
                 darkIcons = false
             )
-
-            if (isSearchHistoryDeleted){
-
-                LaunchedEffect(Unit) {
-
-                    withContext(Dispatchers.IO){
-
-                        historyDatabase.deleteAll()
-
-                    }
-
-                }
-
-            }
 
             LawGuideBookTheme {
 
@@ -149,15 +138,13 @@ class Act_setting : ComponentActivity() {
 
                     },
                     deleteSearchHistory = {
-
-                        isSearchHistoryDeleted = true
-
-                        Toast.makeText(this,"ডিলিট হয়েছে", Toast.LENGTH_SHORT).show()
-
+                        presenter.dbDeleteAllHistory()
                     }
 
                 )
             }
+
+
 
             BackHandler {
 
@@ -171,7 +158,37 @@ class Act_setting : ComponentActivity() {
     private fun init(){
 
         historyDatabase = HistoryDatabase(this)
+        presenter = HomePresenter(this, historyDatabase, null)
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.onDestroy()
+    }
+
+    override fun onHistoryList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onSearchList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCategoryList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onBookmarkList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun serverStatus(message: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun message(status: String) {
+        ShortMessageHelper.toast(this, status)
     }
 
 }//class=========================================
@@ -331,10 +348,10 @@ private fun SettingFullScreen(
                     TextButtonHelper(
                         text = "ডিলিট সার্চ হিস্ট্রি",
                         textClick = { deleteSearchHistory() },
-                        topStartCorner = 15,
-                        topEndCorner = 15,
-                        bottomStartCorner = 15,
-                        bottomEndCorner = 15,
+                        topStartCorner = 12,
+                        topEndCorner = 12,
+                        bottomStartCorner = 12,
+                        bottomEndCorner = 12,
                         startIcon = R.drawable.ic_delete,
                         startIconSize = 25,
                         spaceWidth = 15
@@ -435,7 +452,7 @@ private fun TextButtonHelper(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 3.dp,
+                    elevation = 2.dp,
                     shape = RoundedCornerShape(
                         topStart = topStartCorner.dp,
                         topEnd = topEndCorner.dp,

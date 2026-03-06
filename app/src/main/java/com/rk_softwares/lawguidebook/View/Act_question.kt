@@ -81,7 +81,11 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
             LaunchedEffect(isInternet.value) {
 
-                presenter.questionsFromServer(toolbarText)
+                if (isInternet.value){
+
+                    presenter.questionsFromServer(toolbarText)
+
+                }
 
             }
 
@@ -207,6 +211,7 @@ private fun QuestionFullScreen(
                     modifier = Modifier
                         .fillMaxSize(),
                     state = lazyState,
+                    userScrollEnabled = if (serverStatus == "Pending") false else true,
 
                 ) {
 
