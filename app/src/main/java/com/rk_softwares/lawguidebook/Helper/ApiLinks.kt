@@ -13,5 +13,9 @@ object ApiLinks {
     fun getQuestionLink() : String { return main_link+"All_app/question_test.php" }
 
     fun getAnswerLink() : String { return main_link+"All_app/answer_test.php" }
+    
+    fun getCalculationLink() : String { return main_link+"All_app/category.php" }
+
+    fun getHomeItemLink() : String { return main_link+"" }
 
 }
