@@ -30,8 +30,8 @@ data class Items(
 )
 
 class HomeModel(
-    private val historyDB : HistoryDatabase,
-    private val bookmarkDB : BookmarkDatabase
+    private val historyDB : HistoryDatabase? = null,
+    private val bookmarkDB : BookmarkDatabase? = null
 ) {
 
     private val bookmarkList = mutableListOf<Items>()
@@ -39,7 +39,7 @@ class HomeModel(
 
     fun dbGetAllHistory() : List<Items>{
 
-        val data = historyDB.getAll()
+        val data = historyDB?.getAll() ?: emptyList()
 
         historyList.clear()
         historyList.addAll(data)
@@ -50,19 +50,19 @@ class HomeModel(
 
     fun dbAddHistory(title: String){
 
-        historyDB.inset(title)
+        historyDB?.inset(title)
 
     }
 
     fun dbHistoryDeleteAll(){
 
-        historyDB.deleteAll()
+        historyDB?.deleteAll()
 
     }
 
     fun dbGetAllBookmark() : List<Items>{
 
-        val data = bookmarkDB.getAll()
+        val data = bookmarkDB?.getAll() ?: emptyList()
 
         bookmarkList.clear()
         bookmarkList.addAll(data)
@@ -72,16 +72,82 @@ class HomeModel(
 
     fun dbAddBookmark(title: String){
 
-        bookmarkDB.insert(title)
+        bookmarkDB?.insert(title)
 
     }
 
-    fun dbBookmarkDeleteOne(title: String) : Boolean{
+    fun dbBookmarkDeleteOne(title: String) : Boolean?{
 
-        return bookmarkDB.deleteOne(title)
+        return bookmarkDB?.deleteOne(title)
 
     }
 
+
+    fun homeServer(
+        //items : Items? = null,
+        onSuccess : (List<Items>) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+    ){
+
+        //if (items == null) return
+
+        val client = OkHttpClient()
+
+        val gson = Gson()
+
+        val request = Request
+            .Builder()
+            .url(ApiLinks.getHomeItemLink())
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+
+            override fun onFailure(call: Call, e: IOException) {
+
+                onFailed(true)
+
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+
+                if (response.isSuccessful){
+
+                    val data = response.body.string()
+
+                    try {
+
+                        val data = gson.fromJson(data, Home::class.java)
+
+                        if (data.status == "Success"){
+
+                            onSuccess(data.items)
+                            onFailed(false)
+
+                        }else{
+
+                            onFailed(true)
+                        }
+
+
+                    }catch (e : Exception){
+
+                        e.printStackTrace()
+                        onFailed(true)
+
+                    }
+
+                }else{
+
+                    onFailed(true)
+
+                }
+
+
+            }
+        })
+
+
+    }
 
     fun categoryServer(
         //items : Items? = null,

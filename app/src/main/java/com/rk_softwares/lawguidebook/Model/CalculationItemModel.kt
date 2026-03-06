@@ -1,66 +1,46 @@
 package com.rk_softwares.lawguidebook.Model
 
-import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.IOException
 import java.lang.Exception
 
-data class Question(
 
+data class CalculationData(
     val status : String = "",
-
     val message : String = "",
+    val items : List<Calculation> = emptyList()
 
-    val data : List<Data> = emptyList()
 )
-
-data class Data(
-    val question : String = "",
-    val category : String = "",
-
-    @SerializedName("device_id")
+data class Calculation(
+    val image : String = "",
+    val title : String = "",
     val deviceID : String = ""
 )
 
-class QuestionModel(
-    private val db : BookmarkDatabase
-) {
+class CalculationItemModel {
 
-    fun dbInsert(title : String){
-
-        db.insert(title)
-
-    }
-
-    fun allQuestions(
-        qData : Data? = null,
-        onSuccess : (List<Data>) -> Unit = {},
+    fun calculationServer(
+        //answerData : AnswerData? = null,
+        onSuccess : (List<Calculation>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
-
-        if (qData == null) return
 
         val client = OkHttpClient()
 
         val gson = Gson()
 
-        val body : RequestBody = gson.toJson(qData.category).toRequestBody("application/json; charset=utf-8".toMediaType())
+        //val body : RequestBody = gson.toJson(answerData.question).toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getQuestionLink())
-            .post(body)
+            .url(ApiLinks.getCalculationLink())
+            //.post(body)
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -79,11 +59,11 @@ class QuestionModel(
 
                     try {
 
-                        val data = gson.fromJson(data, Question::class.java)
+                        val item = gson.fromJson(data, CalculationData::class.java)
 
-                        if (data.status == "Success"){
+                        if (item.status == "Success"){
 
-                            onSuccess(data.data)
+                            onSuccess(item.items)
                             onFailed(false)
 
                         }else{
