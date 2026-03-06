@@ -26,8 +26,8 @@ interface Home{
 
 class HomePresenter(
     private val view : Home,
-    private val historyDB : HistoryDatabase,
-    private val bookmarkDB: BookmarkDatabase
+    private val historyDB : HistoryDatabase? = null,
+    private val bookmarkDB: BookmarkDatabase? = null
 ) {
 
     private val homeModel = HomeModel(historyDB, bookmarkDB)
@@ -49,6 +49,22 @@ class HomePresenter(
         }
 
     }//fun end
+
+    fun dbDeleteAllHistory(){
+
+        scopeIO.launch {
+
+            homeModel.dbHistoryDeleteAll()
+
+            withContext(Dispatchers.Main){
+
+                view.message("ডিলিট হয়েছে")
+
+            }
+
+        }
+
+    }
 
     fun getAllBookmark(){
 
@@ -91,7 +107,7 @@ class HomePresenter(
 
         scopeIO.launch {
 
-            val deleted = homeModel.dbBookmarkDeleteOne(title)
+            val deleted = homeModel.dbBookmarkDeleteOne(title) ?: false
 
             if (deleted){
 
@@ -152,6 +168,41 @@ class HomePresenter(
                 }
 
             })
+
+        }
+
+    }//fun end
+
+    fun homeItemFromServer(){
+
+        view.serverStatus("Pending")
+
+        scopeIO.launch {
+
+            homeModel.homeServer(
+                onSuccess = { result ->
+
+                    scopeMain.launch {
+
+                        view.serverStatus("Success")
+
+                    }
+
+                },
+                onFailed = { isFailed ->
+
+                    if (isFailed){
+
+                        scopeMain.launch {
+
+                            view.serverStatus("Failed")
+
+                        }
+
+                    }
+
+                }
+            )
 
         }
 
