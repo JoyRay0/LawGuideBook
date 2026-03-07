@@ -40,8 +40,12 @@ class Act_calculation : ComponentActivity(), InternetStatus {
                 darkIcons = false
             )
 
+            if (savedInstanceState == null){
 
-            toolbarText.value = intent.getStringExtra(KeyHelper.calculationTitle_IntentKey()) ?: ""
+                toolbarText.value = intent.getStringExtra(KeyHelper.calculationTitle_IntentKey()) ?: ""
+
+            }
+
 
             LawGuideBookTheme {
 

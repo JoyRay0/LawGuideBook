@@ -53,7 +53,7 @@ class LawWebsiteModel {
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getQuestionLink())
+            .url(ApiLinks.getWebsitesLink())
             //.post(body)
             .build()
 

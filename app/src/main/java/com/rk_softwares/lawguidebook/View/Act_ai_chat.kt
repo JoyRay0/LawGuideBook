@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.razzaghi.compose_loading_dots.core.rememberDotsLoadingController
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
@@ -604,7 +603,6 @@ private fun ChatBubble(
 ) {
 
     //var isDotVisible by remember { mutableStateOf(false) }
-    val dotWave = rememberDotsLoadingController()
 
 
     Box(
