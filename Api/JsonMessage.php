@@ -24,13 +24,13 @@ class JsonMessage{
 
     }
 
-    function successMessage($status, $from, $data){
+    function successMessage($status, $from, $name, $data){
 
         echo json_encode([
 
             "status" => $status,
             "from" => $from,
-            "data" => $data
+            $name => $data
 
         ]);
 
