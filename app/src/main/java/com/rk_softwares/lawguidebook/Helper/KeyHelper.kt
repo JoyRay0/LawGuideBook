@@ -6,6 +6,7 @@ object KeyHelper {
     fun sendTitle_IntentKey() : String { return "title" }
     fun otherApp_privacy_IntentKey() : String { return "other_app&privacy" }
     fun calculationTitle_IntentKey() : String { return "calculation" }
+    fun lawWebsiteLink_IntentKey() : String { return "law_website" }
 
 
 }
