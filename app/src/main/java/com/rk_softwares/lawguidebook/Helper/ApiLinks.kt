@@ -18,4 +18,6 @@ object ApiLinks {
 
     fun getHomeItemLink() : String { return main_link+"" }
 
+    fun getWebsitesLink() : String { return  main_link+"All_app/websites.php" }
+
 }
