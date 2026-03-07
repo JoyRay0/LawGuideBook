@@ -8,4 +8,5 @@
     <string name="title_activity_act_ai_chat">Act_ai_chat</string>
     <string name="title_activity_act_calculation">Act_calculation</string>
     <string name="title_activity_act_lawwebsites">Act_lawwebsites</string>
+    <string name="title_activity_act_browser">Act_browser</string>
 </resources>

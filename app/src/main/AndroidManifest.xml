@@ -17,14 +17,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LawGuideBook">
         <activity
+            android:name=".View.Act_browser"
+            android:exported="false"
+            android:label="@string/title_activity_act_browser"
+            android:theme="@style/Theme.LawGuideBook" />
+        <activity
             android:name=".View.Act_lawwebsites"
             android:exported="false"
             android:label="@string/title_activity_act_lawwebsites"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_calculation"
             android:exported="false"
             android:label="@string/title_activity_act_calculation"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_calculation_item"
