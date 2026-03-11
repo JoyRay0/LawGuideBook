@@ -2,15 +2,15 @@
 
 namespace App\Helper;
 
-class HeadersManager{
+class HeadersManagerHelper{
 
-    private function cacheHeader(){
+    private static function cacheHeader(){
 
         header("Cache-Control: public, max-age=3600");
 
     }
 
-    private function securityHeader(){
+    private static function securityHeader(){
 
         // Strict-Transport-Security হেডার
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
@@ -29,7 +29,7 @@ class HeadersManager{
 
     }
 
-    private function httpHeader(){
+    private static function httpHeader(){
 
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
@@ -39,11 +39,11 @@ class HeadersManager{
 
     }
 
-    public function setAllHeaders(){
+    public static function setAllHeaders(){
 
-        $this->cacheHeader();
-        $this->securityHeader();
-        $this->httpHeader();
+        self::cacheHeader();
+        self::securityHeader();
+        self::httpHeader();
 
     }
 

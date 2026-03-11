@@ -11,7 +11,7 @@ class DeviceIDMiddleware{
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface{
     
-        $device_id = $request->getHeaderLine("Device-ID");
+        $device_id = $request->getHeaderLine("Device-ID") ?? "";
 
         $response = new Response();
 
@@ -25,7 +25,7 @@ class DeviceIDMiddleware{
 
         if(!preg_match("/^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{16}$/i", $device_id)){
 
-            $response->getBody()->write("<h3>Invalid ID</h3>");
+            $response->getBody()->write("<h2>Invalid ID</h2>");
 
             return $response->withHeader("Content-Type", "text/html");
 
