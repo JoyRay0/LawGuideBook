@@ -7,7 +7,7 @@ use Slim\Psr7\Response;
 
 class CalculationController{
 
-    public function limt_item(Request $request, Response $response){
+    public function calculation_limt_item(Request $request, Response $response){
 
         $data = [
 
@@ -38,7 +38,7 @@ class CalculationController{
 
     }
 
-    public function all_item(Request $request, Response $response){
+    public function calculation_all_item(Request $request, Response $response){
 
         $data = [
 

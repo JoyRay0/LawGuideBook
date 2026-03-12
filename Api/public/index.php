@@ -10,6 +10,8 @@ use App\Controller\CategoryController;
 use App\Middleware\DeviceIDMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\ApiKeyMiddleware;
+use App\Controller\AdController;
+use App\Controller\SearchController;
 
 $env = Dotenv::createImmutable( __DIR__ . '/Api');
 
@@ -35,18 +37,22 @@ if(isset($_ENV["DEBUG"]) && $_ENV["DEBUG"] === "false"){
 //========================
 //GET Request
 
-$app->get('/limt_item', CalculationController::class .':limt_item');
+$app->get('/calculation_limit', CalculationController::class .':calculation_limt_item');
 
-$app->get('/all_item', CalculationController::class .':all_item');
+$app->get('/calculation_all', CalculationController::class .':calculation_all_item');
 
 $app->get('/websites', LawWebsitiesController::class .':websites');
 
-$app->get('/all_category', CategoryController::class . ':all_category');
+$app->get('/all_category', CategoryController::class .':all_category');
+
+$app->get('/ads', AdController::class .':ads');
 
 
 //POST Request
 
 $app->post('/category', CategoryController::class .':category');
+
+$app->post('/search', SearchController::class .':search');
 
 
 

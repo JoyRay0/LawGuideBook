@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Database\DB;
+use App\Helper\CacheHelper;
+use CachingIterator;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
@@ -72,15 +75,15 @@ class CategoryController{
 
         ];
 
-        $data = $request->getParsedBody();
+        $data = $request->getParsedBody() ?: [];
 
-        $table_name = $data['t_name'] ?? "";    // database table name
+        $table_name = $data['t_name'] ?: "";    // database table name
 
         if(empty(trim($table_name))){
 
             $response->getBody()->write(json_encode([
 
-                "status" => "Failed",
+                "status" => "Error",
                 "message" => "This filed can not be empty"
 
             ]));
@@ -96,8 +99,8 @@ class CategoryController{
 
             $response->getBody()->write(json_encode([
 
-                "status" => "Failed",
-                "message" => "Not Found"
+                "status" => "Error",
+                "message" => "Not match"
 
             ]));
 
@@ -105,6 +108,54 @@ class CategoryController{
 
         }
 
+        //=============================
+        //checking cache
+        //=============================
+
+        $cacheData = CacheHelper::getStringCache($table_name."_cache");
+
+        if(!empty($cacheData)){
+
+            $response->getBody()->write(json_encode([
+
+                "status" => "Success",
+                "from" => "cache",
+                "data" => $cacheData
+
+            ]));
+
+            return $response->withHeader("Content-Type", "application/json");
+
+        }
+
+        //=============================
+        //db query
+        //=============================
+
+        $data =  DB::query("SELECT * FROM $table_name");
+
+        if(empty($data)){
+
+            $response->getBody()->write(json_encode([
+
+                "status" => "Failed",
+                "message" => "Data not Found"
+
+            ]));
+
+            return $response->withHeader("Content-Type", "application/json");
+
+        }
+
+        CacheHelper::setStringCache($table_name."_cache", json_encode($data), 120);      //saving data in cache
+
+        $response->getBody()->write(json_encode([
+
+            "status" => "Success",
+            "from" => "database",
+            "data" => $data
+
+        ]));
 
         return $response->withHeader("Content-Type", "application/json");
 

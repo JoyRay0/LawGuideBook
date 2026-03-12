@@ -42,7 +42,7 @@ class CacheHelper{
 
 
         self::init();
-        $data = self::$cache->get($key) ?? "";
+        $data = self::$cache->get($key) ?: "";
 
         return $data;
     }
@@ -51,7 +51,7 @@ class CacheHelper{
 
 
         self::init();
-        $data = self::$cache->get($key) ?? [];
+        $data = self::$cache->get($key) ?: [];
 
         return $data;
     }
@@ -59,7 +59,7 @@ class CacheHelper{
     public static function deleteCache(string $key) : bool{
 
         self::init();
-        $data = self::$cache->delete($key) ?? false;
+        $data = self::$cache->delete($key) ?: false;
 
         return $data;
 
@@ -68,7 +68,7 @@ class CacheHelper{
     public static function deleteAllCache():bool{
 
         self::init();
-        $data = self::$cache->clear() ?? false;
+        $data = self::$cache->clear() ?: false;
 
         return $data;
     }
