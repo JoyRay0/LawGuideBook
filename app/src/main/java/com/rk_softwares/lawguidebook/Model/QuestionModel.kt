@@ -18,15 +18,21 @@ import java.lang.Exception
 
 data class Question(
 
+    @SerializedName("status")
     val status : String = "",
 
+    @SerializedName("message")
     val message : String = "",
 
+    @SerializedName("data")
     val data : List<Data> = emptyList()
 )
 
 data class Data(
+    @SerializedName("question")
     val question : String = "",
+
+    @SerializedName("category")
     val category : String = "",
 
     @SerializedName("device_id")
