@@ -56,12 +56,12 @@ class DB{
 
     }
 
-    public static function query(string $sql){
+    public static function query(string $sql, array $params = []){
 
         self::connect();
 
         $stmt = self::$connection->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);       //return array with data
 
@@ -83,6 +83,28 @@ class DB{
         }
 
         return $data;       //return boolean with data
+    }
+
+    public static function findOne(string $sql , array $params = []){
+
+        self::connect();
+
+        $stmt = self::$connection->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);      //return boolean with data
+
+    }
+
+    public static function insertOne(string $sql, array $params){
+
+        self::connect();
+
+        $stmt = self::$connection->prepare($sql);
+        $isInserted = $stmt->execute($params);
+
+        return $isInserted;
+
     }
 
 }

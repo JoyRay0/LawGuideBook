@@ -35,7 +35,7 @@ class HeadersManagerHelper{
 
         header('Content-Type: application/json; charset=utf-8');
 
-        header("Access-Control-Allow-Origin: https://rksoftwares.fun");
+        header("Access-Control-Allow-Origin: ". $_ENV['APP_LINK']);
 
     }
 

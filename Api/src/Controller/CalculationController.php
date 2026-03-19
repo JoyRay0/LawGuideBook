@@ -13,15 +13,15 @@ class CalculationController{
 
             [
                 "title" => "উওরাধিকার",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/family.png"
+                "image" => $_ENV['APP_LINK']."/cdn/family.png"
             ],
             [
                 "title" => "রেজিস্ট্রেশন ফি",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/regi.png"
+                "image" => $_ENV['APP_LINK']."/cdn/regi.png"
             ],
             [
                 "title" => "দেনমোহর",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/denmohor.png"
+                "image" => $_ENV['APP_LINK']."/cdn/denmohor.png"
             ],
 
         ];
@@ -34,7 +34,7 @@ class CalculationController{
 
         ]));
 
-        return $response->withHeader("Content-Type", "application/json");
+        return $response;
 
     }
 
@@ -44,15 +44,15 @@ class CalculationController{
 
             [
                 "title" => "উওরাধিকার",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/family.png"
+                "image" => $_ENV['APP_LINK']."/cdn/family.png"
             ],
             [
                 "title" => "রেজিস্ট্রেশন ফি",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/regi.png"
+                "image" => $_ENV['APP_LINK']."/cdn/regi.png"
             ],
             [
                 "title" => "দেনমোহর",
-                "image" => "https://lawguidebook.rksoftwares.fun/cdn/denmohor.png"
+                "image" => $_ENV['APP_LINK']."/cdn/denmohor.png"
             ],
 
         ];
@@ -65,7 +65,7 @@ class CalculationController{
 
         ]));
 
-        return $response->withHeader("Content-Type", "application/json");
+        return $response;
 
     }
 
