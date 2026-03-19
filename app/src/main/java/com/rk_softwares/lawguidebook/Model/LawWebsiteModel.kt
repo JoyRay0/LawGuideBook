@@ -27,7 +27,7 @@ data class WebsiteData(
     @SerializedName("title")
     val title : String = "",
 
-    @SerializedName("website_link")
+    @SerializedName("data")
     val websiteLink : String = "",
 
     @SerializedName("device_id")

@@ -1,6 +1,5 @@
 package com.rk_softwares.lawguidebook.Model
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
@@ -65,7 +64,7 @@ class QuestionModel(
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getQuestionLink())
+            .url(ApiLinks.getCategoryLink())
             .post(body)
             .build()
 

@@ -1,9 +1,11 @@
 package com.rk_softwares.lawguidebook.Model
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import kotlinx.serialization.Serializable
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,7 +20,9 @@ import java.lang.Exception
 data class Home(
     val status : String = "",
     val message : String = "",
-    val items : List<Items> = emptyList()
+
+    @SerializedName("item", alternate = ["item", "data"])
+    val item : List<Items> = emptyList()
 )
 
 data class Items(
@@ -120,7 +124,7 @@ class HomeModel(
 
                         if (data.status == "Success"){
 
-                            onSuccess(data.items)
+                            onSuccess(data.item)
                             onFailed(false)
 
                         }else{
@@ -163,7 +167,7 @@ class HomeModel(
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getCategoryLink())
+            .url(ApiLinks.getAllCategoryLink())
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -186,7 +190,7 @@ class HomeModel(
 
                         if (data.status == "Success"){
 
-                            onSuccess(data.items)
+                            onSuccess(data.item)
                             onFailed(false)
 
                         }else{
@@ -256,7 +260,7 @@ class HomeModel(
 
                         if (data.status == "Success"){
 
-                            onSuccess(data.items)
+                            onSuccess(data.item)
                             onFailed(false)
 
                         }else{

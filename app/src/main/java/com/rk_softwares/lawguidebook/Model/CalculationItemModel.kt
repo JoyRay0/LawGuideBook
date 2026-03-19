@@ -1,6 +1,7 @@
 package com.rk_softwares.lawguidebook.Model
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
 import okhttp3.Call
 import okhttp3.Callback
@@ -14,6 +15,8 @@ import java.lang.Exception
 data class CalculationData(
     val status : String = "",
     val message : String = "",
+
+    @SerializedName("item")
     val items : List<Calculation> = emptyList()
 
 )
@@ -39,7 +42,7 @@ class CalculationItemModel {
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getCalculationLink())
+            .url(ApiLinks.getCalculationAllLink())
             //.post(body)
             .build()
 

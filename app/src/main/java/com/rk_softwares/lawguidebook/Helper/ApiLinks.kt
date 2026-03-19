@@ -2,22 +2,28 @@ package com.rk_softwares.lawguidebook.Helper
 
 object ApiLinks {
 
-    private val main_link ="https://rksoftwares.fun/"
+    private val main_link ="https://lawguidebook.rksoftwares.fun/"
 
-    fun getChatLink() : String { return main_link+"All_app/test.php" }
+    fun getChatLink() : String { return main_link+"ai_chat" }
 
-    fun getCategoryLink() : String { return main_link+"All_app/category.php" }
+    fun getAllCategoryLink() : String { return main_link+"all_category" }
 
-    fun getSearchLink() : String { return main_link+"All_app/search.php" }
+    fun getSearchLink() : String { return main_link+"search/" }
 
-    fun getQuestionLink() : String { return main_link+"All_app/question_test.php" }
+    fun getCategoryLink() : String { return main_link+"category/" }
 
-    fun getAnswerLink() : String { return main_link+"All_app/answer_test.php" }
+    fun getAnswerLink() : String { return main_link+"answer" }
     
-    fun getCalculationLink() : String { return main_link+"All_app/category.php" }
+    fun getCalculationLimitLink() : String { return main_link+"calculation_limit" }
+
+    fun getCalculationAllLink() : String { return main_link+"calculation_all" }
 
     fun getHomeItemLink() : String { return main_link+"" }
 
-    fun getWebsitesLink() : String { return  main_link+"All_app/websites.php" }
+    fun getWebsitesLink() : String { return  main_link+"websites" }
+
+    fun getAppUpdate() : String { return  main_link+"app_update" }
+
+    fun getAds() : String { return  main_link+"ads" }
 
 }
