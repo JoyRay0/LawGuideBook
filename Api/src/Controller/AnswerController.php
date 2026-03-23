@@ -22,7 +22,7 @@ class AnswerController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -45,7 +45,7 @@ class AnswerController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -57,7 +57,7 @@ class AnswerController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
 
     }

@@ -2,6 +2,7 @@
 require __DIR__ . '/Api/vendor/autoload.php';
 
 
+use App\Controller\InitController;
 use App\Middleware\HeaderMiddleware;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;

@@ -34,7 +34,7 @@ class CalculationController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 
@@ -65,7 +65,7 @@ class CalculationController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 

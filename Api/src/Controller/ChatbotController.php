@@ -22,7 +22,7 @@ class ChatbotController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -65,7 +65,7 @@ class ChatbotController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -83,11 +83,11 @@ class ChatbotController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 

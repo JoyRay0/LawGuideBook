@@ -24,7 +24,7 @@ class SearchController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -51,7 +51,7 @@ class SearchController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -64,7 +64,7 @@ class SearchController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 

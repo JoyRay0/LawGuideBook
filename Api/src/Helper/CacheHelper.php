@@ -14,11 +14,7 @@ class CacheHelper{
 
         if(!self::$cache){
 
-            $config = new MemcachedConfig();
-            $config->setHost("localhost");
-            $config->setPort(11211);
-
-            self::$cache = new Psr16Adapter('Memcached', $config);
+            self::$cache = new Psr16Adapter('Files');
 
         }
 

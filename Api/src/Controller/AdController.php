@@ -17,7 +17,7 @@ class AdController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 

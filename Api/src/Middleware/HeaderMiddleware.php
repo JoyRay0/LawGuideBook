@@ -21,7 +21,6 @@ class HeaderMiddleware{
         ->withHeader("X-Frame-Options", "DENY")
         ->withHeader("Referrer-Policy", "no-referrer")
         ->withHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        ->withHeader("Content-Type", "application/json; charset=utf-8")
         ->withHeader("Access-Control-Allow-Origin", "". $_ENV['APP_LINK'])
         ->withHeader("Cache-Control", "public, max-age=3600")
         ->withHeader("X-App-Name", "LawGuideBook");

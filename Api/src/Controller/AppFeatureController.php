@@ -20,7 +20,7 @@ class AppFeatureController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -31,7 +31,7 @@ class AppFeatureController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 

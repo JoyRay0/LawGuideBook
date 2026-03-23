@@ -85,7 +85,7 @@ class CategoryController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 
@@ -115,7 +115,7 @@ class CategoryController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -131,7 +131,7 @@ class CategoryController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -139,9 +139,11 @@ class CategoryController{
         //checking cache
         //=============================
 
-        $cacheData = CacheHelper::getStringCache($table_name."_cache_".$page);
+        $cacheData = CacheHelper::getArrayCache($table_name."_cache_".$page);
 
         if(!empty($cacheData)){
+
+            //$cache_arry = json_decode($cacheData, true);
 
             $response->getBody()->write(json_encode([
 
@@ -149,9 +151,9 @@ class CategoryController{
                 "from" => "cache",
                 "data" => $cacheData
 
-            ]));
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
@@ -175,11 +177,11 @@ class CategoryController{
 
             ]));
 
-            return $response;
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
         }
 
-        CacheHelper::setStringCache($table_name."_cache_".$page, json_encode($data), 120);      //saving data in cache
+        CacheHelper::setArrayCache($table_name."_cache_".$page, $data, 120);      //saving data in cache
 
         $response->getBody()->write(json_encode([
 
@@ -191,7 +193,7 @@ class CategoryController{
 
         ]));
 
-        return $response;
+        return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
 
