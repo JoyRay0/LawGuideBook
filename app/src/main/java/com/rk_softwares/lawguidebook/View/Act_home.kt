@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +73,7 @@ import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 
 class Act_home : ComponentActivity(), Home, InternetStatus {
 
@@ -87,6 +89,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
     private val historyList = mutableStateListOf<Items>()
     private val categoryList = mutableStateListOf<Items>()
     private val bookmarkList = mutableStateListOf<Items>()
+    private val calculationList = mutableStateListOf<Items>()
     private var serverStatus = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +99,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
@@ -139,14 +142,12 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                         )
 
                     },
-                    gridClick = {
+                    gridClick = { it ->
 
-                        IntentHelper.dataIntent(
-                            this,
-                            Act_question::class.java,
-                            KeyHelper.sendTitle_IntentKey(),
-                            it
-                        )
+                        val intent = Intent(this, Act_question::class.java)
+                        intent.putExtra(KeyHelper.sendTitle_IntentKey(), it.title)
+                        intent.putExtra(KeyHelper.sendTableName_IntentKey(), it.tableName)
+                        startActivity(intent)
 
 
                     },
@@ -189,11 +190,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                         IntentHelper.normalIntent(this, Act_calculation_item::class.java)
 
                     },
-                    calculationName = {
-
-                        Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-
-                    },
                     internet = isInternet.value,
                     navCategoryClick = {
                         presenter.categoryItemFromServer()
@@ -203,7 +199,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                                        },
                     navHomeClick = {
 
-                        presenter.homeItemFromServer()
+                        //presenter.homeItemFromServer()
+                        presenter.calculationLimitItemFromServer()
                         historyList.clear()
                         searchList.clear()
                         bookmarkList.clear()
@@ -219,7 +216,13 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     categoryRetryClick = {
                         presenter.categoryItemFromServer()
                     },
-                    lawWebsiteClick = { IntentHelper.normalIntent(this, Act_lawwebsites::class.java) }
+                    lawWebsiteClick = { IntentHelper.normalIntent(this, Act_lawwebsites::class.java) },
+                    calculationList = calculationList,
+                    calculationClick = {
+
+                        IntentHelper.dataIntent(this, Act_calculation::class.java, KeyHelper.calculationTitle_IntentKey(), it)
+
+                    }
 
                 )
 
@@ -268,6 +271,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         bookmarkList.addAll(list)
     }
 
+    override fun onCalculationList(list: List<Items>) {
+        calculationList.clear()
+        calculationList.addAll(list)
+    }
+
     override fun serverStatus(message: String) {
         serverStatus.value = message
         ShortMessageHelper.toast(this, message)
@@ -294,7 +302,7 @@ private fun HomeFullScreen(
     historyTitleClick: (String) -> Unit = {},
     historyClick: () -> Unit = {},
     searchItemClick: (String) -> Unit = {},
-    gridClick: (String) -> Unit = {},
+    gridClick: (Items) -> Unit = {},
     gridList : List<Items> = emptyList(),
     settingClick : () -> Unit = {},
     searchBookmarkClick: (String) -> Unit = {},
@@ -303,14 +311,15 @@ private fun HomeFullScreen(
     deleteBookmarkClick : (String) -> Unit = {},
     aiChatClick: () -> Unit = {},
     aiChatMoreClick: () -> Unit = {},
-    calculationName : (String) -> Unit = {},
     internet: Boolean = false,
     navCategoryClick : () -> Unit = {},
     navHomeClick : () -> Unit = {},
     navBookmark : () -> Unit = {},
     serverStatus : String = "",
     categoryRetryClick: () -> Unit = {},
-    lawWebsiteClick: () -> Unit = {}
+    lawWebsiteClick: () -> Unit = {},
+    calculationList: List<Items> = emptyList(),
+    calculationClick : (String) -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -353,8 +362,10 @@ private fun HomeFullScreen(
                     HomeScreen(
                         aiChatClick = { aiChatClick() },
                         moreClick = { aiChatMoreClick() },
-                        calculationName = { calculationName(it) },
-                        lawWebsiteClick = { lawWebsiteClick() }
+                        calculationClick = { calculationClick(it) },
+                        calculationList = calculationList,
+                        lawWebsiteClick = { lawWebsiteClick() },
+                        status = serverStatus
                         )
 
                 1 ->
@@ -365,6 +376,7 @@ private fun HomeFullScreen(
                         internet = internet,
                         categoryRetryClick = { categoryRetryClick() }
                         )
+
                 2 -> SearchScreen(
                     searchList = searchList,
                     historyList = historyList,
@@ -431,10 +443,10 @@ private fun Toolbar(
                 fontSize = 17.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFFFFF),
+                color = Color(0xFF9C27B0),
                 modifier = Modifier
                     .wrapContentWidth()
-                    .padding(10.dp)
+                    .padding(7.dp)
                     .align(Alignment.CenterStart)
                 )
 
@@ -459,7 +471,7 @@ private fun Toolbar(
 
                     Icon( painter = painterResource(R.drawable.ic_setting),
                         contentDescription = "Setting",
-                        tint = Color(0xFFFFFFFF),
+                        tint = LightToolBarIcon,
                         modifier = Modifier
                             .wrapContentWidth()
                             .size(19.dp)
@@ -494,7 +506,7 @@ private fun BottomNav(
 
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(50.dp)
             .shadow(elevation = 3.dp)
             .background(color = Color(0xFFFFFFFF)),
         horizontalArrangement = Arrangement.SpaceAround
@@ -550,7 +562,7 @@ private fun BottomNavHelper(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
+                .padding(3.dp)
                 .align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
 
@@ -565,14 +577,14 @@ private fun BottomNavHelper(
                     .clickable { navClick() }
                     .background(color = if (selected) Color(0xFFB5E9FF) else Color.Transparent)
                     .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-                    .size(22.dp)
+                    .size(20.dp)
                     .align(Alignment.CenterHorizontally)
             )
 
             //Spacer(modifier = Modifier.height(2.dp))
 
             Text( text = labelText,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = if (selected) Color(0xFFCC3AE5) else Color.Gray,
@@ -596,8 +608,10 @@ private fun BottomNavHelper(
 private fun HomeScreen(
     aiChatClick: () -> Unit = {},
     moreClick: () -> Unit = {},
-    calculationName : (String) -> Unit = {},
-    lawWebsiteClick : () -> Unit = {}
+    calculationClick: (String) -> Unit = {},
+    calculationList: List<Items> = emptyList(),
+    lawWebsiteClick : () -> Unit = {},
+    status: String = ""
 ) {
 
     Box(
@@ -616,10 +630,16 @@ private fun HomeScreen(
 
             AiChatBot(aiChatClick = aiChatClick)
 
+            Spacer(modifier = Modifier.height(7.dp))
+
             Calculator(
                 moreClick = { moreClick() },
-                calculationName = { calculationName(it) }
+                calculationClick = {calculationClick(it)},
+                calculationList = calculationList,
+                status = status
             )
+
+            Spacer(modifier = Modifier.height(7.dp))
 
             //law website btn
 
@@ -627,7 +647,7 @@ private fun HomeScreen(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(7.dp)
+                    .padding(8.dp)
 
             ) {
 
@@ -635,10 +655,12 @@ private fun HomeScreen(
 
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(12.dp))
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                        .clip(shape = RoundedCornerShape(16.dp))
                         .clickable{ lawWebsiteClick() }
-                        .border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
-                        .padding(7.dp)
+                        //.border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
+                        .background(color = Color(0xFFFFFFFF))
+                        .padding(10.dp)
 
                 ) {
 
@@ -651,7 +673,7 @@ private fun HomeScreen(
 
                         Icon( painter = painterResource(R.drawable.ic_website),
                             contentDescription = "Forward",
-                            tint = Color(0xFFB07B7B),
+                            tint = Color(0xFFB98C8C),
                             modifier = Modifier
                                 .wrapContentWidth()
                                 .size(20.dp)
@@ -666,7 +688,7 @@ private fun HomeScreen(
                             fontFamily = BanglaFont.font(),
                             fontWeight = FontWeight.Normal,
                             textAlign = TextAlign.Start,
-                            color = Color(0xFF000000),
+                            color = Color(0xFF3F3838),
                             modifier = Modifier
                                 .wrapContentWidth()
                                 .align(Alignment.CenterVertically)
@@ -676,7 +698,7 @@ private fun HomeScreen(
 
                     Icon( painter = painterResource(R.drawable.ic_right),
                         contentDescription = "Forward",
-                        tint = Color(0xFFB07B7B),
+                        tint = Color(0xFFC99898),
                         modifier = Modifier
                             .wrapContentWidth()
                             .padding(3.dp)
@@ -706,7 +728,7 @@ private fun AiChatBot(
 
         modifier = Modifier
             .fillMaxWidth()
-            .padding(7.dp)
+            .padding(9.dp)
 
     ) {
         
@@ -714,14 +736,11 @@ private fun AiChatBot(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = Color(0xFF7FC5FC),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .clip(shape = RoundedCornerShape(12.dp))
+                .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
                 .clickable { aiChatClick() }
-                .padding(10.dp)
+                .background(color = Color(0xFFFFFFFF))
+                .padding(11.dp)
 
 
         ) {
@@ -730,15 +749,16 @@ private fun AiChatBot(
                 contentDescription = "Ai",
                 modifier = Modifier
                     .wrapContentWidth()
+                    .size(18.dp)
                     .align(Alignment.CenterVertically)
             )
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            Text(text = "আপনার আইনি সহায়ক AI",
+            Text(text = "আইনি সহায়ক AI",
                 fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Normal,
                 color = Color(0xFF494343),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -757,8 +777,12 @@ private fun AiChatBot(
 @Composable
 private fun Calculator(
     moreClick : () -> Unit = {},
-    calculationName : (String) -> Unit = {}
+    calculationClick : (String) -> Unit = {},
+    calculationList : List<Items> = emptyList(),
+    status : String = "Pending"
 ) {
+
+    val lazyScroll = rememberLazyGridState()
 
     Box(
 
@@ -784,7 +808,7 @@ private fun Calculator(
             ) {
 
                 Text("ক্যালকুলেটর",
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontFamily = BanglaFont.font(),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -807,7 +831,7 @@ private fun Calculator(
                 ) {
 
                     Text("আরো দেখুন",
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontFamily = BanglaFont.font(),
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
@@ -831,7 +855,91 @@ private fun Calculator(
 
             }//box
 
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                state = lazyScroll,
+                userScrollEnabled = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
 
+                if (status == "Pending"){
+
+                    items(
+                        count = 3
+                    ){
+                        ComposeHelper.SkeletonLoading(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(7.dp),
+                            shape = 14.dp,
+                            innerPadding = 40.dp
+                        )
+                    }
+
+                }else{
+
+                    items(
+                        items = calculationList,
+                        //key = { it.title }
+                    ){it ->
+
+                        Box(
+
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(5.dp)
+
+                        ) {
+
+                            Column(
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    //.border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(12.dp))
+                                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                                    .clip(shape = RoundedCornerShape(16.dp))
+                                    .clickable{ calculationClick(it.title) }
+                                    .background(color = Color(0xFFFFFFFF))
+                                    .align(Alignment.Center)
+                                    .padding(10.dp)
+
+                            ) {
+
+                                AsyncImage( model = it.image,
+                                    contentDescription = "Calculation",
+                                    modifier = Modifier
+                                        .width(33.dp)
+                                        .height(33.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(text = it.title,
+                                    fontSize = 12.sp,
+                                    fontFamily = BanglaFont.font(),
+                                    fontWeight = FontWeight.Normal,
+                                    color = Color(0xFF000000),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.CenterHorizontally)
+                                )
+
+
+                            }//column
+
+                        }//box
+
+                    }
+
+                }
+
+            }
+
+            /*
             Row(
 
                 modifier = Modifier
@@ -841,8 +949,11 @@ private fun Calculator(
 
             ) {
 
-                val calName = arrayOf("উওরাধিকার", "রেজিস্ট্রেশন ফি", "দেনমোহর")
-                val calImage = arrayOf(R.drawable.img_family, R.drawable.img_regi, R.drawable.img_denmhor)
+               // val calName = arrayOf("উওরাধিকার", "রেজিস্ট্রেশন ফি", "দেনমোহর")
+                //val calImage = arrayOf(R.drawable.img_family, R.drawable.img_regi, R.drawable.img_denmhor)
+
+
+
 
 
                 calName.forEachIndexed { index, name ->
@@ -898,7 +1009,11 @@ private fun Calculator(
 
                 }//loop
 
+
+
             }//row
+
+             */
 
 
         }//column
@@ -911,7 +1026,7 @@ private fun Calculator(
 @Composable
 private fun ListScreen(
     list: List<Items> = emptyList(),
-    gridClick : (String) -> Unit = {},
+    gridClick : (Items) -> Unit = {},
     serverStatus : String = "",
     internet: Boolean = false,
     categoryRetryClick : () -> Unit = {}
@@ -958,7 +1073,7 @@ private fun ListScreen(
                     ListGridHelper(
                         gridImageUrl = it.image,
                         gridText = it.title,
-                        onGridClick = { gridClick(it.title) }
+                        onGridClick = { gridClick(it) }
                     )
 
                 }
@@ -1056,6 +1171,8 @@ private fun ListGridHelper(
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp)

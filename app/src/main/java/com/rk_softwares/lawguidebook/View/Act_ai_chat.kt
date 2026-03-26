@@ -56,6 +56,7 @@ import com.rk_softwares.lawguidebook.Model.ChatMessage
 import com.rk_softwares.lawguidebook.Presenter.ChatPresenter
 import com.rk_softwares.lawguidebook.Presenter.ChatView
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 
 class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
@@ -80,7 +81,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
@@ -390,14 +391,13 @@ private fun Toolbar(
             .fillMaxWidth()
             .background(color = LightToolBar)
 
-
     ) {
 
         Box(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(3.dp)
+                .padding(4.dp)
 
         ) {
 
@@ -405,14 +405,17 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(34.dp)
                     .align(Alignment.CenterStart)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(21.dp)
                         .align(Alignment.Center)
 
                 )
@@ -423,12 +426,14 @@ private fun Toolbar(
                 onClick = { moreClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(34.dp)
                     .align(Alignment.CenterEnd)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_vertical_three_dot),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
                         .size(20.dp)
@@ -456,13 +461,13 @@ private fun Toolbar(
 
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(20.dp))
 
                 Text(text = "আইনি অ্যাসিস্ট্যান্ট",
-                    fontSize = 17.sp,
+                    fontSize = 15.sp,
                     fontFamily = BanglaFont.font(),
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFFFFFFF),
+                    color = Color(0xFFCC3AE5),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .wrapContentWidth()
@@ -546,13 +551,13 @@ private fun ChatNav(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(15.dp))
+                        .clip(shape = RoundedCornerShape(16.dp))
                         .border(
                             width = 1.dp,
-                            color = Color(0xFF938181),
-                            shape = RoundedCornerShape(15.dp)
+                            color = Color(0xFFD0BABA),
+                            shape = RoundedCornerShape(16.dp)
                         )
-                        .padding(10.dp)
+                        .padding(7.dp)
                         .align(Alignment.CenterStart)
                 )
 
