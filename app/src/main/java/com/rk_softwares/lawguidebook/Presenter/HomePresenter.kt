@@ -17,6 +17,7 @@ interface Home{
     fun onSearchList (list: List<Items>)
     fun onCategoryList (list: List<Items>)
     fun onBookmarkList (list: List<Items>)
+    fun onCalculationList (list: List<Items>)
 
     fun serverStatus(message : String)
     fun message(status : String)
@@ -145,7 +146,7 @@ class HomePresenter(
             }
 
             homeModel.searchDataToServer(
-                items = Items(title = title),
+                items = Items(search = title),
                 onSuccess = { result ->
 
                 scopeMain.launch{
@@ -220,6 +221,40 @@ class HomePresenter(
 
                     view.serverStatus("Success")
                     view.onCategoryList(result)
+
+                }
+
+            }, onFailed = { isFailed ->
+
+                if (isFailed){
+
+                    scopeMain.launch {
+
+                        view.serverStatus("Failed")
+
+                    }
+
+                }
+
+
+            })
+
+        }
+
+    }//fun end
+
+    fun calculationLimitItemFromServer(){
+
+        view.serverStatus("Pending")
+
+        scopeIO.launch {
+
+            homeModel.calculationLimitItemFrommServer (onSuccess = { result ->
+
+                scopeMain.launch {
+
+                    view.serverStatus("Success")
+                    view.onCalculationList(result)
 
                 }
 

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,7 +23,7 @@ data class Answer(
     @SerializedName("message")
     val message : String = "",
 
-    @SerializedName("answer_data")
+    @SerializedName("data")
     val answerData : AnswerData = AnswerData()
 )
 
@@ -45,11 +46,13 @@ class AnswerModel {
 
         val gson = Gson()
 
-        val body : RequestBody = gson.toJson(answerData.question).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val body : RequestBody = gson.toJson(answerData).toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val request = Request
             .Builder()
             .url(ApiLinks.getAnswerLink())
+            .addHeader("API-KEY", SecurityKey.getSHA256())
+            .addHeader("Device-ID", SecurityKey.getDeviceID())
             .post(body)
             .build()
 

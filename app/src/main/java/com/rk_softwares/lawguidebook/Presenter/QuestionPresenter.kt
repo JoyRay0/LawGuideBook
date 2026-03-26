@@ -44,16 +44,16 @@ class QuestionPresenter(
 
     }
 
-    fun questionsFromServer(category : String){
+    fun questionsFromServer(category : String, tName : String){
 
-        if (category.isEmpty()) return
+        if (category.isEmpty() && tName.isEmpty()) return
 
         view.serverStatus("Pending")
 
         scopeIO.launch{
 
             model.allQuestions(
-                qData = Data(category = category),
+                qData = Data(title = category, tableName = tName),
 
                 onSuccess = { result ->
 

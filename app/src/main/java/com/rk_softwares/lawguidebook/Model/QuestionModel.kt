@@ -1,9 +1,11 @@
 package com.rk_softwares.lawguidebook.Model
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -31,11 +33,14 @@ data class Data(
     @SerializedName("question")
     val question : String = "",
 
-    @SerializedName("category")
-    val category : String = "",
+    @SerializedName("title")
+    val title : String = "",
 
     @SerializedName("device_id")
-    val deviceID : String = ""
+    val deviceID : String = "",
+
+    @SerializedName("t_name")
+    val tableName : String = ""
 )
 
 class QuestionModel(
@@ -60,11 +65,15 @@ class QuestionModel(
 
         val gson = Gson()
 
-        val body : RequestBody = gson.toJson(qData.category).toRequestBody("application/json; charset=utf-8".toMediaType())
+        val body : RequestBody = gson.toJson(qData).toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        Log.d("item", qData.toString())
 
         val request = Request
             .Builder()
-            .url(ApiLinks.getCategoryLink())
+            .url(ApiLinks.getCategoryLink()+1)
+            .addHeader("API-KEY", SecurityKey.getSHA256())
+            .addHeader("Device-ID", SecurityKey.getDeviceID())
             .post(body)
             .build()
 

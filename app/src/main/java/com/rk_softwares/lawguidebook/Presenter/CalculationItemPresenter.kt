@@ -30,7 +30,7 @@ class CalculationItemPresenter(
 
         scopeIO.launch {
 
-            model.calculationServer(onSuccess = { result ->
+            model.calculationAllItemServer(onSuccess = { result ->
 
                 scopeMain.launch {
 

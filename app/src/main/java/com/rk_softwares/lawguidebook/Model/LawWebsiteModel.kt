@@ -3,6 +3,7 @@ package com.rk_softwares.lawguidebook.Model
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -23,6 +24,9 @@ data class Websites(
 )
 
 data class WebsiteData(
+
+    @SerializedName("id")
+    val id : Int = 0,
 
     @SerializedName("title")
     val title : String = "",
@@ -54,6 +58,8 @@ class LawWebsiteModel {
         val request = Request
             .Builder()
             .url(ApiLinks.getWebsitesLink())
+            .addHeader("API-KEY", SecurityKey.getSHA256())
+            .addHeader("Device-ID", SecurityKey.getDeviceID())
             //.post(body)
             .build()
 

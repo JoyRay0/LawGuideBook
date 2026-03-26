@@ -3,6 +3,7 @@ package com.rk_softwares.lawguidebook.Model
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -21,6 +22,7 @@ data class CalculationData(
 
 )
 data class Calculation(
+    val id : Int = 0,
     val image : String = "",
     val title : String = "",
     val deviceID : String = ""
@@ -28,8 +30,7 @@ data class Calculation(
 
 class CalculationItemModel {
 
-    fun calculationServer(
-        //answerData : AnswerData? = null,
+    fun calculationAllItemServer(
         onSuccess : (List<Calculation>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
@@ -38,12 +39,11 @@ class CalculationItemModel {
 
         val gson = Gson()
 
-        //val body : RequestBody = gson.toJson(answerData.question).toRequestBody("application/json; charset=utf-8".toMediaType())
-
         val request = Request
             .Builder()
             .url(ApiLinks.getCalculationAllLink())
-            //.post(body)
+            .addHeader("API-KEY", SecurityKey.getSHA256())
+            .addHeader("Device-ID", SecurityKey.getDeviceID())
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -93,5 +93,6 @@ class CalculationItemModel {
         })
 
     }//fun end
+
 
 }
