@@ -2,7 +2,6 @@ package com.rk_softwares.lawguidebook.View
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -185,7 +184,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                         IntentHelper.normalIntent(this, Act_ai_chat::class.java)
 
                     },
-                    aiChatMoreClick = {
+                    moreCalculationItemClick = {
 
                         IntentHelper.normalIntent(this, Act_calculation_item::class.java)
 
@@ -310,7 +309,7 @@ private fun HomeFullScreen(
     bookmarkQuestionClick: (String) -> Unit = {},
     deleteBookmarkClick : (String) -> Unit = {},
     aiChatClick: () -> Unit = {},
-    aiChatMoreClick: () -> Unit = {},
+    moreCalculationItemClick: () -> Unit = {},
     internet: Boolean = false,
     navCategoryClick : () -> Unit = {},
     navHomeClick : () -> Unit = {},
@@ -361,7 +360,7 @@ private fun HomeFullScreen(
                 0 ->
                     HomeScreen(
                         aiChatClick = { aiChatClick() },
-                        moreClick = { aiChatMoreClick() },
+                        moreClick = { moreCalculationItemClick() },
                         calculationClick = { calculationClick(it) },
                         calculationList = calculationList,
                         lawWebsiteClick = { lawWebsiteClick() },
@@ -745,6 +744,8 @@ private fun AiChatBot(
 
         ) {
 
+            Spacer(modifier = Modifier.width(5.dp))
+
             Image( painter = painterResource(R.drawable.ic_ai_chat),
                 contentDescription = "Ai",
                 modifier = Modifier
@@ -880,15 +881,14 @@ private fun Calculator(
                 }else{
 
                     items(
-                        items = calculationList,
-                        //key = { it.title }
+                        items = calculationList ?: emptyList(),
+                        key = null
                     ){it ->
 
                         Box(
 
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f)
                                 .padding(5.dp)
 
                         ) {
@@ -897,7 +897,6 @@ private fun Calculator(
 
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    //.border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(12.dp))
                                     .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
                                     .clip(shape = RoundedCornerShape(16.dp))
                                     .clickable{ calculationClick(it.title) }
@@ -910,12 +909,12 @@ private fun Calculator(
                                 AsyncImage( model = it.image,
                                     contentDescription = "Calculation",
                                     modifier = Modifier
-                                        .width(33.dp)
-                                        .height(33.dp)
+                                        .width(30.dp)
+                                        .height(30.dp)
                                         .align(Alignment.CenterHorizontally)
                                 )
 
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 Text(text = it.title,
                                     fontSize = 12.sp,
@@ -938,84 +937,6 @@ private fun Calculator(
                 }
 
             }
-
-            /*
-            Row(
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-
-            ) {
-
-               // val calName = arrayOf("উওরাধিকার", "রেজিস্ট্রেশন ফি", "দেনমোহর")
-                //val calImage = arrayOf(R.drawable.img_family, R.drawable.img_regi, R.drawable.img_denmhor)
-
-
-
-
-
-                calName.forEachIndexed { index, name ->
-
-                    Box(
-
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(5.dp)
-
-                    ) {
-
-                        Column(
-
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(width = 1.dp, color = Color(0xFFF2AAFF), shape = RoundedCornerShape(12.dp))
-                                .clip(shape = RoundedCornerShape(12.dp))
-                                .clickable{ calculationName(name) }
-                                .align(Alignment.Center)
-                                .padding(10.dp)
-
-                        ) {
-
-                            Image( painter = painterResource(calImage[index]),
-                                contentDescription = "Calculation",
-                                modifier = Modifier
-                                    .width(43.dp)
-                                    .height(43.dp)
-                                    .align(Alignment.CenterHorizontally)
-
-                            )
-
-                            Spacer(modifier = Modifier.height(2.dp))
-
-                            Text(text = name,
-                                fontSize = 13.sp,
-                                fontFamily = BanglaFont.font(),
-                                fontWeight = FontWeight.Normal,
-                                color = Color(0xFF000000),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterHorizontally)
-                            )
-
-
-                        }//column
-
-                    }//box
-
-
-                }//loop
-
-
-
-            }//row
-
-             */
-
-
         }//column
 
     }//box
@@ -1058,7 +979,7 @@ private fun ListScreen(
                             .fillMaxWidth()
                             .padding(12.dp),
                         shape = 12.dp,
-                        innerPadding = 60.dp
+                        innerPadding = 45.dp
                     )
 
                 }
@@ -1081,28 +1002,6 @@ private fun ListScreen(
             }
 
         }
-
-        /*
-        if (internet && list.isEmpty()){
-
-            Text(text = "পুনরায় চেষ্টা করুন",
-                fontFamily = BanglaFont.font(),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF595151),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .clip(shape = RoundedCornerShape(10.dp))
-                    .clickable{ categoryRetryClick() }
-                    .border(width = 1.dp, color = Color(0xFFC7A1A1), shape = RoundedCornerShape(10.dp))
-                    .padding(10.dp)
-                    .align(Alignment.Center)
-                )
-
-        }
-
-         */
 
     }//box
 
@@ -1129,8 +1028,8 @@ private fun ListGridHelper(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 1.dp, color = Color(0xFFFDE5E5), shape = RoundedCornerShape(12.dp))
-                .clip(shape = RoundedCornerShape(12.dp))
+                .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
                 .clickable { onGridClick() }
                 .background(color = Color(0xFFFFFFFF))
 
@@ -1145,8 +1044,8 @@ private fun ListGridHelper(
             Box(
 
                 modifier = Modifier
-                    .width(80.dp)
-                    .height(80.dp)
+                    .width(50.dp)
+                    .height(50.dp)
                     .padding(5.dp)
                     .align(Alignment.CenterHorizontally)
 
@@ -1166,19 +1065,20 @@ private fun ListGridHelper(
             }//box
 
             Text(text = gridText,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(110.dp)
                     .padding(5.dp)
                     .align(Alignment.CenterHorizontally)
                 )
 
+            Spacer(modifier = Modifier.height(3.dp))
 
         }//column
 
