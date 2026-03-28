@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -58,6 +59,7 @@ import com.rk_softwares.lawguidebook.Model.AnswerData
 import com.rk_softwares.lawguidebook.Presenter.Answer
 import com.rk_softwares.lawguidebook.Presenter.AnswerPresenter
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 
 class Act_answer : ComponentActivity(), Answer, InternetStatus {//class======================================================
 
@@ -74,7 +76,7 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
@@ -269,34 +271,40 @@ private fun Toolbar(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(3.dp)
+                .padding(4.dp)
 
         ) {
+
+            Spacer(modifier = Modifier.width(3.dp))
 
             IconButton(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(34.dp)
+                    //.background(color = Color(0xFFDEC3C3))
                     .align(Alignment.CenterVertically)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 
             }
 
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(7.dp))
 
             Text(toolbarTitle,
                 fontSize = 16.sp,
                 fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFFFFFFFF),
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF9C27B0),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

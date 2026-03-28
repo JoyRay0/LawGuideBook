@@ -1262,10 +1262,10 @@ private fun SearchBarHelper(
 
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
-                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp))
                     .clip(shape = RoundedCornerShape(12.dp))
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(5.dp)
+                    .padding(2.dp)
                     .align(Alignment.CenterVertically)
                     .imePadding()
 
@@ -1285,7 +1285,7 @@ private fun SearchBarHelper(
                         tint = Color(0xFF000000),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(26.dp)
+                            .size(24.dp)
                             .align(Alignment.CenterVertically)
 
                     )
@@ -1303,7 +1303,7 @@ private fun SearchBarHelper(
                         if (searchFiled.isEmpty()){
 
                             Text("যেকোনো আইনি বিষয় সার্চ করুন",
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontFamily = BanglaFont.font(),
                                 fontWeight = FontWeight.Normal,
                                 color = Color(0xFF695D5D),
@@ -1375,17 +1375,17 @@ private fun SearchBarHelper(
 
             }//box
 
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             Box(
 
                 modifier = Modifier
                     .wrapContentWidth()
-                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(14.dp))
                     .clip(shape = RoundedCornerShape(12.dp))
                     .clickable { historyClick() }
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(12.dp)
+                    .padding(9.dp)
                     .align(Alignment.CenterVertically)
 
             ) {
@@ -1395,7 +1395,7 @@ private fun SearchBarHelper(
                     tint = Color(0xFF000000),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(26.dp)
+                        .size(24.dp)
                         .align(Alignment.Center)
 
                 )
@@ -1466,15 +1466,13 @@ private fun QuestionItem(
 
                     }
                 )
-
-                //.background(color = Color(0xFFFFFFFF))
-                .padding(7.dp)
+                .padding(6.dp)
                 .align(Alignment.Center)
 
         ) {
             
             Text(text = title,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
@@ -1583,13 +1581,13 @@ private fun HistoryItem(
                 )
 
                 //.background(color = Color(0xFFFFFFFF))
-                .padding(7.dp)
+                .padding(5.dp)
                 .align(Alignment.Center)
 
         ) {
 
             Text(text = title,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
