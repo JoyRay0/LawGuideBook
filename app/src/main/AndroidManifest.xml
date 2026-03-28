@@ -15,7 +15,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LawGuideBook">
+        android:theme="@style/Theme.LawGuideBook"
+        android:name=".Helper.App"
+        >
         <activity
             android:name=".View.Act_browser"
             android:exported="false"
