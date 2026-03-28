@@ -12,9 +12,12 @@ val Pink40 = Color(0xFF7D5260)
 
 //light color--------------------------------------
 
-val LightStatusBar = Color(0xFFCC3AE5)
+//val LightStatusBar = Color(0xFFCC3AE5)
+val LightStatusBar = Color(0xFFFFFFFF)
 val LightNav = Color(0xFFFFFFFF)
 
-val LightToolBar = Color(0xFFCC3AE5)
+val LightToolBar = Color(0xFFFFFFFF)
+
+val LightToolBarIcon = Color(0xFF8F7272)
 
 //dark color---------------------------------------
