@@ -11,7 +11,7 @@ class ChatbotController{
 
     public function chatbot(Request $request, Response $response){
 
-        $message = $request->getParsedBody() ?: "";
+        $message = (!empty($request->getParsedBody())) ? $request->getParsedBody() : ""; 
 
         if(empty($message['user_message'])){
 
@@ -28,6 +28,25 @@ class ChatbotController{
 
         $s_user_message = SanitizeHelper::inputString($message['user_message']);
 
+        $result =  self::check_user_message($s_user_message, $response);
+
+        if($result !== null){
+
+            $response->getBody()->write(json_encode([
+
+                "status" => "Success",
+                "user_message" => $s_user_message,
+                "ai_message" => $result
+
+            ]));
+
+            return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
+
+        }
+
+        //======================================
+        //searching in ser=arch table
+        //=======================================
         $answer = DB::find(
             "SELECT question, answer FROM search WHERE MATCH(question) AGAINST (? IN NATURAL LANGUAGE MODE) LIMIT 3", 
             [$s_user_message]);
@@ -48,13 +67,17 @@ class ChatbotController{
 
         $context = "### তথ্যসূত্র (Reference Data):".$answer."### ব্যবহারকারীর প্রশ্ন (User Question): ". $s_user_message;
 
+        //=============================
+        //sending user message to ai
+        //=============================
+
         $gemini_ai = self::geminiBot($rules, $context);
 
         //$deepeek_ai = self::deepseek($rules, "### তথ্যসূত্র (Reference Data):".$answer."### ব্যবহারকারীর প্রশ্ন (User Question): ". $s_user_message);
 
-        $ai_error_message = json_decode($gemini_ai, true);
+        $ai_message = json_decode($gemini_ai, true);
 
-        if(!$ai_error_message || isset($ai_error_message['error'])){
+        if(!$ai_message || isset($ai_message['error'])){
 
             //$deepeek_ai = self::deepseek($rules, "### তথ্যসূত্র (Reference Data):".$answer."### ব্যবহারকারীর প্রশ্ন (User Question): ". $s_user_message);
 
@@ -69,9 +92,13 @@ class ChatbotController{
 
         }
 
+        //===========================
+        //save ai response
+        //===========================
+
         $isInserted = DB::insertOne(
-            "INSERT INTO ai_chat WHERE (user_message, ai_message) VALUES (?, ?)",
-            [$s_user_message, $answer]
+            "INSERT INTO ai_chat (user_message, ai_message) VALUES (?, ?)",
+            [$s_user_message, $ai_message]
         );
 
         if(!$isInserted){
@@ -87,6 +114,14 @@ class ChatbotController{
 
         }
 
+        $response->getBody()->write(json_encode([
+
+            "status" => "Success",
+            "user_message" => $s_user_message,
+            "ai_message" => $gemini_ai
+
+        ]));
+
         return $response ->withHeader("Content-Type", "application/json; charset=utf-8");
 
     }
@@ -101,8 +136,8 @@ class ChatbotController{
             CURLOPT_POST => true,
             CURLOPT_HTTPHEADER => $header,
             CURLOPT_POSTFIELDS => $json,
-            CURLOPT_CONNECTTIMEOUT => 15,
-            CURLOPT_TIMEOUT => 20
+            CURLOPT_CONNECTTIMEOUT => 20,
+            CURLOPT_TIMEOUT => 30
 
         ]);
 
@@ -117,6 +152,57 @@ class ChatbotController{
         curl_close($ch);
 
         return $result;
+
+    }
+
+    private function check_user_message(string $message, $response) : ?string{
+
+        $hash = md5(self::normalize($message));
+
+        //=================================
+        //Hash check
+        //=================================
+
+        $hash_response = DB::findOne(
+            "SELECT ai_message FROM ai_chat WHERE hash = ? LIMIT 1", 
+            [$hash]);
+
+        if($hash_response){
+
+           return $hash_response['ai_message'];
+
+        }
+
+        //======================================
+        //full text message check
+        //======================================
+
+        $full_text_response = DB::findOne(
+            "SELECT ai_message, MATCH(user_message) AGAINST(? IN NATURAL LANGUAGE MODE) AS score
+                FROM ai_chat
+                WHERE MATCH(user_message) AGAINST(? IN NATURAL LANGUAGE MODE)
+                ORDER BY score DESC
+                LIMIT 10", 
+            [$message, $message]);
+
+
+        if($full_text_response && $full_text_response['score'] >= 0.90){
+
+
+            return $full_text_response['ai_message'];
+
+        }
+
+        //===================================
+        //Like message check
+        //===================================
+
+        $like_response = DB::findOne(
+            "",
+            []
+        );
+
+        return null;
 
     }
 
@@ -189,7 +275,15 @@ class ChatbotController{
 
     }
 
+    private function normalize(string $text){
+
+        $text = strtolower($text);
+        $text = preg_replace('/[^\p{L}\p{N}\s]/u', '', $text); //symbol remove
+        $text = preg_replace('/\s+/', '', $text);  //multi space remopve
 
 
+        return trim($text);
+
+    }
 
 }
