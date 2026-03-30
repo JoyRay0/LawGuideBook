@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -56,6 +57,7 @@ import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -75,7 +77,7 @@ class Act_setting : ComponentActivity(), Home {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             LawGuideBookTheme {
@@ -180,6 +182,10 @@ class Act_setting : ComponentActivity(), Home {
     }
 
     override fun onBookmarkList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCalculationList(list: List<Items>) {
         TODO("Not yet implemented")
     }
 
@@ -405,14 +411,17 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 

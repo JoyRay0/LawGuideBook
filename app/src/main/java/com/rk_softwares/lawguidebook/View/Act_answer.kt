@@ -60,6 +60,7 @@ import com.rk_softwares.lawguidebook.Presenter.Answer
 import com.rk_softwares.lawguidebook.Presenter.AnswerPresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_answer : ComponentActivity(), Answer, InternetStatus {//class======================================================
 
@@ -165,7 +166,21 @@ private fun AnswerFullScreen(
     var textZoom by remember { mutableIntStateOf(0) }
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
+
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
 
     Scaffold(
         topBar = {Toolbar(
@@ -238,9 +253,7 @@ private fun AnswerFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }

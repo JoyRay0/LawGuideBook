@@ -57,6 +57,7 @@ import com.rk_softwares.lawguidebook.Presenter.ChatPresenter
 import com.rk_softwares.lawguidebook.Presenter.ChatView
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
@@ -224,7 +225,21 @@ private fun ChatFullScreen(
     var isPopUpMenuVisible by remember { mutableStateOf(false) }
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
+
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
 
     Scaffold(
         topBar = { Toolbar(
@@ -358,14 +373,14 @@ private fun ChatFullScreen(
 
             }
 
+
+
             if (isInternetDialogVisible){
 
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
                 )
 
             }
@@ -567,16 +582,16 @@ private fun ChatNav(
 
             IconButton(
                 onClick = {
-                    if (inputMessage.isNotEmpty()) message(inputMessage)
+                    if (inputMessage.isNotBlank()) message(inputMessage)
                     inputMessage = ""
                     sendClick()
                           },
-                enabled = if (inputMessage.isEmpty()) false else true,
+                enabled = if (inputMessage.isBlank()) false else true,
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
                     //.background(color = Color(0xFF00BCD4))
-                    .alpha(if (inputMessage.isEmpty()) 0.5f else 1f)
+                    .alpha(if (inputMessage.isBlank()) 0.5f else 1f)
                     .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
@@ -795,78 +810,87 @@ private fun DeleteDialog(
 
     ) {
 
-        Column(
+        Row(
 
             modifier = Modifier
-                .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(15.dp))
-                .clip(shape = RoundedCornerShape(15.dp))
+                .wrapContentWidth()
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
                 .background(color = Color(0xFFFFFFFF))
-                .padding(14.dp)
+                .padding(5.dp)
+                .align(Alignment.BottomEnd)
 
         ) {
 
-            Text(text = "কপি মেসেজ",
-                fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF695A5A),
+            IconButton(
+                onClick = { copyClick() },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable { copyClick() }
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xC6625353),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .align(Alignment.CenterHorizontally)
-                    .padding(10.dp)
-            )
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    //.background(color = Color(0xFFBD8C8C))
+                    .size(45.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Icon( painter = painterResource(R.drawable.ic_copy),
+                    contentDescription = "Copy",
+                    tint = Color(0xFF000000),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+                        .align(Alignment.CenterVertically)
 
-            Text(text = "ডিলিট মেসেজ",
-                fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color(0xFFF44336),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable { deleteClick() }
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xBEF44336),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .align(Alignment.CenterHorizontally)
-                    .padding(10.dp)
                 )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            }
 
-            Text(text = "বন্ধ করুন",
-                fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF9F8888),
+            Spacer(modifier = Modifier.width(9.dp))
+
+            IconButton(
+                onClick = { deleteClick() },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable { closeClick() }
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFB69494),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .align(Alignment.CenterHorizontally)
-                    .padding(10.dp)
-            )
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    //.background(color = Color(0xFFBD8C8C))
+                    .size(45.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
 
+                Icon( painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = "Copy",
+                    tint = Color(0xFFF44336),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+                        .align(Alignment.CenterVertically)
+
+                )
+
+            }
+
+            Spacer(modifier = Modifier.width(9.dp))
+
+            IconButton(
+                onClick = { closeClick() },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    //.background(color = Color(0xFFBD8C8C))
+                    .size(45.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
+
+                Icon( painter = painterResource(R.drawable.ic_close_2),
+                    contentDescription = "Copy",
+                    tint = Color(0xFF000000),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+                        .align(Alignment.CenterVertically)
+
+                )
+
+            }
 
         }//column
 
@@ -896,29 +920,51 @@ private fun PopUpMenu(
             modifier = Modifier
                 .width(170.dp)
                 .wrapContentHeight()
-                .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
-                .clip(shape = RoundedCornerShape(12.dp))
+                .shadow(elevation = 5.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
                 .align(Alignment.CenterEnd)
 
         ) {
 
-            Text("সব মেসেজ ডিলিট করুন",
-                fontSize = 14.sp,
-                fontFamily = BanglaFont.font(),
-                fontWeight = FontWeight.Normal,
-                color = Color(0xFF000000),
-                textAlign = TextAlign.Center,
-                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(10.dp))
+                    .clip(shape = RoundedCornerShape(16.dp))
                     .clickable { deleteAllMessage() }
-                    //.background(color = Color(0xFF00BCD4))
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.Start)
+
+            ) {
+
+                Spacer(modifier = Modifier.width(7.dp))
+
+                Icon( painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = "",
+                    tint = Color(0xFF423B3B),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(17.dp)
+                        .align(Alignment.CenterVertically)
+
                 )
+
+                Spacer(modifier = Modifier.width(7.dp))
+
+                Text("সব ডিলিট",
+                    fontSize = 14.sp,
+                    fontFamily = BanglaFont.font(),
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF000000),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(8.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+            }
 
         }//column
 

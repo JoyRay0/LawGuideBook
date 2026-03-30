@@ -73,6 +73,7 @@ import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_home : ComponentActivity(), Home, InternetStatus {
 
@@ -95,13 +96,13 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         super.onCreate(savedInstanceState)
         setContent {
 
+            init()
+
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            init()
 
             internetChecker.onStart()
 
@@ -324,7 +325,21 @@ private fun HomeFullScreen(
     var screen by remember { mutableIntStateOf(0) }
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
+
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
 
     Scaffold(
 
@@ -400,9 +415,7 @@ private fun HomeFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }

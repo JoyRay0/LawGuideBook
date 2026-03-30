@@ -47,6 +47,8 @@ import com.rk_softwares.lawguidebook.Presenter.CalculationItemPresenter
 import com.rk_softwares.lawguidebook.Presenter.CalculationItemView
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationItemView {
 
@@ -65,7 +67,7 @@ class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationIte
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
@@ -147,8 +149,21 @@ private fun CalculationItemFullScreen(
     val lazyState = rememberLazyGridState()
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
 
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
     Scaffold(
         topBar = { Toolbar(backClick = {backClick()}) },
         modifier = Modifier.fillMaxSize())
@@ -219,8 +234,6 @@ private fun CalculationItemFullScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
                 )
 
             }
@@ -259,14 +272,16 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .size(35.dp)
                     .align(Alignment.CenterStart)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 

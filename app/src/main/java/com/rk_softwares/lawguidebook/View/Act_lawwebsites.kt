@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,6 +55,8 @@ import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
@@ -74,7 +78,7 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             LaunchedEffect(isInternet.value) {
@@ -143,8 +147,21 @@ private fun LawWebsitesFullScreen(
     var isInternetDialogVisible by remember { mutableStateOf(false) }
     val lazyState = rememberLazyListState()
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
 
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
     Scaffold(
         topBar = { Toolbar(
             backClick = { backClick() }
@@ -178,7 +195,7 @@ private fun LawWebsitesFullScreen(
                     items(
 
                         items = websiteList,
-                        key = { it.websiteLink }
+                        key = { it.id }
 
                     ){ it ->
 
@@ -198,9 +215,7 @@ private fun LawWebsitesFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }
@@ -237,13 +252,16 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(CircleShape)
+                    .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
+                        .size(22.dp)
                         .wrapContentWidth()
 
                 )

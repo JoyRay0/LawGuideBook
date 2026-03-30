@@ -46,6 +46,7 @@ import com.rk_softwares.lawguidebook.Presenter.QuestionPresenter
 import com.rk_softwares.lawguidebook.Presenter.Questions
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -76,14 +77,16 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
             internetChecker.onStart()
 
             var toolbarText by remember { mutableStateOf("") }
+            var tableName by remember { mutableStateOf("") }
 
             toolbarText = intent.getStringExtra(KeyHelper.sendTitle_IntentKey()) ?: ""
+            tableName = intent.getStringExtra(KeyHelper.sendTableName_IntentKey()) ?: ""
 
             LaunchedEffect(isInternet.value) {
 
                 if (isInternet.value){
 
-                    presenter.questionsFromServer(toolbarText)
+                    presenter.questionsFromServer(toolbarText, tableName)
 
                 }
 
@@ -149,7 +152,7 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
     override fun serverStatus(message: String) {
 
         serverStatus.value = message
-        //ShortMessageHelper.toast(this, message)
+        ShortMessageHelper.toast(this, message)
 
     }
 
@@ -180,8 +183,21 @@ private fun QuestionFullScreen(
     val lazyState = rememberLazyListState()
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
 
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
     Scaffold(
         topBar = { Toolbar(
             backClick = { backClick() },
@@ -255,9 +271,7 @@ private fun QuestionFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }

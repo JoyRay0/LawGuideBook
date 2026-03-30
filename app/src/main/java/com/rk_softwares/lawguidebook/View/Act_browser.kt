@@ -49,6 +49,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
+import kotlinx.coroutines.delay
 
 class Act_browser : ComponentActivity(), InternetStatus {
 
@@ -124,7 +125,21 @@ private fun BrowserFullScreen(
 
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
+
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
 
 
     Scaffold(
@@ -154,9 +169,7 @@ private fun BrowserFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }

@@ -34,7 +34,7 @@ class Act_splash : ComponentActivity() {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             LawGuideBookTheme {

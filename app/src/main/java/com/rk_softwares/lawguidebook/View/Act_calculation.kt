@@ -6,10 +6,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -21,6 +23,7 @@ import androidx.compose.ui.unit.*
 import com.rk_softwares.lawguidebook.Helper.*
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.*
+import kotlinx.coroutines.delay
 
 
 class Act_calculation : ComponentActivity(), InternetStatus {
@@ -37,7 +40,7 @@ class Act_calculation : ComponentActivity(), InternetStatus {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             if (savedInstanceState == null){
@@ -85,8 +88,21 @@ private fun CalculationFullScreen(
 
     var isInternetDialogVisible by remember { mutableStateOf(false) }
 
-    if (internet) isInternetDialogVisible = false else isInternetDialogVisible = true
+    LaunchedEffect(internet) {
 
+        if (!internet){
+
+            delay(2000L)
+
+            isInternetDialogVisible = true
+
+        }else{
+
+            isInternetDialogVisible = false
+
+        }
+
+    }
 
     Scaffold(
         topBar = { Toolbar(
@@ -113,9 +129,7 @@ private fun CalculationFullScreen(
                 ComposeHelper.InternetDialog(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    closeClick = { isInternetDialogVisible = false },
-                    openClick = { isInternetDialogVisible = false }
+                        .align(Alignment.BottomCenter)
                 )
 
             }
@@ -154,14 +168,17 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 
@@ -173,7 +190,7 @@ private fun Toolbar(
                 fontSize = 16.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFFFFFFFF),
+                color = Color(0xFF9C27B0),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .wrapContentWidth()
