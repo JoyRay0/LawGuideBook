@@ -7,7 +7,9 @@ import android.net.NetworkCapabilities
 import androidx.compose.runtime.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 interface InternetStatus{
@@ -32,17 +34,14 @@ class InternetChecker(
             scope.launch { view.isInternet(false) }
         }
 
-        override fun onUnavailable() {
-            scope.launch { view.isInternet(false) }
-        }
-
     }
 
     fun onStart(){
 
         cm.registerDefaultNetworkCallback(callback)
+        scope.launch { view.isInternet(isConnected()) }
 
-        checkCurrentStatus()
+
     }
 
     fun onStop(){
@@ -52,13 +51,9 @@ class InternetChecker(
 
     }
 
-    private fun checkCurrentStatus() {
-        val network = cm.activeNetwork
-        val capabilities = cm.getNetworkCapabilities(network)
-        val isConnected = capabilities != null &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-
-        CoroutineScope(Dispatchers.Main).launch { view.isInternet(isConnected) }
+    private fun isConnected(): Boolean {
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
 }
