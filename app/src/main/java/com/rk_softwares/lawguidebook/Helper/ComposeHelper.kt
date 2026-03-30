@@ -52,8 +52,6 @@ object ComposeHelper {
     @Composable
     fun InternetDialog(
         modifier: Modifier = Modifier,
-        closeClick : () -> Unit = {},
-        openClick : () -> Unit = {}
     ){
 
         val context = LocalContext.current
@@ -62,7 +60,7 @@ object ComposeHelper {
 
             modifier = modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(9.dp)
 
         ) {
 
@@ -70,91 +68,24 @@ object ComposeHelper {
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(elevation = 7.dp, shape = RoundedCornerShape(14.dp))
+                    .shadow(elevation = 2.dp, shape = RoundedCornerShape(14.dp))
                     .clip(shape = RoundedCornerShape(14.dp))
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(7.dp)
+                    .padding(3.dp)
 
             ) {
-
-                Text(text = "ইন্টারনেট সংযোগ নেই!",
-                    fontSize = 20.sp,
-                    fontFamily = BanglaFont.font(),
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF332D2D),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                    )
 
                 Text(text = "ইন্টারনেট সংযোগ চালু করে আবার চেষ্টা করুন।",
                     fontSize = 15.sp,
                     fontFamily = BanglaFont.font(),
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF7A6F6F),
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF564D4D),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(10.dp)
+                        .padding(7.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Row(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(7.dp)
-
-                ) {
-
-                    Text(text = "বন্ধ করুন",
-                        fontSize = 14.sp,
-                        fontFamily = BanglaFont.font(),
-                        fontWeight = FontWeight.Normal,
-                        color = Color(0xFF000000),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .clip(shape = RoundedCornerShape(12.dp))
-                            .clickable{
-                                closeClick()
-                            }
-                            .background(color = Color(0xFFF1EFEF))
-                            .padding(10.dp)
-                            .align(Alignment.CenterVertically)
-                        )
-
-                    Spacer(modifier = Modifier.width(24.dp))
-
-                    Text(text = "চালু করুন",
-                        fontSize = 14.sp,
-                        fontFamily = BanglaFont.font(),
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .clip(shape = RoundedCornerShape(12.dp))
-                            .clickable{
-
-                                openClick()
-
-                                val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
-                                context.startActivity(intent)
-
-                            }
-                            .background(color = Color(0xFF2DB732))
-                            .padding(10.dp)
-                            .align(Alignment.CenterVertically)
-                    )
-
-                }//row
 
             }//column
 
