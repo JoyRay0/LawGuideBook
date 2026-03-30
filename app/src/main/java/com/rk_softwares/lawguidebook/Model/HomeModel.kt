@@ -1,11 +1,14 @@
 package com.rk_softwares.lawguidebook.Model
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
-import kotlinx.serialization.Serializable
+import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
+import com.rk_softwares.lawguidebook.Helper.header
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -21,16 +24,19 @@ data class Home(
     val status : String = "",
     val message : String = "",
 
-    @SerializedName("item", alternate = ["item", "data"])
-    val item : List<Items> = emptyList()
+    @SerializedName("items", alternate = ["item", "data"])
+    val items : List<Items> = emptyList()
 )
 
 data class Items(
+    val id : Int = 0,
     val image : String = "",
     val title : String = "",
     val question : String = "",
     val deviceId : String = "",
-    val search : String = ""
+    val search : String = "",
+    @SerializedName("t_name")
+    val tableName : String = ""
 )
 
 class HomeModel(
@@ -54,7 +60,7 @@ class HomeModel(
 
     fun dbAddHistory(title: String){
 
-        historyDB?.inset(title)
+        historyDB?.insert(title)
 
     }
 
@@ -88,136 +94,47 @@ class HomeModel(
 
 
     fun homeServer(
-        //items : Items? = null,
         onSuccess : (List<Items>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
-        //if (items == null) return
 
-        val client = OkHttpClient()
-
-        val gson = Gson()
-
-        val request = Request
-            .Builder()
+        OkHttpWrapper()
             .url(ApiLinks.getHomeItemLink())
-            .build()
+            .header()
+            .execute(Home::class.java, onSuccess = { result ->
 
-        client.newCall(request).enqueue(object : Callback {
+                if (result.status == "Success"){
 
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val data = gson.fromJson(data, Home::class.java)
-
-                        if (data.status == "Success"){
-
-                            onSuccess(data.item)
-                            onFailed(false)
-
-                        }else{
-
-                            onFailed(true)
-                        }
-
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
-                }else{
-
-                    onFailed(true)
+                    onSuccess(result.items)
 
                 }
 
 
-            }
-        })
+            }, onFailed = {onFailed(it)}, onError = {})
 
-
-    }
+    }//fun end
 
     fun categoryServer(
-        //items : Items? = null,
         onSuccess : (List<Items>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
-        //if (items == null) return
-
-        val client = OkHttpClient()
-
-        val gson = Gson()
-
-        val request = Request
-            .Builder()
+        OkHttpWrapper()
             .url(ApiLinks.getAllCategoryLink())
-            .build()
+            .header()
+            .execute(Home::class.java, onSuccess = { result ->
 
-        client.newCall(request).enqueue(object : Callback {
+                if (result.status == "Success"){
 
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val data = gson.fromJson(data, Home::class.java)
-
-                        if (data.status == "Success"){
-
-                            onSuccess(data.item)
-                            onFailed(false)
-
-                        }else{
-
-                            onFailed(true)
-                        }
-
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
-                }else{
-
-                    onFailed(true)
+                    onSuccess(result.items)
 
                 }
 
 
-            }
-        })
+            }, onFailed = {onFailed(it)}, onError = {})
 
-
-    }
+    }//fun end
 
     fun searchDataToServer(
         items : Items? = null,
@@ -227,62 +144,41 @@ class HomeModel(
 
         if (items == null) return
 
-        val client = OkHttpClient()
+        OkHttpWrapper()
+            .url(ApiLinks.getSearchLink()+1)
+            .header()
+            .post(items)
+            .execute(Home::class.java, onSuccess = { result ->
 
-        val gson = Gson()
+                if (result.status == "Success"){
 
-        val body : RequestBody = gson.toJson(items).toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val request = Request
-            .Builder()
-            .url(ApiLinks.getSearchLink())
-            .post(body)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val data = gson.fromJson(data, Home::class.java)
-
-                        if (data.status == "Success"){
-
-                            onSuccess(data.item)
-                            onFailed(false)
-
-                        }else{
-                            onFailed(true)
-                        }
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
-                }else{
-
-                    onFailed(true)
+                    onSuccess(result.items)
 
                 }
 
 
-            }
-        })
+            }, onFailed = {onFailed(it)}, onError = {})
 
-    }
+    }//fun end
+
+    fun calculationLimitItemFrommServer(
+        onSuccess : (List<Items>) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+    ){
+
+        OkHttpWrapper()
+            .url(ApiLinks.getCalculationLimitLink())
+            .header()
+            .execute(Home::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.items)
+
+                }
+
+
+            }, onFailed = {onFailed(it)}, onError = {})
+
+    }//fun end
 }

@@ -5,6 +5,9 @@ import com.google.gson.Gson
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
 import com.rk_softwares.lawguidebook.Helper.CacheHelper
+import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
+import com.rk_softwares.lawguidebook.Helper.SecurityKey
+import com.rk_softwares.lawguidebook.Helper.header
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -19,6 +22,7 @@ import java.lang.Exception
 data class ChatMessage(
 
     val id : Int = 0,
+    val status : String = "",
     val message : String = "",
     val user_message : String = "",
     val ai_message : String = "",
@@ -97,63 +101,20 @@ class ChatModel(
 
         if (userMessage == null) return
 
-        val client = OkHttpClient()
-
-        val gson = Gson()
-
-        val body : RequestBody = gson.toJson(userMessage).toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val request = Request
-            .Builder()
+        OkHttpWrapper()
             .url(ApiLinks.getChatLink())
-            .post(body)
-            .build()
+            .header()
+            .post(userMessage)
+            .execute(ChatMessage::class.java, onSuccess = { result ->
 
-        client.newCall(request).enqueue(object : Callback {
+                if (result.status == "Success"){
 
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-                Log.d("failed", e.toString())
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val item_message = gson.fromJson(data, ChatMessage::class.java)
-
-                        //if (item_message.status == "success") onResultAvailable(true)
-
-                        //Log.d("message", item_message.user_message)
-
-                        onSuccess(item_message)
-                        onFailed(false)
-
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
-                }else{
-
-                    onFailed(true)
+                    onSuccess(result)
 
                 }
 
+            }, onFailed = {onFailed(it)}, onError = {})
 
-            }
-        })
-
-    }
+    }//fun end
 
 }

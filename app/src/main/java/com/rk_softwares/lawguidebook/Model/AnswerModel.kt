@@ -1,20 +1,9 @@
 package com.rk_softwares.lawguidebook.Model
 
-import android.util.Log
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
-import com.rk_softwares.lawguidebook.Helper.SecurityKey
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okio.IOException
-import java.lang.Exception
+import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
+import com.rk_softwares.lawguidebook.Helper.header
 
 data class Answer(
     @SerializedName("status")
@@ -34,6 +23,7 @@ data class AnswerData(
 
 class AnswerModel {
 
+    /*
     fun answer(
         answerData : AnswerData? = null,
         onSuccess : (AnswerData) -> Unit = {},
@@ -103,5 +93,36 @@ class AnswerModel {
         })
 
     }//fun end
+
+     */
+
+    fun answer(
+        answerData : AnswerData? = null,
+        onSuccess : (AnswerData) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+        ){
+
+        if (answerData == null) return
+
+        OkHttpWrapper()
+            .url(ApiLinks.getAnswerLink())
+            .header()
+            .post(answerData)
+            .execute(Answer::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.answerData)
+
+                }
+
+            }, onFailed = { isFailed->
+
+                onFailed(isFailed)
+
+            }, onError = {})
+
+    }
+
 
 }

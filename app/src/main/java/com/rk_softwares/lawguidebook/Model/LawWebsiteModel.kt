@@ -3,6 +3,7 @@ package com.rk_softwares.lawguidebook.Model
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
 import com.rk_softwares.lawguidebook.Helper.SecurityKey
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -42,11 +43,23 @@ data class WebsiteData(
 class LawWebsiteModel {
 
     fun allWebsiteLinks(
-        //qData : Data? = null,
         onSuccess : (List<WebsiteData>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
+        OkHttpWrapper()
+            .url(ApiLinks.getWebsitesLink())
+            .execute(Websites::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.data)
+
+                }
+
+            }, onFailed = {onFailed(it)}, onError = {})
+
+        /*
         //if (qData == null) return
 
         val client = OkHttpClient()
@@ -108,6 +121,8 @@ class LawWebsiteModel {
 
             }
         })
+
+         */
 
     }//fun end
 

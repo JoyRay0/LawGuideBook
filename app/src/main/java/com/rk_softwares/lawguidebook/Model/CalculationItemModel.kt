@@ -3,7 +3,9 @@ package com.rk_softwares.lawguidebook.Model
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
+import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
 import com.rk_softwares.lawguidebook.Helper.SecurityKey
+import com.rk_softwares.lawguidebook.Helper.header
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -35,62 +37,18 @@ class CalculationItemModel {
         onFailed : (Boolean) -> Unit = {}
     ){
 
-        val client = OkHttpClient()
-
-        val gson = Gson()
-
-        val request = Request
-            .Builder()
+        OkHttpWrapper()
             .url(ApiLinks.getCalculationAllLink())
-            .addHeader("API-KEY", SecurityKey.getSHA256())
-            .addHeader("Device-ID", SecurityKey.getDeviceID())
-            .build()
+            .header()
+            .execute(CalculationData::class.java, onSuccess = { result ->
 
-        client.newCall(request).enqueue(object : Callback {
+                if (result.status == "Success"){
 
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val item = gson.fromJson(data, CalculationData::class.java)
-
-                        if (item.status == "Success"){
-
-                            onSuccess(item.items)
-                            onFailed(false)
-
-                        }else{
-
-                            onFailed(true)
-                        }
-
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
-                }else{
-
-                    onFailed(true)
+                    onSuccess(result.items)
 
                 }
 
-
-            }
-        })
+            }, onFailed = {onFailed(it)}, onError = {})
 
     }//fun end
 
