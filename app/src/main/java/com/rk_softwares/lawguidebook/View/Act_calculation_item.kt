@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +64,7 @@ class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationIte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
 
             ThemeHelper.SystemUi(
@@ -166,7 +169,11 @@ private fun CalculationItemFullScreen(
     }
     Scaffold(
         topBar = { Toolbar(backClick = {backClick()}) },
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
+    )
     { innerPadding ->
 
         Box(
@@ -201,8 +208,8 @@ private fun CalculationItemFullScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(7.dp),
-                                shape = 12.dp,
-                                innerPadding = 48.dp
+                                shape = 16.dp,
+                                innerPadding = 39.dp
                             )
 
                         }
@@ -314,28 +321,30 @@ private fun Item(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(12.dp))
+                .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
                 .clickable{ itemClick() }
-                .border(width = 1.dp, color = Color(0xFFFCD0D0), shape = RoundedCornerShape(12.dp))
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
 
         ) {
+
+            Spacer(modifier = Modifier.height(6.dp))
 
             AsyncImage( model = image,
                 contentDescription = "",
                 placeholder = painterResource(R.drawable.img_loading),
                 error = painterResource(R.drawable.img_loading),
                 modifier = Modifier
-                    .width(50.dp)
-                    .height(55.dp)
+                    .width(30.dp)
+                    .height(30.dp)
                     .align(Alignment.CenterHorizontally)
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(text = title,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF605252),

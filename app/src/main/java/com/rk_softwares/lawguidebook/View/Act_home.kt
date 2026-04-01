@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
@@ -74,6 +75,7 @@ import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.delay
+import okhttp3.internal.platform.android.AndroidLog
 
 class Act_home : ComponentActivity(), Home, InternetStatus {
 
@@ -94,6 +96,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
 
             init()
@@ -347,9 +350,11 @@ private fun HomeFullScreen(
             settingClick = {settingClick()}
         )},
         bottomBar = { BottomNav(  screenIndex = { screen = it }) },
-        modifier = Modifier.fillMaxSize())
-
-    { innerPadding ->
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
+    ) { innerPadding ->
 
         Box(
 

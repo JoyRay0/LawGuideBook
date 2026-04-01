@@ -1,9 +1,15 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Bundle
 import android.provider.Browser
+import android.webkit.SslErrorHandler
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
@@ -18,8 +24,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -32,12 +43,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
@@ -49,6 +65,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.delay
 
 class Act_browser : ComponentActivity(), InternetStatus {
@@ -61,6 +78,7 @@ class Act_browser : ComponentActivity(), InternetStatus {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
 
             init()
@@ -68,7 +86,7 @@ class Act_browser : ComponentActivity(), InternetStatus {
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             website.value = intent.getStringExtra(KeyHelper.lawWebsiteLink_IntentKey()) ?: ""
@@ -104,6 +122,11 @@ class Act_browser : ComponentActivity(), InternetStatus {
 
     override fun onDestroy() {
         super.onDestroy()
+        //internetChecker.onStop()
+    }
+
+    override fun onStop() {
+        super.onStop()
         internetChecker.onStop()
     }
 
@@ -141,12 +164,14 @@ private fun BrowserFullScreen(
 
     }
 
-
     Scaffold(
         topBar = { Toolbar(
-            backClick = { backClick() }
+            backClick = { backClick() },
         ) },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
     ) { innerPadding ->
 
         Box(
@@ -156,7 +181,8 @@ private fun BrowserFullScreen(
                 .padding(innerPadding)
 
         ) {
-            if (internet){
+
+            if (website.isNotEmpty()){
 
                 WebView(
                     websiteLink = website
@@ -194,7 +220,7 @@ private fun Toolbar(
 
     ) {
 
-        Row(
+        Box(
 
             modifier = Modifier
                 .fillMaxWidth()
@@ -206,20 +232,23 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
-                    .align(Alignment.CenterVertically)
+                    .clip(shape = CircleShape)
+                    .size(35.dp)
+                    .align(Alignment.CenterStart)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 
             }
 
-        }//row
+        }//box
 
     }//box
 
@@ -229,43 +258,86 @@ private fun Toolbar(
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun WebView(
-    modifier: Modifier = Modifier,
     websiteLink : String = ""
 ) {
 
+    var isLoading = remember { mutableStateOf(true) }
+
+
     Box(
 
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
 
     ) {
 
 
         AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                webViewClient = WebViewClient()
-                settings.apply {
+            factory = { context ->
+                WebView(context).apply {
 
-                    javaScriptEnabled = true
-                    domStorageEnabled = true
-                    loadWithOverviewMode = true
-                    useWideViewPort = true
-                    builtInZoomControls = true
-                    displayZoomControls = false
+                    webViewClient = object : WebViewClient(){
 
-                    allowFileAccess = false
-                    allowContentAccess = false
+                        override fun onReceivedSslError(
+                            view: WebView?,
+                            handler: SslErrorHandler?,
+                            error: SslError?
+                        ) {
+                            super.onReceivedSslError(view, handler, error)
+                            handler?.proceed()
+                        }
 
-                    allowFileAccessFromFileURLs = false
-                    allowFileAccessFromFileURLs = false
+                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                            super.onPageStarted(view, url, favicon)
+                            isLoading.value = true
+                        }
 
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            isLoading.value = false
+                        }
+
+                    }
+
+                    settings.apply {
+
+                        javaScriptEnabled = true
+                        domStorageEnabled = true
+                        loadWithOverviewMode = true
+                        useWideViewPort = true
+                        builtInZoomControls = true
+                        displayZoomControls = false
+
+
+                        allowFileAccess = false
+                        allowContentAccess = false
+
+                        allowFileAccessFromFileURLs = false
+                        allowFileAccessFromFileURLs = false
+
+                    }
+                    loadUrl(websiteLink)
                 }
-                loadUrl(websiteLink)
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+        )
+
+        if (isLoading.value){
+
+            CircularProgressIndicator(
+
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .size(50.dp)
+                    .align(Alignment.Center),
+                strokeWidth = 5.dp,
+                color = Color(0xFF9C27B0),
+                trackColor = Color.LightGray
+
+            )
+
+        }
 
     }//box
 

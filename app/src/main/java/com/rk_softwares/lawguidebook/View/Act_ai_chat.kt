@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,6 +78,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
 
             ThemeHelper.SystemUi(
@@ -252,7 +254,11 @@ private fun ChatFullScreen(
             sendClick = { sendClick() }
         ) },
 
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
+    )
 
     { innerPadding ->
 

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +36,7 @@ class Act_calculation : ComponentActivity(), InternetStatus {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             
             ThemeHelper.SystemUi(
@@ -110,7 +112,11 @@ private fun CalculationFullScreen(
             toolbarTitle = toolbarTitle
         ) },
 
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
+    )
 
     { innerPadding ->
 
