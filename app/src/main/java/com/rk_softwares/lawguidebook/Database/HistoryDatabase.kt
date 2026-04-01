@@ -29,7 +29,7 @@ class HistoryDatabase(
 
     }
 
-    fun inset(title : String){
+    fun insert(title : String){
 
         val db = dbOpen(true)
 
