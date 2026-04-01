@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import kotlinx.coroutines.delay
 
 @Preview
 @Composable
@@ -33,7 +35,8 @@ fun FullView(){
 
     Column(
 
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(color = Color(0xFFFFFFFF))
 
     ) {
@@ -41,6 +44,8 @@ fun FullView(){
         ComposeHelper.InternetDialog()
 
         ComposeHelper.SkeletonLoading()
+
+        ComposeHelper.CircularProgressBar()
 
     }//column
 
@@ -113,12 +118,62 @@ object ComposeHelper {
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(shape))
                     .background(color = Color(0xFFFAE2E2))
-                    .padding(innerPadding )
+                    .padding(innerPadding)
             )
             
 
         }
 
+
+    }//fun end
+
+    @Composable
+    fun CircularProgressBar(
+        modifier: Modifier = Modifier
+    ) {
+
+        val colors = arrayOf(
+            Color(0xFF9C27B0),
+            Color(0xFF2196F3),
+            Color(0xFF8BC34A),
+            Color(0xFFFF9800),
+            Color(0xFFFF5722),
+
+        )
+
+        var index = remember { mutableStateOf(0) }
+        
+        LaunchedEffect(Unit) {
+
+            while (true){
+
+                delay(2000)
+
+                index.value = (index.value + 1) % colors.size
+
+            }
+
+        }
+
+        Box(
+
+            modifier = modifier
+                .wrapContentWidth()
+
+        ) {
+
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .size(45.dp)
+                    .align(Alignment.Center),
+                color = colors[index.value],
+                strokeWidth = 4.dp,
+                trackColor = Color.LightGray
+
+            )
+
+        }//box
 
     }//fun end
 
