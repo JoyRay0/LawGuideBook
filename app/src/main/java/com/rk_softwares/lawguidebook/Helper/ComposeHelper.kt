@@ -105,6 +105,27 @@ object ComposeHelper {
         innerPadding : Dp = 10.dp
     ){
 
+        val colors = arrayOf(
+            Color(0xFFFAE2E2),
+            Color(0xE2FAE2E2),
+            Color(0xCEFAE2E2),
+            Color(0xA1FAE2E2)
+
+        )
+
+        var index = remember { mutableStateOf(0) }
+
+        LaunchedEffect(Unit) {
+
+            while (true){
+
+                delay(200L)
+                index.value = (index.value + 1) % colors.size
+
+            }
+
+        }
+
         Box(
 
             modifier = modifier
@@ -117,7 +138,7 @@ object ComposeHelper {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(shape))
-                    .background(color = Color(0xFFFAE2E2))
+                    .background(color = colors[index.value])
                     .padding(innerPadding)
             )
             
@@ -137,7 +158,7 @@ object ComposeHelper {
             Color(0xFF2196F3),
             Color(0xFF8BC34A),
             Color(0xFFFF9800),
-            Color(0xFFFF5722),
+            Color(0xFFF66639),
 
         )
 
