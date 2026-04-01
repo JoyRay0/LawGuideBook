@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Model
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
@@ -32,7 +33,7 @@ data class WebsiteData(
     @SerializedName("title")
     val title : String = "",
 
-    @SerializedName("data")
+    @SerializedName("website_link")
     val websiteLink : String = "",
 
     @SerializedName("device_id")
@@ -54,6 +55,8 @@ class LawWebsiteModel {
                 if (result.status == "Success"){
 
                     onSuccess(result.data)
+
+                    Log.d("websites", result.data.toString())
 
                 }
 
