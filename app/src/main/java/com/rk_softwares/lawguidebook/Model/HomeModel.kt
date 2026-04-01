@@ -25,7 +25,8 @@ data class Home(
     val message : String = "",
 
     @SerializedName("items", alternate = ["item", "data"])
-    val items : List<Items> = emptyList()
+    val items : List<Items> = emptyList(),
+    val version : String = ""
 )
 
 data class Items(
@@ -177,6 +178,26 @@ class HomeModel(
 
                 }
 
+
+            }, onFailed = {onFailed(it)}, onError = {})
+
+    }//fun end
+
+    fun appVersion(
+        onSuccess : (String) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+    ){
+
+        OkHttpWrapper()
+            .url(ApiLinks.getAppUpdate())
+            .header()
+            .execute(Home::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.version)
+
+                }
 
             }, onFailed = {onFailed(it)}, onError = {})
 

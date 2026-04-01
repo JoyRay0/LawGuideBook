@@ -22,6 +22,8 @@ interface Home{
     fun serverStatus(message : String)
     fun message(status : String)
 
+    fun appUpdateStatus(version: String)
+
 
 }
 
@@ -272,6 +274,42 @@ class HomePresenter(
 
 
             })
+
+        }
+
+    }//fun end
+
+    fun appUpdate(){
+
+        view.serverStatus("Pending")
+
+        scopeIO.launch {
+
+            homeModel.appVersion(
+                onSuccess = { result ->
+
+                    scopeMain.launch {
+
+                        view.serverStatus("Success")
+                        view.appUpdateStatus(result)
+
+                    }
+
+                },
+                onFailed = { isFailed ->
+
+                    if (isFailed){
+
+                        scopeMain.launch {
+
+                            view.serverStatus("Failed")
+
+                        }
+
+                    }
+
+                }
+            )
 
         }
 
