@@ -25,6 +25,8 @@ class AnswerPresenter(
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
     fun answerFromServer(question : String){
 
+        view.serverStatus("Pending")
+
         scopeIO.launch {
 
             model.answer(
