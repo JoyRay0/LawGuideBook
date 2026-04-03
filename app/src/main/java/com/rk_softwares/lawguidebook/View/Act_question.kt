@@ -6,7 +6,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +47,7 @@ import com.rk_softwares.lawguidebook.Model.Data
 import com.rk_softwares.lawguidebook.Presenter.QuestionPresenter
 import com.rk_softwares.lawguidebook.Presenter.Questions
 import com.rk_softwares.lawguidebook.R
+import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,12 +67,13 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
@@ -204,7 +208,11 @@ private fun QuestionFullScreen(
             toolbarTitle = toolbarTitle
         ) },
 
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = LightStatusBar)
+            .systemBarsPadding()
+    )
     { innerPadding ->
 
         Box(
@@ -215,52 +223,53 @@ private fun QuestionFullScreen(
 
         ) {
 
-            Column(
+            Box(
 
                 modifier = Modifier
                     .fillMaxSize()
 
             ) {
 
+                when(serverStatus){
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = lazyState,
-                    userScrollEnabled = if (serverStatus == "Pending") false else true,
+                    "Pending" -> {
 
-                ) {
+                        ComposeHelper.CircularProgressBar(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.Center)
+                        )
 
-                    if (serverStatus == "Pending"){
+                    }
 
-                        items(17){
+                    "Success" -> {
 
-                            ComposeHelper.SkeletonLoading(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(7.dp),
-                                shape = 12.dp,
-                                innerPadding = 22.dp
-                            )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            state = lazyState,
+                            userScrollEnabled = if (serverStatus == "Pending") false else true,
 
-                        }
+                            ) {
 
-                    }else{
+                            items(
+                                items = questionList,
+                                key = { it.question }
+                            ){ it ->
 
-                        items(
-                            items = questionList,
-                            key = { it.question }
-                        ){ it ->
+                                Item(
+                                    title = it.question,
+                                    titleClick = { questionClick(it.question) },
+                                    bookmarkTitleClick = { bookmarkClick(it.question) }
+                                )
 
-                            Item(
-                                title = it.question,
-                                titleClick = { questionClick(it.question) },
-                                bookmarkTitleClick = { bookmarkClick(it.question) }
-                            )
+                            }
 
                         }
 
                     }
+
+                    else -> null
 
                 }
 
@@ -296,7 +305,6 @@ private fun Toolbar(
             .fillMaxWidth()
             .background(color = LightToolBar)
 
-
     ) {
 
         Box(
@@ -311,14 +319,17 @@ private fun Toolbar(
                 onClick = { backClick() },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(35.dp)
                     .align(Alignment.CenterStart)
             ) {
 
                 Icon( painter = painterResource(R.drawable.ic_back),
                     contentDescription = "Back",
-                    tint = Color(0xFFFFFFFF),
+                    tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(22.dp)
 
                 )
 
@@ -327,10 +338,10 @@ private fun Toolbar(
             Spacer(modifier = Modifier.width(5.dp))
 
             Text(toolbarTitle,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFFFFFFFF),
+                color = Color(0xFF9C27B0),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -368,7 +379,7 @@ private fun Item(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp))
+                .border(width = 1.dp, color = Color(0xFFFFDCDC), shape = RoundedCornerShape(12.dp))
                 .clip(shape = RoundedCornerShape(12.dp))
                 .combinedClickable(
 
@@ -384,14 +395,13 @@ private fun Item(
 
                     }
                 )
-                .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
                 .align(Alignment.Center)
 
         ) {
 
             Text(text = title,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
