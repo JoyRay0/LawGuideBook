@@ -71,6 +71,7 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
     private lateinit var internetChecker: InternetChecker
     private var answerData = mutableStateOf("")
     private var isInternet = mutableStateOf(false)
+    private var status = mutableStateOf("Pending")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +88,7 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
 
             var toolBarText by remember { mutableStateOf("") }
 
-            if (savedInstanceState == null){
+            LaunchedEffect(Unit) {
 
                 toolBarText = intent.getStringExtra(KeyHelper.sendQuestion_IntentKey()) ?: ""
 
@@ -95,7 +96,7 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
 
             LaunchedEffect(isInternet.value) {
 
-                presenter.answerFromServer(toolBarText)
+                if (toolBarText.isNotEmpty())  presenter.answerFromServer(toolBarText)
 
             }
 
@@ -109,7 +110,8 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
                     },
                     toolbarTitle = toolBarText,
                     answer = answerData.value,
-                    internet = isInternet.value
+                    internet = isInternet.value,
+                    serverStatus = status.value
                 )
 
             }
@@ -143,7 +145,7 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
 
     override fun serverStatus(message: String) {
 
-        //ShortMessageHelper.toast(this, message)
+        status.value = message
 
     }
 
@@ -162,7 +164,8 @@ private fun AnswerFullScreen(
     backClick: () -> Unit = {},
     toolbarTitle: String = "",
     answer : String = "",
-    internet : Boolean = false
+    internet : Boolean = false,
+    serverStatus : String = ""
 
 ) {
 
@@ -205,27 +208,53 @@ private fun AnswerFullScreen(
 
         ) {
 
-            Column(
+            if (serverStatus == "Pending"){
 
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .align(Alignment.TopStart)
 
-            ) {
 
-                MarkdownText(
-                    text = answer,
-                    zoomCount = textZoom,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
+            }
 
-                Spacer(modifier = Modifier.height(80.dp))
+            when(serverStatus){
 
-            }//column
+                "Pending" -> {
+
+                    ComposeHelper.CircularProgressBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                    )
+
+                }
+
+                "Success" -> {
+
+                    Column(
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .align(Alignment.TopStart)
+
+                    ) {
+
+                        MarkdownText(
+                            text = answer,
+                            zoomCount = textZoom,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+
+                        Spacer(modifier = Modifier.height(80.dp))
+
+                    }//column
+
+                }
+
+                else -> null
+
+            }
 
             if (answer.isNotEmpty()){
 
