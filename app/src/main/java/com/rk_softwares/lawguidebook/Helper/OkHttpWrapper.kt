@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Helper
 
+import android.util.Log
 import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
