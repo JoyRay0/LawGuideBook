@@ -11,14 +11,14 @@ class AnswerController{
 
     public function answer(Request $request, Response $response){
 
-        $questionData = $request->getParsedBody() ?: "";
+        $questionData = (!empty($request->getParsedBody())) ? $request->getParsedBody() : "";
 
         if(empty($questionData['question'])){
 
             $response->getBody()->write(json_encode([
 
                 "status" => "Error",
-                "message" => "question not found"
+                "message" => "question filed can not be empty"
 
             ]));
 
