@@ -200,6 +200,10 @@ class Act_setting : ComponentActivity(), Home {
         ShortMessageHelper.toast(this, status)
     }
 
+    override fun appUpdateStatus(version: String) {
+        TODO("Not yet implemented")
+    }
+
 }//class=========================================
 
 @Preview(showBackground = true)
