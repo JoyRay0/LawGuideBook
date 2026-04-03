@@ -23,6 +23,7 @@
             android:name=".View.Act_browser"
             android:exported="false"
             android:label="@string/title_activity_act_browser"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_lawwebsites"
@@ -40,32 +41,38 @@
             android:name=".View.Act_calculation_item"
             android:exported="false"
             android:label="@string/title_activity_act_calculation"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_ai_chat"
             android:exported="false"
             android:label="@string/title_activity_act_ai_chat"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".View.Act_home"
             android:exported="false"
             android:label="@string/title_activity_act_splash"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_webview"
             android:exported="false"
             android:label="@string/title_activity_act_webview"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_setting"
             android:exported="false"
             android:label="@string/title_activity_act_setting"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_question"
             android:exported="false"
             android:label="@string/title_activity_act_question"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_answer"
@@ -77,6 +84,7 @@
             android:name=".View.Act_splash"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.LawGuideBook">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
