@@ -114,9 +114,13 @@ class AnswerModel {
 
                     onSuccess(result.answerData)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
-            }, onFailed = { isFailed->
+            }, onFailed = { isFailed ->
 
                 onFailed(isFailed)
 

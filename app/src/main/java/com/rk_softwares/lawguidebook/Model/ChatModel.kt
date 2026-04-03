@@ -111,6 +111,10 @@ class ChatModel(
 
                     onSuccess(result)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
             }, onFailed = {onFailed(it)}, onError = {})

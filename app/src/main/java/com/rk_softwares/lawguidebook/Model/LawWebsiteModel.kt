@@ -56,76 +56,13 @@ class LawWebsiteModel {
 
                     onSuccess(result.data)
 
-                    Log.d("websites", result.data.toString())
-
-                }
-
-            }, onFailed = {onFailed(it)}, onError = {})
-
-        /*
-        //if (qData == null) return
-
-        val client = OkHttpClient()
-
-        val gson = Gson()
-
-        //val body : RequestBody = gson.toJson(qData.category).toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val request = Request
-            .Builder()
-            .url(ApiLinks.getWebsitesLink())
-            .addHeader("API-KEY", SecurityKey.getSHA256())
-            .addHeader("Device-ID", SecurityKey.getDeviceID())
-            //.post(body)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-
-            override fun onFailure(call: Call, e: IOException) {
-
-                onFailed(true)
-
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful){
-
-                    val data = response.body.string()
-
-                    try {
-
-                        val data = gson.fromJson(data, Websites::class.java)
-
-                        if (data.status == "Success"){
-
-                            onSuccess(data.data)
-                            onFailed(false)
-
-                        }else{
-
-                            onFailed(true)
-                        }
-
-
-                    }catch (e : Exception){
-
-                        e.printStackTrace()
-                        onFailed(true)
-
-                    }
-
                 }else{
 
                     onFailed(true)
 
                 }
 
-
-            }
-        })
-
-         */
+            }, onFailed = {onFailed(it)}, onError = {})
 
     }//fun end
 

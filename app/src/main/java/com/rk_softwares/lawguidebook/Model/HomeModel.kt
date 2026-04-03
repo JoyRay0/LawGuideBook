@@ -24,9 +24,12 @@ data class Home(
     val status : String = "",
     val message : String = "",
 
+    @SerializedName("version")
+    val version : String = "",
+
     @SerializedName("items", alternate = ["item", "data"])
     val items : List<Items> = emptyList(),
-    val version : String = ""
+
 )
 
 data class Items(
@@ -99,7 +102,6 @@ class HomeModel(
         onFailed : (Boolean) -> Unit = {}
     ){
 
-
         OkHttpWrapper()
             .url(ApiLinks.getHomeItemLink())
             .header()
@@ -108,6 +110,10 @@ class HomeModel(
                 if (result.status == "Success"){
 
                     onSuccess(result.items)
+
+                }else{
+
+                    onFailed(true)
 
                 }
 
@@ -129,6 +135,10 @@ class HomeModel(
                 if (result.status == "Success"){
 
                     onSuccess(result.items)
+
+                }else{
+
+                    onFailed(true)
 
                 }
 
@@ -155,6 +165,10 @@ class HomeModel(
 
                     onSuccess(result.items)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
 
@@ -175,6 +189,10 @@ class HomeModel(
                 if (result.status == "Success"){
 
                     onSuccess(result.items)
+
+                }else{
+
+                    onFailed(true)
 
                 }
 
@@ -197,9 +215,15 @@ class HomeModel(
 
                     onSuccess(result.version)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
-            }, onFailed = {onFailed(it)}, onError = {})
+            }, onFailed = { onFailed(it) }, onError = {
+
+            })
 
     }//fun end
 }

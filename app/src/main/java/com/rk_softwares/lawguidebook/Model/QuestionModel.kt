@@ -73,6 +73,10 @@ class QuestionModel(
 
                     onSuccess(result.data)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
             }, onFailed = {onFailed(it)}, onError = {})

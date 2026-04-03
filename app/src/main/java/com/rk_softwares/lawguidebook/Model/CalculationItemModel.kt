@@ -46,6 +46,10 @@ class CalculationItemModel {
 
                     onSuccess(result.items)
 
+                }else{
+
+                    onFailed(true)
+
                 }
 
             }, onFailed = {onFailed(it)}, onError = {})
