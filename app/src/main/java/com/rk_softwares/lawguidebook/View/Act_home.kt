@@ -1,7 +1,10 @@
 package com.rk_softwares.lawguidebook.View
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -54,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
@@ -75,7 +79,6 @@ import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.delay
-import okhttp3.internal.platform.android.AndroidLog
 
 class Act_home : ComponentActivity(), Home, InternetStatus {
 
@@ -93,6 +96,12 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
     private val bookmarkList = mutableStateListOf<Items>()
     private val calculationList = mutableStateListOf<Items>()
     private var serverStatus = mutableStateOf("")
+    private var appUpdate = mutableStateOf("")
+    private var versionName = mutableStateOf("")
+
+    private var isUpdateAvailable = mutableStateOf(false)
+
+    private val appPackageName = "com.rk_softwares.lawguidebook"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,12 +121,33 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             var isSearchScreenList by remember { mutableStateOf(true) }
             var historyData by remember { mutableIntStateOf(0) }
 
+            try {
+
+                versionName.value = packageManager.getPackageInfo(packageName, 0).versionName ?: ""
+
+            }catch (e : PackageManager.NameNotFoundException){
+                e.printStackTrace()
+            }
+
+
+            presenter.appUpdate()
+
             LaunchedEffect(historyData) {
 
                 presenter.getAllHistory()
 
             }
 
+            // Checking For App Update
+
+            val newVersion = appUpdate.value.toDoubleOrNull()
+            val currentVersion = versionName.value.toDoubleOrNull()
+
+            if (newVersion != null && currentVersion != null){
+
+                if (newVersion > currentVersion) isUpdateAvailable.value = true else isUpdateAvailable.value = false
+
+            }
 
             LawGuideBookTheme {
 
@@ -225,6 +255,26 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         IntentHelper.dataIntent(this, Act_calculation::class.java, KeyHelper.calculationTitle_IntentKey(), it)
 
+                    },
+                    updateStatus = isUpdateAvailable.value,
+                    updateClick = {
+
+                        try {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$appPackageName".toUri()
+                                )
+                            )
+
+                        } catch (e: ActivityNotFoundException) {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW, "market://details?id=$appPackageName".toUri()
+                                )
+                            )
+
+                        }
+
                     }
 
                 )
@@ -281,11 +331,14 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     override fun serverStatus(message: String) {
         serverStatus.value = message
-        ShortMessageHelper.toast(this, message)
     }
 
     override fun message(status: String) {
-        ShortMessageHelper.toast(this, status)
+    }
+
+    override fun appUpdateStatus(version: String) {
+        appUpdate.value = version
+
     }
 
     override fun isInternet(internet: Boolean) {
@@ -322,7 +375,9 @@ private fun HomeFullScreen(
     categoryRetryClick: () -> Unit = {},
     lawWebsiteClick: () -> Unit = {},
     calculationList: List<Items> = emptyList(),
-    calculationClick : (String) -> Unit = {}
+    calculationClick : (String) -> Unit = {},
+    updateStatus : Boolean = false,
+    updateClick: () -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -347,7 +402,9 @@ private fun HomeFullScreen(
     Scaffold(
 
         topBar = { Toolbar(
-            settingClick = {settingClick()}
+            settingClick = {settingClick()},
+            updateStatus = updateStatus,
+            updateClick = {updateClick()}
         )},
         bottomBar = { BottomNav(  screenIndex = { screen = it }) },
         modifier = Modifier
@@ -389,8 +446,8 @@ private fun HomeFullScreen(
 
                 1 ->
                     ListScreen(
-                        gridClick = { gridClick(it) }
-                        , list = gridList,
+                        gridClick = { gridClick(it) },
+                        list = gridList,
                         serverStatus = serverStatus,
                         internet = internet,
                         categoryRetryClick = { categoryRetryClick() }
@@ -409,8 +466,8 @@ private fun HomeFullScreen(
                 )
                 3 -> BookmarkScreen(
                     bookmarkList = bookmarkList,
-                    titleClick = { bookmarkQuestionClick(it) },
-                    deleteClick = { deleteBookmarkClick(it) }
+                    bookmarkTitleClick = { bookmarkQuestionClick(it) },
+                    bookmarkDeleteClick = { deleteBookmarkClick(it) }
                 )
 
             }
@@ -436,9 +493,13 @@ private fun HomeFullScreen(
 @Composable
 private fun Toolbar(
 
-    settingClick: () -> Unit = {}
+    settingClick: () -> Unit = {},
+    updateStatus: Boolean = false,
+    updateClick : () -> Unit = {}
 
 ) {
+
+    var isUpdate = remember(updateStatus) { mutableStateOf(updateStatus) }
 
     Box(
 
@@ -474,6 +535,34 @@ private fun Toolbar(
                     .align(Alignment.CenterEnd)
 
             ) {
+
+                if (isUpdate.value){
+
+                    IconButton(
+                        onClick = { updateClick() },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .clip(shape = CircleShape)
+                            .size(32.dp)
+                            .align(Alignment.CenterVertically)
+
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_upgrade),
+                            contentDescription = "Setting",
+                            tint = LightToolBarIcon,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .size(19.dp)
+                                .align(Alignment.CenterVertically)
+
+                        )
+
+                    }
+
+                    Spacer(modifier = Modifier.width(7.dp))
+
+                }
 
                 IconButton(
                     onClick = { settingClick() },
@@ -1155,8 +1244,8 @@ private fun SearchScreen(
                 ){ it ->
 
                     QuestionItem(
-                        title = it.question,
-                        titleClick = { searchItemClick(it.question) },
+                        questionTitle = it.question,
+                        questionTitleClick = { searchItemClick(it.question) },
                         bookmarkClick = { searchBookmarkClick(it.question) },
                         blockBookmarkIcon = "visible"
 
@@ -1172,9 +1261,9 @@ private fun SearchScreen(
                 ){ it ->
 
                     HistoryItem(
-                        title = it.question,
-                        titleData = { historyTitle.value = it },
-                        titleClick = {
+                        historyTitle = it.question,
+                        historyTitleData = { historyTitle.value = it },
+                        historyTitleClick = {
                             historyTitleClick(historyTitle.value)
                             isSearchDataVisible = true
                         }
@@ -1434,8 +1523,8 @@ private fun SearchBarHelper(
 @Composable
 private fun QuestionItem(
     modifier: Modifier = Modifier,
-    title : String = "Title",
-    titleClick : () -> Unit = {},
+    questionTitle : String = "Title",
+    questionTitleClick : () -> Unit = {},
     bookmarkClick : () -> Unit = {},
     deleteClick : () -> Unit = {},
     blockBookmarkIcon : String = "",
@@ -1480,7 +1569,7 @@ private fun QuestionItem(
 
                     onClick = {
                         isIconVisible = false
-                        titleClick()
+                        questionTitleClick()
 
                     }
                 )
@@ -1489,7 +1578,7 @@ private fun QuestionItem(
 
         ) {
             
-            Text(text = title,
+            Text(text = questionTitle,
                 fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
@@ -1569,9 +1658,9 @@ private fun QuestionItem(
 @Composable
 private fun HistoryItem(
     modifier: Modifier = Modifier,
-    title : String = "Title",
-    titleData : (String) -> Unit = {},
-    titleClick : () -> Unit = {},
+    historyTitle : String = "Title",
+    historyTitleData : (String) -> Unit = {},
+    historyTitleClick : () -> Unit = {},
 ) {
 
     Box(
@@ -1592,8 +1681,8 @@ private fun HistoryItem(
 
                     onClick = {
 
-                        titleClick()
-                        if (title.isNotEmpty()) titleData(title)
+                        historyTitleClick()
+                        if (historyTitle.isNotEmpty()) historyTitleData(historyTitle)
 
                     }
                 )
@@ -1604,7 +1693,7 @@ private fun HistoryItem(
 
         ) {
 
-            Text(text = title,
+            Text(text = historyTitle,
                 fontSize = 15.sp,
                 fontFamily = BanglaFont.font(),
                 fontWeight = FontWeight.Normal,
@@ -1636,8 +1725,8 @@ private fun HistoryItem(
 @Composable
 private fun BookmarkScreen(
     bookmarkList: List<Items> = emptyList(),
-    titleClick: (String) -> Unit = {},
-    deleteClick: (String) -> Unit = {}
+    bookmarkTitleClick: (String) -> Unit = {},
+    bookmarkDeleteClick: (String) -> Unit = {}
 ) {
 
     val lazyState = rememberLazyListState()
@@ -1670,9 +1759,9 @@ private fun BookmarkScreen(
                 ){ item ->
 
                     QuestionItem(
-                        title = item.question,
-                        titleClick = { titleClick(item.question) },
-                        deleteClick = { deleteClick(item.question) },
+                        questionTitle = item.question,
+                        questionTitleClick = { bookmarkTitleClick(item.question) },
+                        deleteClick = { bookmarkDeleteClick(item.question) },
                         deleteIcon = "visible"
                     )
 
