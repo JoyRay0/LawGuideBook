@@ -161,7 +161,10 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         historyData++
                                   },
-                    historyTitleClick = { presenter.searchAndHistoryToServer(it) },
+                    historyTitleClick = {
+                        presenter.searchAndHistoryToServer(it)
+                        Log.d("history", it)
+                                        },
                     historyClick = {
 
                         historyData++ },
@@ -1264,7 +1267,7 @@ private fun SearchScreen(
                         historyTitle = it.question,
                         historyTitleData = { historyTitle.value = it },
                         historyTitleClick = {
-                            historyTitleClick(historyTitle.value)
+                            historyTitleClick(it.question)
                             isSearchDataVisible = true
                         }
                     )
@@ -1283,7 +1286,7 @@ private fun SearchScreen(
                 contentDescription = "Search",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(130.dp)
+                    .size(100.dp)
                     .align(Alignment.Center)
 
             )
