@@ -3,6 +3,11 @@ package com.rk_softwares.lawguidebook.Helper
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.delay
@@ -46,6 +52,8 @@ fun FullView(){
         ComposeHelper.SkeletonLoading()
 
         ComposeHelper.CircularProgressBar()
+
+        ComposeHelper.CustomSnackBar()
 
     }//column
 
@@ -195,6 +203,82 @@ object ComposeHelper {
             )
 
         }//box
+
+    }//fun end
+
+
+    @Composable
+    fun CustomSnackBar(
+        message : String = "Hello",
+        backgroundColor : Color = Color.White,
+        fontColor : Color = Color.Black
+    ) {
+
+        var visible = remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+
+            delay(2000)
+            visible.value = true
+
+        }
+
+        LaunchedEffect(visible.value) {
+
+            if (visible.value){
+
+                delay(3000)
+                visible.value = false
+
+            }
+
+
+        }
+
+        AnimatedVisibility(
+            visible = visible.value,
+            enter = slideInVertically { it },
+            exit = slideOutHorizontally { it }
+        ) {
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(7.dp)
+                ,
+                contentAlignment = Alignment.BottomCenter
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(10.dp))
+                        .background(color = backgroundColor)
+                        .padding(10.dp)
+
+                ) {
+
+                    Text(text = message,
+                        fontSize = 14.sp,
+                        fontFamily = BanglaFont.font(),
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Start,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = fontColor,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                        )
+
+                }//box
+
+
+            }//box
+
+        }//animate
 
     }//fun end
 
