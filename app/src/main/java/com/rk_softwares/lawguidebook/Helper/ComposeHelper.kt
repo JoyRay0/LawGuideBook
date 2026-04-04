@@ -245,7 +245,7 @@ object ComposeHelper {
 
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(7.dp)
+                    .padding(vertical = 20.dp, horizontal = 10.dp)
                 ,
                 contentAlignment = Alignment.BottomCenter
 
@@ -255,7 +255,7 @@ object ComposeHelper {
 
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(10.dp))
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(14.dp))
                         .background(color = backgroundColor)
                         .padding(10.dp)
 
