@@ -138,6 +138,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
             }
 
+
             // Checking For App Update
 
             val newVersion = appUpdate.value.toDoubleOrNull()
