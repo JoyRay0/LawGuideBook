@@ -33,7 +33,7 @@ class AnswerController{
         //==================================
 
         $data = DB::findOne(
-            "SELECT answer FROM search WHERE MATCH(question) AGAINST (? IN NATURAL LANGUAGE MODE)",
+            "SELECT answer FROM search WHERE question = ? LIMIT 1",
             [$s_question]);
 
         if(!$data){
