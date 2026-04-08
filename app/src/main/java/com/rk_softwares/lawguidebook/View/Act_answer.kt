@@ -208,12 +208,6 @@ private fun AnswerFullScreen(
 
         ) {
 
-            if (serverStatus == "Pending"){
-
-
-
-            }
-
             when(serverStatus){
 
                 "Pending" -> {
@@ -468,7 +462,7 @@ private fun MarkdownText(
 
         0 -> MarkdownText(
             markdown = text,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -476,7 +470,7 @@ private fun MarkdownText(
 
         1 -> MarkdownText(
             markdown = text,
-            fontSize = 19.sp,
+            fontSize = 17.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -484,7 +478,7 @@ private fun MarkdownText(
 
         2 -> MarkdownText(
             markdown = text,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -492,7 +486,7 @@ private fun MarkdownText(
 
         3 -> MarkdownText(
             markdown = text,
-            fontSize = 21.sp,
+            fontSize = 19.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -500,7 +494,7 @@ private fun MarkdownText(
 
         4 -> MarkdownText(
             markdown = text,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -508,7 +502,7 @@ private fun MarkdownText(
 
         5 -> MarkdownText(
             markdown = text,
-            fontSize = 23.sp,
+            fontSize = 21.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -516,7 +510,7 @@ private fun MarkdownText(
 
         6 -> MarkdownText(
             markdown = text,
-            fontSize = 24.sp,
+            fontSize = 22.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -524,7 +518,7 @@ private fun MarkdownText(
 
         7 -> MarkdownText(
             markdown = text,
-            fontSize = 25.sp,
+            fontSize = 23.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -532,7 +526,7 @@ private fun MarkdownText(
 
         8 -> MarkdownText(
             markdown = text,
-            fontSize = 26.sp,
+            fontSize = 24.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -540,7 +534,7 @@ private fun MarkdownText(
 
         9 -> MarkdownText(
             markdown = text,
-            fontSize = 27.sp,
+            fontSize = 25.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -548,7 +542,7 @@ private fun MarkdownText(
 
         10 -> MarkdownText(
             markdown = text,
-            fontSize = 28.sp,
+            fontSize = 26.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -556,7 +550,7 @@ private fun MarkdownText(
 
         11 -> MarkdownText(
             markdown = text,
-            fontSize = 29.sp,
+            fontSize = 27.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -564,7 +558,7 @@ private fun MarkdownText(
 
         12 -> MarkdownText(
             markdown = text,
-            fontSize = 30.sp,
+            fontSize = 28.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -572,7 +566,7 @@ private fun MarkdownText(
 
         13 -> MarkdownText(
             markdown = text,
-            fontSize = 31.sp,
+            fontSize = 29.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -580,7 +574,7 @@ private fun MarkdownText(
 
         14 -> MarkdownText(
             markdown = text,
-            fontSize = 32.sp,
+            fontSize = 30.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -588,7 +582,7 @@ private fun MarkdownText(
 
         15 -> MarkdownText(
             markdown = text,
-            fontSize = 33.sp,
+            fontSize = 31.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -596,7 +590,7 @@ private fun MarkdownText(
 
         16 -> MarkdownText(
             markdown = text,
-            fontSize = 34.sp,
+            fontSize = 32.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -604,7 +598,7 @@ private fun MarkdownText(
 
         17 -> MarkdownText(
             markdown = text,
-            fontSize = 35.sp,
+            fontSize = 33.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -612,7 +606,7 @@ private fun MarkdownText(
 
         18 -> MarkdownText(
             markdown = text,
-            fontSize = 36.sp,
+            fontSize = 34.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -620,7 +614,7 @@ private fun MarkdownText(
 
         19 -> MarkdownText(
             markdown = text,
-            fontSize = 37.sp,
+            fontSize = 35.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -628,7 +622,7 @@ private fun MarkdownText(
 
         20 -> MarkdownText(
             markdown = text,
-            fontSize = 38.sp,
+            fontSize = 36.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -636,7 +630,7 @@ private fun MarkdownText(
 
         21 -> MarkdownText(
             markdown = text,
-            fontSize = 39.sp,
+            fontSize = 37.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
@@ -644,7 +638,7 @@ private fun MarkdownText(
 
         22 -> MarkdownText(
             markdown = text,
-            fontSize = 40.sp,
+            fontSize = 38.sp,
             fontResource = R.font.noto_serif_bengali,
             modifier = modifier
 
