@@ -161,29 +161,6 @@ object ComposeHelper {
         modifier: Modifier = Modifier
     ) {
 
-        val colors = arrayOf(
-            Color(0xFF9C27B0),
-            Color(0xFF2196F3),
-            Color(0xFF8BC34A),
-            Color(0xFFFF9800),
-            Color(0xFFF66639),
-
-        )
-
-        var index = remember { mutableStateOf(0) }
-        
-        LaunchedEffect(Unit) {
-
-            while (true){
-
-                delay(2000)
-
-                index.value = (index.value + 1) % colors.size
-
-            }
-
-        }
-
         Box(
 
             modifier = modifier
@@ -196,7 +173,7 @@ object ComposeHelper {
                     .wrapContentWidth()
                     .size(45.dp)
                     .align(Alignment.Center),
-                color = colors[index.value],
+                color = Color(0xFF9F31B2),
                 strokeWidth = 4.dp,
                 trackColor = Color.LightGray
 
