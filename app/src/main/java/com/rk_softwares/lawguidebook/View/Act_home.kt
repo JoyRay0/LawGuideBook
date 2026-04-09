@@ -119,7 +119,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             internetChecker.onStart()
 
             var isSearchScreenList by remember { mutableStateOf(true) }
-            var historyData by remember { mutableIntStateOf(0) }
 
             try {
 
@@ -131,13 +130,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
 
             presenter.appUpdate()
-
-            LaunchedEffect(historyData) {
-
-                presenter.getAllHistory()
-
-            }
-
 
             // Checking For App Update
 
@@ -157,18 +149,9 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     historyList = historyList,
                     searchScreenBool = { isSearchScreenList = it },
 
-                    searchClick = {
-                        presenter.searchAndHistoryToServer(it)
-
-                        historyData++
-                                  },
-                    historyTitleClick = {
-                        presenter.searchAndHistoryToServer(it)
-                        Log.d("history", it)
-                                        },
-                    historyClick = {
-
-                        historyData++ },
+                    searchClick = { presenter.searchAndHistoryToServer(it) },
+                    historyTitleClick = { presenter.searchAndHistoryToServer(it) },
+                    historyClick = { presenter.getAllHistory() },
                     searchItemClick = {
 
                         IntentHelper.dataIntent(
@@ -271,11 +254,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                             )
 
                         } catch (e: ActivityNotFoundException) {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW, "market://details?id=$appPackageName".toUri()
-                                )
-                            )
+                            e.printStackTrace()
 
                         }
 
@@ -335,6 +314,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     override fun serverStatus(message: String) {
         serverStatus.value = message
+        //ShortMessageHelper.toast(this, message)
     }
 
     override fun message(status: String) {
@@ -461,11 +441,12 @@ private fun HomeFullScreen(
                     searchList = searchList,
                     historyList = historyList,
                     searchScreenBool = { searchScreenBool( it ) },
-                    searchClick = { searchClick(it)},
-                    historyTitleClick = {historyTitleClick(it)},
+                    searchClick = { searchClick(it) },
+                    historyTitleClick = { historyTitleClick(it) },
                     historyClick = {historyClick()},
                     searchItemClick = {searchItemClick(it)},
-                    searchBookmarkClick = { searchBookmarkClick(it) }
+                    searchBookmarkClick = { searchBookmarkClick(it) },
+                    serverStatus = serverStatus
 
                 )
                 3 -> BookmarkScreen(
@@ -1208,12 +1189,18 @@ private fun SearchScreen(
     historyTitleClick: (String) -> Unit = {},
     historyClick: () -> Unit = {},
     searchItemClick : (String) -> Unit = {},
-    searchBookmarkClick: (String) -> Unit = {}
+    searchBookmarkClick: (String) -> Unit = {},
+    serverStatus: String = ""
     ) {
 
     val lazyState = rememberLazyListState()
-    var isSearchDataVisible by remember { mutableStateOf(true) }
+    var isSearchScreenVisible by remember { mutableStateOf(true) }
     val historyTitle = remember { mutableStateOf("") }
+    var searchScreenDataLoading by remember { mutableStateOf(false) }
+    var isHistoryListEmpty by remember { mutableStateOf(false) }
+
+    if (serverStatus == "Pending") searchScreenDataLoading = true else searchScreenDataLoading = false
+    if (searchList.isNotEmpty()) searchScreenDataLoading = false
 
 
     Box(
@@ -1240,7 +1227,7 @@ private fun SearchScreen(
 
             }
 
-            if (isSearchDataVisible){
+            if (isSearchScreenVisible){
 
                 items(
                     items = searchList,
@@ -1269,7 +1256,7 @@ private fun SearchScreen(
                         historyTitleData = { historyTitle.value = it },
                         historyTitleClick = {
                             historyTitleClick(it.question)
-                            isSearchDataVisible = true
+                            isSearchScreenVisible = true
                         }
                     )
 
@@ -1279,9 +1266,9 @@ private fun SearchScreen(
 
         }
 
-        searchScreenBool(isSearchDataVisible) //sending list boolean to activity
+        searchScreenBool(isSearchScreenVisible) //sending list boolean to activity
 
-        if (searchList.isEmpty() && isSearchDataVisible){
+        if (searchList.isEmpty() && isSearchScreenVisible && !searchScreenDataLoading){
 
             Image( painter = painterResource(R.drawable.img_search),
                 contentDescription = "Search",
@@ -1294,7 +1281,15 @@ private fun SearchScreen(
 
         }
 
-        if (historyList .isEmpty() && !isSearchDataVisible){
+        LaunchedEffect(isHistoryListEmpty) {
+
+            delay(2000)
+
+            isHistoryListEmpty = if (historyList.isEmpty()) true else false
+
+        }
+
+        if (isHistoryListEmpty && !isSearchScreenVisible){
 
             Text("কোন হিস্ট্রি নেই।",
                 fontSize = 17.sp,
@@ -1309,9 +1304,9 @@ private fun SearchScreen(
 
         }
 
-        LaunchedEffect(isSearchDataVisible) {
+        LaunchedEffect(isSearchScreenVisible) {
 
-           if (!isSearchDataVisible){
+           if (!isSearchScreenVisible){
 
                searchList.clear()
 
@@ -1327,13 +1322,28 @@ private fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            historyClick = {
-                isSearchDataVisible = !isSearchDataVisible
-                           historyClick()
+            historyIconClick = {
+                //searchScreenDataLoading = false
+                isSearchScreenVisible = !isSearchScreenVisible
+                historyClick()
+                isHistoryListEmpty = false
                            },
             historyTitle = historyTitle,
-            searchClick = {searchClick(it)}
+            searchClick = {
+                searchClick(it)
+                searchScreenDataLoading = true
+            }
         )
+
+        if (searchScreenDataLoading && isSearchScreenVisible){
+
+            ComposeHelper.CircularProgressBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+            )
+
+        }
 
     }//box
 
@@ -1343,7 +1353,7 @@ private fun SearchScreen(
 @Preview(showBackground = true)
 @Composable
 private fun SearchBarHelper(
-    historyClick: () -> Unit = {},
+    historyIconClick: () -> Unit = {},
     historyTitle: MutableState<String> = mutableStateOf(""),
     modifier: Modifier = Modifier,
     searchClick : (String) -> Unit = {}
@@ -1494,7 +1504,7 @@ private fun SearchBarHelper(
                     .wrapContentWidth()
                     .shadow(elevation = 3.dp, shape = RoundedCornerShape(14.dp))
                     .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable { historyClick() }
+                    .clickable { historyIconClick() }
                     .background(color = Color(0xFFFFFFFF))
                     .padding(9.dp)
                     .align(Alignment.CenterVertically)
