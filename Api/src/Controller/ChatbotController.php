@@ -286,4 +286,39 @@ class ChatbotController{
 
     }
 
+    private function check_text(string $text) : string{
+
+        $words = [
+
+            "Hi" => "hi", "hi" => "hi", "Hello" => "hi", "hello" => "hi", "হ্যালো" => "hi", "হাই" => "hi",
+
+            "Land" => "জমি", "land" => "জমি", "জায়গা" => "জমি", "ভূমি" => "জমি", "ভুমি" => "জমি", "জমি" => "জমি",
+            "খেত" => "জমি", "jomi" => "জমি", "Jomi" => "জমি", "jayga" => "জমি", "Jayga" => "জমি",
+
+            "Purchase" => "ক্রয়", "purchase" => "ক্রয়", "কেনা" => "ক্রয়", "ক্রয়" => "ক্রয়", "কেনা" => "ক্রয়", "kory" => "ক্রয়",
+            "kinte" => "ক্রয়", "kinta" => "ক্রয়",
+
+            "Sell" => "বিক্রয়", "Sold" => "বিক্রয়", "sell" => "বিক্রয়", "sold" => "বিক্রয়", "বিক্রি" => "বিক্রয়", "বেচা" => "বিক্রয়",
+            "বিক্রয়" => "বিক্রয়", "bikroy" => "বিক্রয়", "bikri" => "বিক্রয়",
+
+            "I" => "আমি", "i" => "আমি", "আমি" => "আমি", "ami" => "আমি", "ame" => "আমি",
+
+        ];
+
+        $word_list = array_filter(explode("\n", trim($text)));
+
+        $result = [];
+
+        foreach($word_list as $w){
+
+            $result[] = $words[$w] ?? $w;
+
+        }
+
+        $full_text = implode(" ", $result);
+
+        return $full_text;
+
+    }
+
 }
