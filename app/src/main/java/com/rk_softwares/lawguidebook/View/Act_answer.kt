@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,8 +41,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
@@ -171,6 +174,7 @@ private fun AnswerFullScreen(
 
     var textZoom by remember { mutableIntStateOf(0) }
     var isInternetDialogVisible by remember { mutableStateOf(false) }
+    var isInfoVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(internet) {
 
@@ -191,7 +195,8 @@ private fun AnswerFullScreen(
     Scaffold(
         topBar = {Toolbar(
             backClick = { backClick()},
-            toolbarTitle = toolbarTitle
+            toolbarTitle = toolbarTitle,
+            infoClick = { isInfoVisible = true }
         )},
         modifier = Modifier
             .fillMaxSize()
@@ -289,6 +294,64 @@ private fun AnswerFullScreen(
 
             }
 
+            if (isInfoVisible){
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(30.dp)
+                        .align(Alignment.Center)
+
+                ) {
+
+                    Column(
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(13.dp))
+                            .clip(shape = RoundedCornerShape(13.dp))
+                            .background(color = Color(0xFFFFFFFF))
+                            .padding(10.dp)
+                            .align(Alignment.Center)
+
+                    ) {
+
+                        Text(text = "আইন সময়ের সাথে পরিবর্তিত হতে পারে।\n" +
+                                "সর্বশেষ তথ্যের জন্য সরকারি উৎস যাচাই করুন।",
+                            fontSize = 16.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF000000),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        Text(text = "ঠিক আছে",
+                            fontSize = 13.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF695D5D),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(shape = RoundedCornerShape(10.dp))
+                                .clickable{ isInfoVisible = false }
+                                .padding(6.dp)
+                                .align(Alignment.End)
+                        )
+
+                    }//column
+
+                }//box
+
+            }
+
         }//box
 
     }//scaffold
@@ -301,6 +364,7 @@ private fun AnswerFullScreen(
 private fun Toolbar(
     backClick : () -> Unit = {},
     toolbarTitle : String = "",
+    infoClick : () -> Unit = {},
 ) {
 
     Box(
@@ -352,11 +416,32 @@ private fun Toolbar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.90f)
                     .align(Alignment.CenterVertically)
                 )
 
         }//row
+
+        IconButton(
+            onClick = { infoClick() },
+            modifier = Modifier
+                .wrapContentWidth()
+                .clip(shape = CircleShape)
+                .size(34.dp)
+                //.background(color = Color(0xFFDEC3C3))
+                .align(Alignment.CenterEnd)
+        ) {
+
+            Icon( painter = painterResource(R.drawable.ic_info_outline),
+                contentDescription = "Back",
+                tint = LightToolBarIcon,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .size(22.dp)
+
+            )
+
+        }
 
     }//box
     
