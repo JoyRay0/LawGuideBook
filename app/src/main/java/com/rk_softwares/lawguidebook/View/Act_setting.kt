@@ -192,6 +192,10 @@ class Act_setting : ComponentActivity(), Home {
         TODO("Not yet implemented")
     }
 
+    override fun onSearchSuggestionList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
     override fun serverStatus(message: String) {
         TODO("Not yet implemented")
     }
