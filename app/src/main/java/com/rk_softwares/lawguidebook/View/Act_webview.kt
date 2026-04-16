@@ -59,7 +59,7 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
-                darkIcons = false
+                darkIcons = true
             )
 
             init()
