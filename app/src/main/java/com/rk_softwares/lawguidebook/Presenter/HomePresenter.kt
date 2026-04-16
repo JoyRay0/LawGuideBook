@@ -18,6 +18,7 @@ interface Home{
     fun onCategoryList (list: List<Items>)
     fun onBookmarkList (list: List<Items>)
     fun onCalculationList (list: List<Items>)
+    fun onSearchSuggestionList(list: List<Items>)
 
     fun serverStatus(message : String)
     fun message(status : String)
@@ -135,7 +136,7 @@ class HomePresenter(
 
         if (title.isEmpty()) return
 
-        view.serverStatus("Pending")
+        view.serverStatus("search_pending")
 
         scopeIO.launch {
 
@@ -153,7 +154,7 @@ class HomePresenter(
 
                 scopeMain.launch{
 
-                    view.serverStatus("Success")
+                    view.serverStatus("search_success")
                     view.onSearchList(result)
 
                 }
@@ -164,7 +165,7 @@ class HomePresenter(
 
                     scopeMain.launch{
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("search_failed")
 
                     }
 
@@ -178,7 +179,7 @@ class HomePresenter(
 
     fun homeItemFromServer(){
 
-        view.serverStatus("Pending")
+        view.serverStatus("home_item_pending")
 
         scopeIO.launch {
 
@@ -187,7 +188,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Success")
+                        view.serverStatus("home_item_success")
 
                     }
 
@@ -198,7 +199,7 @@ class HomePresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("Failed")
+                            view.serverStatus("home_item_failed")
 
                         }
 
@@ -213,7 +214,7 @@ class HomePresenter(
 
     fun categoryItemFromServer(){
 
-        view.serverStatus("Pending")
+        view.serverStatus("category_pending")
 
         scopeIO.launch {
 
@@ -221,7 +222,7 @@ class HomePresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("Success")
+                    view.serverStatus("category_success")
                     view.onCategoryList(result)
 
                 }
@@ -232,7 +233,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("category_failed")
 
                     }
 
@@ -247,7 +248,7 @@ class HomePresenter(
 
     fun calculationLimitItemFromServer(){
 
-        view.serverStatus("Pending")
+        view.serverStatus("calculation_limit_pending")
 
         scopeIO.launch {
 
@@ -255,7 +256,7 @@ class HomePresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("Success")
+                    view.serverStatus("calculation_limit_success")
                     view.onCalculationList(result)
 
                 }
@@ -266,7 +267,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("calculation_limit_failed")
 
                     }
 
@@ -281,7 +282,7 @@ class HomePresenter(
 
     fun appUpdate(){
 
-        view.serverStatus("Pending")
+        view.serverStatus("appUpdate_pending")
 
         scopeIO.launch {
 
@@ -290,7 +291,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Success")
+                        view.serverStatus("appUpdate_success")
                         view.appUpdateStatus(result)
 
                     }
@@ -302,7 +303,46 @@ class HomePresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("Failed")
+                            view.serverStatus("appUpdate_failed")
+
+                        }
+
+                    }
+
+                }
+            )
+
+        }
+
+    }//fun end
+
+    fun searchSuggestion(char : String){
+
+        view.serverStatus("suggestion_pending")
+
+        scopeIO.launch {
+
+            homeModel.searchSuggestion(
+
+                items  = Items(search = char),
+
+                onSuccess = { result ->
+
+                    scopeMain.launch {
+
+                        view.serverStatus("suggestion_success")
+                        view.onSearchSuggestionList(result)
+
+                    }
+
+                },
+                onFailed = { isFailed ->
+
+                    if (isFailed){
+
+                        scopeMain.launch {
+
+                            view.serverStatus("suggestion_failed")
 
                         }
 

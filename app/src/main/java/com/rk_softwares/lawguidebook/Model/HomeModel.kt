@@ -226,4 +226,33 @@ class HomeModel(
             })
 
     }//fun end
+
+    fun searchSuggestion(
+        items : Items? = null,
+        onSuccess : (List<Items>) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+    ){
+
+        if (items == null) return
+
+        OkHttpWrapper()
+            .url(ApiLinks.getSuggestion())
+            .header()
+            .post(items)
+            .execute(Home::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.items)
+
+                }else{
+
+                    onFailed(true)
+
+                }
+
+
+            }, onFailed = {onFailed(it)}, onError = {})
+
+    }//fun end
 }
