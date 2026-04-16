@@ -25,7 +25,7 @@ class AnswerPresenter(
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
     fun answerFromServer(question : String){
 
-        view.serverStatus("Pending")
+        view.serverStatus("answer_pending")
 
         scopeIO.launch {
 
@@ -36,7 +36,7 @@ class AnswerPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Success")
+                        view.serverStatus("answer_success")
                         view.answer(result)
 
                     }
@@ -48,7 +48,7 @@ class AnswerPresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("Failed")
+                            view.serverStatus("answer_failed")
 
                         }
 

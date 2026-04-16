@@ -195,12 +195,12 @@ private fun CalculationItemFullScreen(
                     columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(5.dp),
                     state = lazyState,
-                    userScrollEnabled = if (serverStatus == "Pending") false else true,
+                    userScrollEnabled = if (serverStatus == "calculation_item_pending") false else true,
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
 
-                    if (serverStatus == "Pending"){
+                    if (serverStatus == "calculation_item_pending"){
 
                         items(25){
 

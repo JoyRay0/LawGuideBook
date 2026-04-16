@@ -53,7 +53,7 @@ class ChatPresenter(
 
         if (message.isEmpty()) return
 
-        view.messageStatus("pending")
+        view.messageStatus("chat_pending")
 
         scopeIO.launch{
 
@@ -68,7 +68,7 @@ class ChatPresenter(
                 scopeMain.launch{
 
                     view.messages(model.getAllMessage())
-                    view.messageStatus("success")
+                    view.messageStatus("chat_success")
 
                 }
 
@@ -78,7 +78,7 @@ class ChatPresenter(
 
                     scopeMain.launch{
 
-                        view.messageStatus("Failed")
+                        view.messageStatus("chat_failed")
 
                     }
 

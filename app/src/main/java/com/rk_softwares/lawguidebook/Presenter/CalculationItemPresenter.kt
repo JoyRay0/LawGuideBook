@@ -26,7 +26,7 @@ class CalculationItemPresenter(
 
     fun calculationDataFromServer(){
 
-        view.serverStatus("Pending")
+        view.serverStatus("calculation_item_pending")
 
         scopeIO.launch {
 
@@ -34,7 +34,7 @@ class CalculationItemPresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("Success")
+                    view.serverStatus("calculation_item_success")
                     view.onCalculationList(result)
 
                 }
@@ -45,7 +45,7 @@ class CalculationItemPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("calculation_item_failed")
 
                     }
 

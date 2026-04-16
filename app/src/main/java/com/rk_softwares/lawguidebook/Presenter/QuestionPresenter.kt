@@ -48,7 +48,7 @@ class QuestionPresenter(
 
         if (category.isEmpty() && tName.isEmpty()) return
 
-        view.serverStatus("Pending")
+        view.serverStatus("question_pending")
 
         scopeIO.launch{
 
@@ -59,7 +59,7 @@ class QuestionPresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("Success")
+                    view.serverStatus("question_success")
                     view.questionList(result)
 
                 }
@@ -70,7 +70,7 @@ class QuestionPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("question_failed")
 
                     }
 

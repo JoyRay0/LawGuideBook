@@ -25,6 +25,8 @@ class LawWebsitePresenter(
 
     fun websitesData(){
 
+        view.serverStatus("websites_pending")
+
         scopeIO.launch {
 
             model.allWebsiteLinks(
@@ -32,7 +34,7 @@ class LawWebsitePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Success")
+                        view.serverStatus("websites_success")
                         view.websiteList(result)
 
                     }
@@ -43,7 +45,7 @@ class LawWebsitePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("Failed")
+                        view.serverStatus("websites_failed")
 
                     }
 

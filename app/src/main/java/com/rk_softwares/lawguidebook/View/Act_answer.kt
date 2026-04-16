@@ -215,7 +215,7 @@ private fun AnswerFullScreen(
 
             when(serverStatus){
 
-                "Pending" -> {
+                "answer_pending" -> {
 
                     ComposeHelper.CircularProgressBar(
                         modifier = Modifier
@@ -225,7 +225,7 @@ private fun AnswerFullScreen(
 
                 }
 
-                "Success" -> {
+                "answer_success" -> {
 
                     Column(
 

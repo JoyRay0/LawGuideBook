@@ -63,7 +63,7 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
     private var isInternet = mutableStateOf(false)
 
-    private var serverStatus = mutableStateOf("Pending")
+    private var serverStatus = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,7 +180,7 @@ private fun QuestionFullScreen(
     questionClick : (String) -> Unit = {},
     bookmarkClick : (String) -> Unit = {},
     internet : Boolean = false,
-    serverStatus : String = "Pending"
+    serverStatus : String = ""
 
 ) {
 
@@ -232,7 +232,7 @@ private fun QuestionFullScreen(
 
                 when(serverStatus){
 
-                    "Pending" -> {
+                    "question_pending" -> {
 
                         ComposeHelper.CircularProgressBar(
                             modifier = Modifier
@@ -242,7 +242,7 @@ private fun QuestionFullScreen(
 
                     }
 
-                    "Success" -> {
+                    "question_success" -> {
 
                         LazyColumn(
                             modifier = Modifier
