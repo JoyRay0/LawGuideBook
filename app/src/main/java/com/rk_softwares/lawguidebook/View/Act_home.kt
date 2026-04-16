@@ -95,6 +95,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
     private val categoryList = mutableStateListOf<Items>()
     private val bookmarkList = mutableStateListOf<Items>()
     private val calculationList = mutableStateListOf<Items>()
+
+    private val searchSuggestionList = mutableStateListOf<Items>()
     private var serverStatus = mutableStateOf("")
     private var appUpdate = mutableStateOf("")
     private var versionName = mutableStateOf("")
@@ -149,7 +151,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     historyList = historyList,
                     searchScreenBool = { isSearchScreenList = it },
 
-                    searchClick = { presenter.searchAndHistoryToServer(it) },
+                    searchClick = {
+                        if (it.isNotBlank()) presenter.searchAndHistoryToServer(it)},
                     historyTitleClick = { presenter.searchAndHistoryToServer(it) },
                     historyClick = { presenter.getAllHistory() },
                     searchItemClick = {
@@ -258,6 +261,26 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         }
 
+                    },
+                    liveSearchTitleChar = {
+
+                        searchSuggestionList.clear()
+
+                        if (it.isNotBlank()) presenter.searchSuggestion(it)
+
+                    },
+                    liveSuggestionList = searchSuggestionList,
+                    suggestionTitleClick = {
+
+                        IntentHelper.dataIntent(
+                            this,
+                            Act_answer::class.java,
+                            KeyHelper.sendQuestion_IntentKey(),
+                            it
+                        )
+
+                        searchSuggestionList.clear()
+
                     }
 
                 )
@@ -312,6 +335,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         calculationList.addAll(list)
     }
 
+    override fun onSearchSuggestionList(list: List<Items>) {
+        searchSuggestionList.clear()
+        searchSuggestionList.addAll(list)
+    }
+
     override fun serverStatus(message: String) {
         serverStatus.value = message
         //ShortMessageHelper.toast(this, message)
@@ -361,7 +389,10 @@ private fun HomeFullScreen(
     calculationList: List<Items> = emptyList(),
     calculationClick : (String) -> Unit = {},
     updateStatus : Boolean = false,
-    updateClick: () -> Unit = {}
+    updateClick: () -> Unit = {},
+    liveSearchTitleChar: (String) -> Unit = {},
+    liveSuggestionList: List<Items> = emptyList(),
+    suggestionTitleClick: (String) -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -446,7 +477,11 @@ private fun HomeFullScreen(
                     historyClick = {historyClick()},
                     searchItemClick = {searchItemClick(it)},
                     searchBookmarkClick = { searchBookmarkClick(it) },
-                    serverStatus = serverStatus
+                    serverStatus = serverStatus,
+                    liveSearchTitleChar = { liveSearchTitleChar(it) },
+                    liveSuggestionList = liveSuggestionList,
+                    suggestionTitleClick = {suggestionTitleClick(it)}
+
 
                 )
                 3 -> BookmarkScreen(
@@ -748,7 +783,7 @@ private fun HomeScreen(
                         .fillMaxWidth()
                         .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
                         .clip(shape = RoundedCornerShape(16.dp))
-                        .clickable{ lawWebsiteClick() }
+                        .clickable { lawWebsiteClick() }
                         //.border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
                         .background(color = Color(0xFFFFFFFF))
                         .padding(10.dp)
@@ -917,7 +952,7 @@ private fun Calculator(
                     modifier = Modifier
                         .wrapContentWidth()
                         .clip(shape = RoundedCornerShape(12.dp))
-                        .clickable{ moreClick() }
+                        .clickable { moreClick() }
                         .padding(5.dp)
                         .align(Alignment.CenterEnd)
 
@@ -991,7 +1026,7 @@ private fun Calculator(
                                     .fillMaxWidth()
                                     .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
                                     .clip(shape = RoundedCornerShape(16.dp))
-                                    .clickable{ calculationClick(it.title) }
+                                    .clickable { calculationClick(it.title) }
                                     .background(color = Color(0xFFFFFFFF))
                                     .align(Alignment.Center)
                                     .padding(10.dp)
@@ -1057,12 +1092,12 @@ private fun ListScreen(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(5.dp),
             state = lazyState,
-            userScrollEnabled = if (serverStatus == "Pending") false else true,
+            userScrollEnabled = if (serverStatus == "category_pending") false else true,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
 
-            if (serverStatus == "Pending"){
+            if (serverStatus == "category_pending"){
 
                 items(17){
 
@@ -1190,7 +1225,10 @@ private fun SearchScreen(
     historyClick: () -> Unit = {},
     searchItemClick : (String) -> Unit = {},
     searchBookmarkClick: (String) -> Unit = {},
-    serverStatus: String = ""
+    serverStatus: String = "",
+    liveSearchTitleChar: (String) -> Unit = {},
+    liveSuggestionList : List<Items> = emptyList(),
+    suggestionTitleClick: (String) -> Unit = {}
     ) {
 
     val lazyState = rememberLazyListState()
@@ -1198,9 +1236,11 @@ private fun SearchScreen(
     val historyTitle = remember { mutableStateOf("") }
     var searchScreenDataLoading by remember { mutableStateOf(false) }
     var isHistoryListEmpty by remember { mutableStateOf(false) }
+    var isSuggestionListEmpty by remember { mutableStateOf(false) }
 
-    if (serverStatus == "Pending") searchScreenDataLoading = true else searchScreenDataLoading = false
+    if (serverStatus == "search_pending") searchScreenDataLoading = true else searchScreenDataLoading = false
     if (searchList.isNotEmpty()) searchScreenDataLoading = false
+    if (liveSuggestionList.isNotEmpty()) isSuggestionListEmpty = true else isSuggestionListEmpty = false
 
 
     Box(
@@ -1318,22 +1358,50 @@ private fun SearchScreen(
 
         }
 
-        SearchBarHelper(
+        Column(
+
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            historyIconClick = {
-                //searchScreenDataLoading = false
-                isSearchScreenVisible = !isSearchScreenVisible
-                historyClick()
-                isHistoryListEmpty = false
-                           },
-            historyTitle = historyTitle,
-            searchClick = {
-                searchClick(it)
-                searchScreenDataLoading = true
+                .align(Alignment.TopCenter)
+
+        ) {
+
+            SearchBarHelper(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                historyIconClick = {
+                    //searchScreenDataLoading = false
+                    isSearchScreenVisible = !isSearchScreenVisible
+                    historyClick()
+                    isHistoryListEmpty = false
+                },
+                historyTitle = historyTitle,
+                searchClick = {
+                    searchClick(it)
+                    searchScreenDataLoading = true
+                },
+                liveSearchTitleChar = {
+                    liveSearchTitleChar(it)
+                    if (it.isNotBlank()) isSuggestionListEmpty = true else isSuggestionListEmpty = false
+                }
+            )
+
+            if (isSuggestionListEmpty){
+
+                SearchSuggestions(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    list = liveSuggestionList,
+                    suggestionTitleClick = { suggestionTitleClick(it) }
+
+                )
+
             }
-        )
+
+        }//column
+
 
         if (searchScreenDataLoading && isSearchScreenVisible){
 
@@ -1356,7 +1424,8 @@ private fun SearchBarHelper(
     historyIconClick: () -> Unit = {},
     historyTitle: MutableState<String> = mutableStateOf(""),
     modifier: Modifier = Modifier,
-    searchClick : (String) -> Unit = {}
+    searchClick : (String) -> Unit = {},
+    liveSearchTitleChar : (String) -> Unit = {}
 ) {
 
     var searchFiled by remember { mutableStateOf("") }
@@ -1438,7 +1507,10 @@ private fun SearchBarHelper(
 
                         BasicTextField(
                             value = searchFiled,
-                            onValueChange = { searchFiled = it },
+                            onValueChange = {
+                                searchFiled = it
+                                liveSearchTitleChar(it)
+                                            },
                             textStyle = TextStyle(fontSize = 15.sp, fontFamily = BanglaFont.font(), fontWeight = FontWeight.Normal, color = Color.Black),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1469,6 +1541,7 @@ private fun SearchBarHelper(
                         onClick = {
                             searchFiled = ""
                             historyTitle.value = ""
+                            liveSearchTitleChar("")
                                   },
                         modifier = Modifier
                             .wrapContentWidth()
@@ -1797,7 +1870,7 @@ private fun BookmarkScreen(
                         contentDescription = "Empty",
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(125.dp)
+                            .size(90.dp)
                             .align(Alignment.CenterHorizontally)
 
                     )
@@ -1805,9 +1878,9 @@ private fun BookmarkScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text("কোন বুকমার্ক নেই।",
-                        fontSize = 18.sp,
+                        fontSize = 14.sp,
                         fontFamily = BanglaFont.font(),
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF000000),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -1818,6 +1891,100 @@ private fun BookmarkScreen(
                 }
 
             }
+
+        }//box
+
+    }//box
+    
+}//fun end
+
+@Preview(showBackground = true)
+@Composable
+private fun SearchSuggestions(
+    modifier: Modifier = Modifier,
+    list : List<Items> = emptyList(),
+    suggestionTitleClick : (String) -> Unit = {}
+) {
+
+    val lazyState = rememberLazyListState()
+
+    val itemHeight = 40.dp
+    val maxItems = 6
+    val visibleCount = if (list.size > maxItems) maxItems else list.size
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+
+    ) {
+
+        Box(
+
+            modifier = modifier
+                .fillMaxWidth()
+                .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp))
+                .clip(shape = RoundedCornerShape(12.dp))
+                .background(color = Color(0xFFFFFFFF))
+                //.padding(4.dp)
+
+        ) {
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(itemHeight * visibleCount),
+                state = lazyState,
+            ) {
+
+                items(
+                    items = list,
+                    //key = { it.title }
+                ){ it->
+                    
+                    Row(
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(itemHeight)
+                            //.background(color = Color(0x2F000000))
+                            .clickable{ suggestionTitleClick(it.question) }
+                            .padding(start = 8.dp, end = 8.dp, top = 5.dp, bottom = 5.dp)
+
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "",
+                            tint = Color(0xFF776666),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .size(17.dp)
+                                .align(Alignment.CenterVertically)
+
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(text = it.question,
+                            fontSize = 14.sp,
+                            fontFamily = BanglaFont.font(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF000000),
+                            textAlign = TextAlign.Start,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically)
+                            )
+
+                    }//row
+                    
+                }
+
+            }// lazy column
 
         }//box
 
