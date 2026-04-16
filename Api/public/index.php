@@ -17,6 +17,7 @@ use App\Controller\SearchController;
 use App\Controller\AnswerController;
 use App\Controller\AppFeatureController;
 use App\Controller\ChatbotController;
+use App\Controller\SearchSuggestion;
 
 $env = Dotenv::createImmutable( __DIR__ . '/Api');
 
@@ -70,6 +71,8 @@ $app->post('/search/{page}', SearchController::class .':search');
 $app->post('/answer', AnswerController::class .':answer');
 
 $app->post('/ai_chat', ChatbotController::class .':chatbot');
+
+$app->post('/suggestion', SearchSuggestion::class . ':suggestion');
 
 
 
