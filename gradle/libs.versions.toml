@@ -1,7 +1,7 @@
 [versions]
 accompanistSystemuicontroller = "0.36.0"
 agp = "9.0.0"
-animation = "1.10.2"
+animation = "1.10.6"
 coilCompose = "3.4.0"
 coreKtx = "1.18.0"
 gson = "2.13.2"
