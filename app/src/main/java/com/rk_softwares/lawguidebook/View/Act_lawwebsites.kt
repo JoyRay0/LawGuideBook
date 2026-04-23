@@ -42,7 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
@@ -105,7 +105,8 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
                         IntentHelper.dataIntent(this, Act_browser::class.java,
                             KeyHelper.lawWebsiteLink_IntentKey(), it)
 
-                    }
+                    },
+                    serverStatus = serverStatus.value
                 )
             }
         }
@@ -144,7 +145,8 @@ private fun LawWebsitesFullScreen(
     backClick: () -> Unit = {},
     internet: Boolean = false,
     websiteList : List<WebsiteData> = emptyList(),
-    websiteTitleClick : (String) -> Unit = {}
+    websiteTitleClick : (String) -> Unit = {},
+    serverStatus : String = ""
 ){
 
     var isInternetDialogVisible by remember { mutableStateOf(false) }
@@ -184,7 +186,7 @@ private fun LawWebsitesFullScreen(
 
         ) {
 
-            Column(
+            Box(
 
                 modifier = Modifier
                     .fillMaxSize()
@@ -192,29 +194,47 @@ private fun LawWebsitesFullScreen(
             ) {
 
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = lazyState
-                ) {
+                when(serverStatus){
 
-                    items(
+                    "websites_pending"->{
 
-                        items = websiteList,
-                        key = { it.id }
-
-                    ){ it ->
-
-                        Item(
-                            title = it.title,
-                            titleClick = { websiteTitleClick(it.websiteLink) }
+                        ComposeHelper.CircularProgressBar(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center)
                         )
 
                     }
+                    "websites_success"->{
+
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            state = lazyState
+                        ) {
+
+                            items(
+
+                                items = websiteList,
+                                key = { it.id }
+
+                            ){ it ->
+
+                                Item(
+                                    title = it.title,
+                                    titleClick = { websiteTitleClick(it.websiteLink) }
+                                )
+
+                            }
+
+                        }//lazy column
+
+                    }
+                    else -> null
 
                 }
 
-            }//column
+            }//box
 
             if (isInternetDialogVisible){
 
@@ -319,7 +339,7 @@ private fun Item(
 
             Text(text = title,
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = Color(0xFF000000),

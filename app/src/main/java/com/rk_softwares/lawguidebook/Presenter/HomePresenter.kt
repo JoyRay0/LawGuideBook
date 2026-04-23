@@ -282,7 +282,7 @@ class HomePresenter(
 
     fun appUpdate(){
 
-        view.serverStatus("appUpdate_pending")
+        //view.serverStatus("appUpdate_pending")
 
         scopeIO.launch {
 
@@ -291,7 +291,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("appUpdate_success")
+                        //view.serverStatus("appUpdate_success")
                         view.appUpdateStatus(result)
 
                     }
@@ -303,7 +303,7 @@ class HomePresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("appUpdate_failed")
+                            //view.serverStatus("appUpdate_failed")
 
                         }
 

@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,12 +52,11 @@ import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
-import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.AnswerData
 import com.rk_softwares.lawguidebook.Presenter.Answer
@@ -320,7 +318,7 @@ private fun AnswerFullScreen(
                         Text(text = "আইন সময়ের সাথে পরিবর্তিত হতে পারে।\n" +
                                 "সর্বশেষ তথ্যের জন্য সরকারি উৎস যাচাই করুন।",
                             fontSize = 16.sp,
-                            fontFamily = BanglaFont.font(),
+                            fontFamily = Bangla.banglaFont(),
                             fontWeight = FontWeight.Normal,
                             color = Color(0xFF000000),
                             textAlign = TextAlign.Center,
@@ -334,7 +332,7 @@ private fun AnswerFullScreen(
 
                         Text(text = "ঠিক আছে",
                             fontSize = 13.sp,
-                            fontFamily = BanglaFont.font(),
+                            fontFamily = Bangla.banglaFont(),
                             fontWeight = FontWeight.Normal,
                             color = Color(0xFF695D5D),
                             textAlign = TextAlign.Center,
@@ -410,7 +408,7 @@ private fun Toolbar(
 
             Text(toolbarTitle,
                 fontSize = 16.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF9C27B0),
                 maxLines = 1,

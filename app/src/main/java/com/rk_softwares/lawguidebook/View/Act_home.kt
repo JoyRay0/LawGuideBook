@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -65,7 +64,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
@@ -121,6 +120,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             internetChecker.onStart()
 
             var isSearchScreenList by remember { mutableStateOf(true) }
+            var reloadHistory by remember { mutableIntStateOf(0) }
 
             try {
 
@@ -130,6 +130,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                 e.printStackTrace()
             }
 
+            LaunchedEffect(reloadHistory) {
+
+                presenter.getAllHistory()
+
+            }
 
             presenter.appUpdate()
 
@@ -152,9 +157,12 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     searchScreenBool = { isSearchScreenList = it },
 
                     searchClick = {
-                        if (it.isNotBlank()) presenter.searchAndHistoryToServer(it)},
+                        if (it.isNotBlank()) {
+                            presenter.searchAndHistoryToServer(it)
+                            reloadHistory++
+                        }},
                     historyTitleClick = { presenter.searchAndHistoryToServer(it) },
-                    historyClick = { presenter.getAllHistory() },
+                    historyClick = { reloadHistory++ },
                     searchItemClick = {
 
                         IntentHelper.dataIntent(
@@ -342,7 +350,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     override fun serverStatus(message: String) {
         serverStatus.value = message
-        //ShortMessageHelper.toast(this, message)
+        ShortMessageHelper.toast(this, message)
     }
 
     override fun message(status: String) {
@@ -539,7 +547,7 @@ private fun Toolbar(
 
             Text("আইনি গাইডবুক",
                 fontSize = 17.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF9C27B0),
                 modifier = Modifier
@@ -711,7 +719,7 @@ private fun BottomNavHelper(
 
             Text( text = labelText,
                 fontSize = 12.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = if (selected) Color(0xFFCC3AE5) else Color.Gray,
                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
@@ -811,7 +819,7 @@ private fun HomeScreen(
 
                         Text(text = "আইনি ওয়েবসাইট",
                             fontSize = 15.sp,
-                            fontFamily = BanglaFont.font(),
+                            fontFamily = Bangla.banglaFont(),
                             fontWeight = FontWeight.Normal,
                             textAlign = TextAlign.Start,
                             color = Color(0xFF3F3838),
@@ -885,7 +893,7 @@ private fun AiChatBot(
 
             Text(text = "আইনি সহায়ক AI",
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF494343),
                 textAlign = TextAlign.Center,
@@ -907,7 +915,7 @@ private fun Calculator(
     moreClick : () -> Unit = {},
     calculationClick : (String) -> Unit = {},
     calculationList : List<Items> = emptyList(),
-    status : String = "Pending"
+    status : String = "calculation_limit_pending"
 ) {
 
     val lazyScroll = rememberLazyGridState()
@@ -937,7 +945,7 @@ private fun Calculator(
 
                 Text("ক্যালকুলেটর",
                     fontSize = 15.sp,
-                    fontFamily = BanglaFont.font(),
+                    fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     color = Color(0xFF000000),
@@ -960,7 +968,7 @@ private fun Calculator(
 
                     Text("আরো দেখুন",
                         fontSize = 12.sp,
-                        fontFamily = BanglaFont.font(),
+                        fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
                         color = Color(0xFF000000),
@@ -991,7 +999,7 @@ private fun Calculator(
                     .fillMaxWidth()
             ) {
 
-                if (status == "Pending"){
+                if (status == "calculation_limit_pending"){
 
                     items(
                         count = 3
@@ -1045,7 +1053,7 @@ private fun Calculator(
 
                                 Text(text = it.title,
                                     fontSize = 12.sp,
-                                    fontFamily = BanglaFont.font(),
+                                    fontFamily = Bangla.banglaFont(),
                                     fontWeight = FontWeight.Normal,
                                     color = Color(0xFF000000),
                                     textAlign = TextAlign.Center,
@@ -1193,7 +1201,7 @@ private fun ListGridHelper(
 
             Text(text = gridText,
                 fontSize = 13.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
@@ -1333,7 +1341,7 @@ private fun SearchScreen(
 
             Text("কোন হিস্ট্রি নেই।",
                 fontSize = 17.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
@@ -1494,7 +1502,7 @@ private fun SearchBarHelper(
 
                             Text("যেকোনো আইনি বিষয় সার্চ করুন",
                                 fontSize = 14.sp,
-                                fontFamily = BanglaFont.font(),
+                                fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 color = Color(0xFF695D5D),
                                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
@@ -1511,7 +1519,7 @@ private fun SearchBarHelper(
                                 searchFiled = it
                                 liveSearchTitleChar(it)
                                             },
-                            textStyle = TextStyle(fontSize = 15.sp, fontFamily = BanglaFont.font(), fontWeight = FontWeight.Normal, color = Color.Black),
+                            textStyle = TextStyle(fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal, color = Color.Black),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.CenterStart),
@@ -1667,7 +1675,7 @@ private fun QuestionItem(
             
             Text(text = questionTitle,
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = Color(0xFF000000),
@@ -1782,7 +1790,7 @@ private fun HistoryItem(
 
             Text(text = historyTitle,
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = Color(0xFF000000),
@@ -1879,7 +1887,7 @@ private fun BookmarkScreen(
 
                     Text("কোন বুকমার্ক নেই।",
                         fontSize = 14.sp,
-                        fontFamily = BanglaFont.font(),
+                        fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF000000),
                         textAlign = TextAlign.Center,
@@ -1968,7 +1976,7 @@ private fun SearchSuggestions(
 
                         Text(text = it.question,
                             fontSize = 14.sp,
-                            fontFamily = BanglaFont.font(),
+                            fontFamily = Bangla.banglaFont(),
                             fontWeight = FontWeight.Normal,
                             color = Color(0xFF000000),
                             textAlign = TextAlign.Start,

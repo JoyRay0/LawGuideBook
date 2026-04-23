@@ -46,7 +46,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.ChatDatabase
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.CacheHelper
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
@@ -486,7 +486,7 @@ private fun Toolbar(
 
                 Text(text = "আইনি অ্যাসিস্ট্যান্ট",
                     fontSize = 15.sp,
-                    fontFamily = BanglaFont.font(),
+                    fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFFCC3AE5),
                     textAlign = TextAlign.Center,
@@ -550,7 +550,7 @@ private fun ChatNav(
 
                     Text(text = "আপনার আইনি সমস্যাটি লিখুন....",
                         fontSize = 15.sp,
-                        fontFamily = BanglaFont.font(),
+                        fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         color = Color(0xFF836464),
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
@@ -565,7 +565,7 @@ private fun ChatNav(
                 BasicTextField(
                     value = inputMessage,
                     onValueChange = { inputMessage = it },
-                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = BanglaFont.font(), fontWeight = FontWeight.Normal),
+                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
                     singleLine = false,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -762,7 +762,7 @@ private fun ChatBubble(
 
                     Text(text = message,
                         fontSize = 15.sp,
-                        fontFamily = BanglaFont.font(),
+                        fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         color = if (isUser) Color(0xFFFFFFFF) else Color(0xFF000000),
                         modifier = Modifier
@@ -959,7 +959,7 @@ private fun PopUpMenu(
 
                 Text("সব ডিলিট",
                     fontSize = 14.sp,
-                    fontFamily = BanglaFont.font(),
+                    fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Normal,
                     color = Color(0xFF000000),
                     textAlign = TextAlign.Center,
@@ -1014,7 +1014,7 @@ fun AlertDialog(
                     "প্রতিটি আইনি বিষয়ের দিকগুলো ভিন্ন হতে পারে, তাই এই অ্যাপ থেকে প্রাপ্ত তথ্যগুলো প্রাথমিক গাইডলাইন হিসেবে বিবেচনা করুন।" +
                     "যেকোনো আইনি বাধ্যবাধকতা বা দাপ্তরিক কাজে ব্যবহারের আগে তথ্যগুলো সংশ্লিষ্ট আইন বিশেষজ্ঞের দ্বারা যাচাই করে নেওয়ার জন্য বিশেষ অনুরোধ রইলো।",
                 fontSize = 17.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
@@ -1058,7 +1058,7 @@ fun AlertDialog(
 
                 Text(text =  "আমি সম্মত আছি",
                     fontSize = 15.sp,
-                    fontFamily = BanglaFont.font(),
+                    fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Normal,
                     textAlign = TextAlign.Center,
                     color = Color(0xFF463D3D),
@@ -1073,7 +1073,7 @@ fun AlertDialog(
 
             Text(text = "ঠিক আছে",
                 fontSize = 13.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF000000),
@@ -1133,7 +1133,7 @@ private fun EmptyChatMessage(
 
             Text(text = "হ্যালো!",
                 fontSize = 16.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
@@ -1149,7 +1149,7 @@ private fun EmptyChatMessage(
 
             Text(text = "আমি কীভাবে আপনাকে সাহায্য করতে পারি?",
                 fontSize = 16.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,

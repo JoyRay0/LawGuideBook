@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -33,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
@@ -345,7 +344,7 @@ private fun Item(
 
             Text(text = title,
                 fontSize = 12.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF605252),
                 textAlign = TextAlign.Center,

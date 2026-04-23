@@ -1,7 +1,6 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -22,7 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +33,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
@@ -48,10 +46,7 @@ import com.rk_softwares.lawguidebook.Presenter.QuestionPresenter
 import com.rk_softwares.lawguidebook.Presenter.Questions
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class Act_question : ComponentActivity(), Questions, InternetStatus {//class=======================================================
 
@@ -339,7 +334,7 @@ private fun Toolbar(
 
             Text(toolbarTitle,
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF9C27B0),
                 maxLines = 1,
@@ -402,7 +397,7 @@ private fun Item(
 
             Text(text = title,
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = Color(0xFF000000),

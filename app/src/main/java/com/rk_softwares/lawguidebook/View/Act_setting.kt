@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -49,9 +48,8 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
+import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
-import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
@@ -60,8 +58,6 @@ import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.HomePresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class Act_setting : ComponentActivity(), Home {
 
@@ -524,7 +520,7 @@ private fun TextButtonHelper(
 
                 Text(text = text,
                     fontSize = 16.sp,
-                    fontFamily = BanglaFont.font(),
+                    fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Normal,
                     color = Color(0xFF000000),
                     modifier = Modifier
@@ -581,7 +577,7 @@ private fun InfoDialog(
 
             Text(text = "ধন্যবাদ আমাদের অ্যাপ ব্যবহার করার জন্য",
                 fontSize = 18.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
@@ -594,7 +590,7 @@ private fun InfoDialog(
 
             Text(text = "আমরা অ্যাপ এর মধ্যে নিয়মিত আপডেট দিই এবং প্রতিটি আপডেটে নতুন নতুন ফিচার যুক্ত করি। আমাদের অ্যাপ ব্যবহার করতে যদি কোনো প্রকার সমস্যা হয় তবে দয়া করে আমাদের জানান। আমরা আপনার সমস্যা সমাধানের যথাসাধ্য চেষ্টা করবো।",
                 fontSize = 15.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
@@ -607,7 +603,7 @@ private fun InfoDialog(
 
             Text("ঠিক আছে",
                 fontSize = 13.sp,
-                fontFamily = BanglaFont.font(),
+                fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
