@@ -2,39 +2,31 @@ package com.rk_softwares.lawguidebook.View
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
-import android.provider.Browser
 import android.webkit.SslErrorHandler
-import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,21 +37,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.rk_softwares.lawguidebook.Helper.BanglaFont
 import com.rk_softwares.lawguidebook.Helper.ComposeHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
-import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Helper.WebviewHelper
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
@@ -263,7 +250,6 @@ private fun WebView(
 
     var isLoading = remember { mutableStateOf(true) }
 
-
     Box(
 
         modifier = Modifier
@@ -297,6 +283,16 @@ private fun WebView(
                             isLoading.value = false
                         }
 
+                        override fun shouldInterceptRequest(
+                            view: WebView?,
+                            request: WebResourceRequest?
+                        ): WebResourceResponse? {
+
+                            WebviewHelper.header()
+
+                            return super.shouldInterceptRequest(view, request)
+                        }
+
                     }
 
                     settings.apply {
@@ -307,6 +303,12 @@ private fun WebView(
                         useWideViewPort = true
                         builtInZoomControls = true
                         displayZoomControls = false
+                        databaseEnabled = true
+
+                        userAgentString = WebviewHelper.userAgent()
+
+                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                        mediaPlaybackRequiresUserGesture = false
 
 
                         allowFileAccess = false
