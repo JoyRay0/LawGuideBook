@@ -36,6 +36,7 @@
             android:exported="false"
             android:label="@string/title_activity_act_calculation"
             android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.LawGuideBook" />
         <activity
             android:name=".View.Act_calculation_item"
