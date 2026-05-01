@@ -5,17 +5,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -24,11 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -257,7 +263,7 @@ private fun TextToFunction(title : String){
     when(title){
 
         "উওরাধিকার" -> { InheritanceCalculator() }
-        "রেজিস্ট্রেশন ফি" -> {}
+        "রেজিস্ট্রেশন ফি" -> { DocumentRegistration() }
         "দেনমোহর" -> {}
 
     }
@@ -500,6 +506,7 @@ private fun InheritanceCalculator() {
 
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
 
         ) {
 
@@ -541,7 +548,6 @@ private fun InheritanceCalculator() {
                         )
                         .padding(3.dp)
                         .align(Alignment.CenterVertically)
-                        .imePadding()
 
                 ) {
 
@@ -567,10 +573,8 @@ private fun InheritanceCalculator() {
                         textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = {}
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
                         ),
                         modifier = Modifier
                             .fillMaxWidth(0.90f)
@@ -645,7 +649,6 @@ private fun InheritanceCalculator() {
                         )
                         .padding(3.dp)
                         .align(Alignment.CenterVertically)
-                        .imePadding()
 
                 ) {
 
@@ -671,10 +674,8 @@ private fun InheritanceCalculator() {
                         textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = {}
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
                         ),
                         modifier = Modifier
                             .fillMaxWidth(0.90f)
@@ -749,7 +750,6 @@ private fun InheritanceCalculator() {
                         )
                         .padding(3.dp)
                         .align(Alignment.CenterVertically)
-                        .imePadding()
 
                 ) {
 
@@ -775,10 +775,8 @@ private fun InheritanceCalculator() {
                         textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = {}
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
                         ),
                         modifier = Modifier
                             .fillMaxWidth(0.90f)
@@ -853,7 +851,6 @@ private fun InheritanceCalculator() {
                         )
                         .padding(3.dp)
                         .align(Alignment.CenterVertically)
-                        .imePadding()
 
                 ) {
 
@@ -879,10 +876,8 @@ private fun InheritanceCalculator() {
                         textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = {}
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
                         ),
                         modifier = Modifier
                             .fillMaxWidth(0.90f)
@@ -1255,5 +1250,998 @@ private fun inheritanceCalculationHelper (
     }
 
     return map
+
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+private fun DocumentRegistration() {
+
+    val context = LocalContext.current
+
+    var isReset = remember { mutableStateOf(false) }
+    var isResultClicked = remember { mutableStateOf(false) }
+
+
+    var documentType = remember { mutableStateOf("") }
+    var divisionType = remember { mutableStateOf("") }
+    var districtType = remember { mutableStateOf("") }
+    var allianceType = remember { mutableStateOf("") }
+    var buildingType = remember { mutableStateOf("") }
+    var sellerType = remember { mutableStateOf("") }
+    var documentPageCount = remember { mutableStateOf("") }
+    var landValueCount = remember { mutableStateOf("") }
+    var buildingValueCount = remember { mutableStateOf("") }
+
+
+    val allType = if (buildingType.value == "হ্যাঁ"){
+
+        (documentType.value.isNotEmpty() && divisionType.value.isNotEmpty() &&
+                districtType.value.isNotEmpty() && allianceType.value.isNotEmpty() &&
+                buildingType.value.isNotEmpty() && sellerType.value.isNotEmpty() &&
+                documentPageCount.value.isNotEmpty() && landValueCount.value.isNotEmpty() &&
+                buildingValueCount.value.isNotEmpty())
+
+    }else{
+
+        (documentType.value.isNotEmpty() && divisionType.value.isNotEmpty() &&
+                districtType.value.isNotEmpty() && allianceType.value.isNotEmpty() &&
+                buildingType.value.isNotEmpty() && sellerType.value.isNotEmpty() &&
+                documentPageCount.value.isNotEmpty() && landValueCount.value.isNotEmpty())
+
+    }
+
+    LaunchedEffect(isReset.value) {
+
+        if (isReset.value){
+
+            documentType.value = ""
+            divisionType.value = ""
+            districtType.value = ""
+            allianceType.value = ""
+            buildingType.value = ""
+            sellerType.value = ""
+            documentPageCount.value = ""
+            landValueCount.value = ""
+            buildingValueCount.value = ""
+
+            isResultClicked.value = false
+            isReset.value = false
+
+        }
+
+    }
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(7.dp)
+                .imePadding()
+
+        ) {
+
+            //document
+            Text(text = "১। দলিলের ধরন বাছাই করুন",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                )
+
+            RegistrationSelectorHelper(
+                documentVisible = true,
+                item = { documentType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //division
+            Text(text = "২। বিভাগ বাছাই করুন",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            RegistrationSelectorHelper(
+                divisionsVisible = true,
+                item = { divisionType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //document
+            Text(text = "৩। জেলা বাছাই করুন",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            RegistrationSelectorHelper(
+                districtVisible = true,
+                item = { districtType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //document
+            Text(text = "৪। স্থানীয় সরকার বাছাই করুন",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            RegistrationSelectorHelper(
+               allianceVisible = true,
+                item = { allianceType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //document
+            Text(text = "৫। স্থাপনা আছে কি না?",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            RegistrationSelectorHelper(
+                buildingVisible = true,
+                item = { buildingType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //document
+            Text(text = "৬। বিক্রেতার ধরন বাছাই করুন",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            RegistrationSelectorHelper(
+                sellerVisible = true,
+                item = { sellerType.value = it },
+                reset = isReset.value
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //document count
+            Text(text = "৭। দলিলের পৃষ্ঠা সংখ্যা",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp)
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(shape = RoundedCornerShape(7.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFCEA5A5),
+                            shape = RoundedCornerShape(7.dp)
+                        )
+                        .padding(5.dp)
+                        .align(Alignment.Center)
+
+                ) {
+
+                    if (documentPageCount.value.isEmpty()){
+
+                        Text(text = "০ পৃষ্ঠা",
+                            fontSize = 14.sp,
+                            fontFamily = Bangla.banglaFont(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF8D7070),
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(start = 5.dp)
+                                .align(Alignment.CenterStart)
+                        )
+
+                    }
+
+                    BasicTextField(
+                        value = documentPageCount.value,
+                        onValueChange = { documentPageCount.value = it },
+                        textStyle = TextStyle(fontSize = 14.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal, color = Color(0xFF000000)),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
+
+                        singleLine = true,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp)
+                            .align(Alignment.CenterStart)
+                    )
+
+
+                }//box
+
+            }//box
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            //land value count
+            Text(text = "৮। জমির মূল্য (টাকা)",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+            )
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp)
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(shape = RoundedCornerShape(7.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFCEA5A5),
+                            shape = RoundedCornerShape(7.dp)
+                        )
+                        .padding(5.dp)
+                        .align(Alignment.Center)
+
+                ) {
+
+                    if (landValueCount.value.isEmpty()){
+
+                        Text(text = "০.০০ টাকা",
+                            fontSize = 14.sp,
+                            fontFamily = Bangla.banglaFont(),
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF8D7070),
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(start = 5.dp)
+                                .align(Alignment.CenterStart)
+                        )
+
+                    }
+
+                    BasicTextField(
+                        value = landValueCount.value,
+                        onValueChange = { landValueCount.value = it },
+                        textStyle = TextStyle(fontSize = 14.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal, color = Color(0xFF000000)),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+
+                        singleLine = true,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .fillMaxWidth(0.90f)
+                            .padding(5.dp)
+                            .align(Alignment.CenterStart)
+                    )
+
+                    if (landValueCount.value.isNotEmpty()){
+
+                        IconButton(
+                            onClick = { landValueCount.value = "" },
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .clip(shape = CircleShape)
+                                .size(30.dp)
+                                .align(Alignment.CenterEnd)
+                        ) {
+
+                            Icon( painter = painterResource(R.drawable.ic_close),
+                                contentDescription = "Clear",
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .size(18.dp)
+                                    .align(Alignment.Center)
+
+                            )
+
+                        }
+
+                    }
+
+                }//box
+
+            }//box
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            if (buildingType.value == "হ্যাঁ"){
+
+                // building value count
+                Text(text = "৯। স্থাপনার মূল্য (টাকা)",
+                    fontSize = 15.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Start,
+                    color = Color(0xFF000000),
+                )
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(7.dp)
+
+                ) {
+
+                    Box(
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = RoundedCornerShape(7.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFFCEA5A5),
+                                shape = RoundedCornerShape(7.dp)
+                            )
+                            .padding(5.dp)
+                            .align(Alignment.Center)
+
+                    ) {
+
+                        if (buildingValueCount.value.isEmpty()){
+
+                            Text(text = "০.০০ টাকা",
+                                fontSize = 14.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.Normal,
+                                color = Color(0xFF8D7070),
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .padding(start = 5.dp)
+                                    .align(Alignment.CenterStart)
+                            )
+
+                        }
+
+                        BasicTextField(
+                            value = buildingValueCount.value,
+                            onValueChange = { buildingValueCount.value = it },
+                            textStyle = TextStyle(fontSize = 14.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal, color = Color(0xFF000000)),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done
+                            ),
+
+                            singleLine = true,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth(0.90f)
+                                .padding(5.dp)
+                                .align(Alignment.CenterStart)
+                        )
+
+                        if (buildingValueCount.value.isNotEmpty()){
+
+                            IconButton(
+                                onClick = { buildingValueCount.value = "" },
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .clip(shape = CircleShape)
+                                    .size(30.dp)
+                                    .align(Alignment.CenterEnd)
+                            ) {
+
+                                Icon( painter = painterResource(R.drawable.ic_close),
+                                    contentDescription = "Clear",
+                                    modifier = Modifier
+                                        .wrapContentWidth()
+                                        .size(18.dp)
+                                        .align(Alignment.Center)
+
+                                )
+
+                            }
+
+                        }
+
+                    }//box
+
+                }//box
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+            }//condition
+
+            //buttons
+            Row(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+
+            ) {
+
+                Text(text = "রিসেট",
+                    fontSize = 14.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF725858),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .clickable { isReset.value = true }
+                        .background(color = Color(0xFFE3E1E1))
+                        .padding(7.dp)
+                        .align(Alignment.CenterVertically)
+                    )
+
+                Spacer(modifier = Modifier.width(18.dp))
+
+                Text(text = "ফলাফল",
+                    fontSize = 14.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFFFFFFF),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .alpha(alpha = if (allType) 1f else 0.5f)
+                        .clickable(
+                            enabled = if (allType) true else false
+                        ) {
+                            isResultClicked.value = true
+                            isReset.value = false
+
+                        }
+                        .background(color = Color(0xFF46B44A))
+                        .padding(7.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+            }//row
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            //result
+
+            if (isResultClicked.value){
+
+                val result = buildString {
+
+                    append("| খাত | টাকা |\n")
+                    append("|----|--------|\n")
+                    append("| রেজিস্ট্রেশন ফি | ০ |\n")
+                    append("| স্ট্যাম্প শুল্ক | ০ |\n")
+                    append("| স্থানীয় সরকার কর | ০ |\n")
+                    append("| উৎস কর | ০ |\n")
+                    append("| ভ্যাট | ০ |\n")
+                    append("| ই-ফি | ০ |\n")
+                    append("| ঢ (এন) ফি (পৃষ্ঠা অনুযায়ী) | ০ |\n")
+                    append("| ঢঢ (এনএন) ফি (পৃষ্ঠা অনুযায়ী) | ০ |\n")
+                    append("| হলফনামার স্ট্যাম্প | ০ |\n")
+                    append("| নোটিশ / কোর্ট ফি | ০ |\n")
+                    append("| **মোট আনুমানিক খরচ** | **০** |\n")
+
+                }
+
+                MarkdownText(
+                    markdown = result,
+                    fontSize = 14.sp,
+                    fontResource = R.font.noto_serif_bengali,
+                    color = Color(0xFF000000),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+            }
+
+        }//column
+
+    }//box
+
+}//fun end
+
+@Preview(showBackground = true)
+@Composable
+private fun RegistrationSelectorHelper(
+    documentVisible : Boolean = false,
+    divisionsVisible : Boolean = false,
+    districtVisible : Boolean = false,
+    allianceVisible : Boolean = false,
+    buildingVisible : Boolean = false,
+    sellerVisible : Boolean = false,
+    item : (String) -> Unit = {},
+    reset : Boolean = false
+) {
+
+    val lazyState = rememberLazyListState()
+
+
+    var selectedIndex = remember { mutableStateOf(-1) }
+    var isSelectorClicked = remember { mutableStateOf(false) }
+
+    val divisionList = arrayOf(
+        "ঢাকা বিভাগ",
+        "চট্টগ্রাম বিভাগ",
+        "রাজশাহী বিভাগ",
+        "খুলনা বিভাগ",
+        "সিলেট বিভাগ",
+        "বরিশাল বিভাগ",
+        "রংপুর বিভাগ",
+        "ময়মনসিংহ বিভাগ")
+
+    val districtList = arrayOf(
+        "ঢাকা জেলা",
+        "ফরিদপুর জেলা",
+        "গাজীপুর জেলা",
+        "গোপালগঞ্জ জেলা",
+        "কিশোরগঞ্জ জেলা",
+        "মাদারীপুর জেলা",
+        "মানিকগঞ্জ জেলা",
+        "মুন্সীগঞ্জ জেলা",
+        "নারায়ণগঞ্জ জেলা",
+        "নরসিংদী জেলা",
+        "রাজবাড়ী জেলা",
+        "শরীয়তপুর জেলা",
+        "টাঙ্গাইল জেলা",
+        "বাগেরহাট জেলা",
+        "চুয়াডাঙ্গা জেলা",
+        "যশোর জেলা",
+        "ঝিনাইদহ জেলা",
+        "খুলনা জেলা",
+        "কুষ্টিয়া জেলা",
+        "মাগুরা জেলা",
+        "মেহেরপুর জেলা",
+        "নড়াইল জেলা",
+        "সাতক্ষীরা জেলা",
+        "বান্দরবান জেলা",
+        "ব্রাহ্মণবাড়িয়া জেলা",
+        "চাঁদপুর জেলা",
+        "চট্টগ্রাম জেলা",
+        "কুমিল্লা জেলা",
+        "কক্সবাজার জেলা",
+        "ফেনী জেলা",
+        "খাগড়াছড়ি জেলা",
+        "লক্ষ্মীপুর জেলা",
+        "নোয়াখালী জেলা",
+        "রাঙ্গামাটি পার্বত্য জেলা",
+        "বগুড়া জেলা",
+        "জয়পুরহাট জেলা",
+        "নওগাঁ জেলা",
+        "নাটোর জেলা",
+        "চাঁপাইনবাবগঞ্জ জেলা",
+        "পাবনা জেলা",
+        "রাজশাহী জেলা",
+        "সিরাজগঞ্জ জেলা",
+        "হবিগঞ্জ জেলা",
+        "মৌলভীবাজার জেলা",
+        "সুনামগঞ্জ জেলা",
+        "সিলেট জেলা",
+        "দিনাজপুর জেলা",
+        "গাইবান্ধা জেলা",
+        "কুড়িগ্রাম জেলা",
+        "লালমনিরহাট জেলা",
+        "নীলফামারী জেলা",
+        "পঞ্চগড় জেলা",
+        "রংপুর জেলা",
+        "ঠাকুরগাঁও জেলা",
+        "জামালপুর জেলা",
+        "ময়মনসিংহ জেলা",
+        "নেত্রকোণা জেলা",
+        "শেরপুর জেলা",
+        "ঝালকাঠি জেলা",
+        "বরগুনা জেলা",
+        "বরিশাল জেলা",
+        "ভোলা জেলা",
+        "পটুয়াখালী জেলা",
+        "পিরোজপুর জেলা",
+    )
+
+    val documentList = arrayOf(
+        "বিক্রয় দলিল",
+        "দান দলিল",
+        "হেবা দলিল",
+        "বিনিময় দলিল",
+        "বন্ধক দলিল",
+        "ইজারা দলিল",
+        "বায়না দলিল",
+        "পাওয়ার অব অ্যাটর্নি",
+        "উইল দলিল",
+        "বণ্টন দলিল",
+    )
+
+    val allianceList = arrayOf(
+        "সিটি কর্পোরেশন",
+        "পৌরসভা",
+        "ইউনিয়ন",
+    )
+
+    val buildingList = arrayOf("না", "হ্যাঁ")
+
+    val sellerList = arrayOf(
+        "মূল মালিক",
+        "ডেভেলপার / কোম্পানি",
+        "ব্যাংক / আর্থিক প্রতিষ্ঠান",
+    )
+
+
+    val maxItem = 10
+    val itemHeight = 40.dp
+
+    val divisionsVisibleItemCount = if (divisionList.size > maxItem) maxItem else divisionList.size
+
+    val districtVisibleItemCount = if (districtList.size > maxItem) maxItem else districtList.size
+
+    val documentVisibleItemCount = if (documentList.size > maxItem) maxItem else documentList.size
+
+    val allianceVisibleItemCount = if (allianceList.size > maxItem) maxItem else allianceList.size
+
+    val buildingVisibleItemCount = if (buildingList.size > maxItem) maxItem else buildingList.size
+
+    val sellerVisibleItemCount = if (sellerList.size > maxItem) maxItem else sellerList.size
+
+    LaunchedEffect(reset) {
+
+        if (reset) selectedIndex.value = -1
+
+    }
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .fillMaxWidth()
+
+
+        ) {
+
+            //default value
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    .clickable { isSelectorClicked.value = !isSelectorClicked.value }
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFCEA5A5),
+                        shape = RoundedCornerShape(7.dp)
+                    )
+                    .padding(8.dp)
+
+            ) {
+
+                if (selectedIndex.value <= -1){
+
+                    Text( text =
+
+                        if (documentVisible){
+
+                            "দলিল বাছাই করুন"
+
+                        }else if (divisionsVisible){
+
+                            "বিভাগ বাছাই করুন"
+
+                        }else if (districtVisible){
+
+                            "জেলা বাছাই করুন"
+
+                        }else if (allianceVisible){
+
+                            "এলাকা বাছাই করুন"
+
+                        }else if (buildingVisible){
+
+                            "হ্যাঁ / না"
+
+                        }else {
+
+                            "বিক্রেতার ধরন"
+
+                        }
+                        ,
+                        fontSize = 14.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Start,
+                        color = Color(0xFF655353),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.CenterStart)
+
+                    )
+
+                }else{
+
+                    Text( text =
+
+                        if (documentVisible){
+
+                            documentList[selectedIndex.value]
+
+                        }else if (divisionsVisible){
+
+                            divisionList[selectedIndex.value]
+
+                        }else if (districtVisible){
+
+                            districtList[selectedIndex.value]
+
+                        }else if (allianceVisible){
+
+                            allianceList[selectedIndex.value]
+
+                        }else if (buildingVisible){
+
+                            buildingList[selectedIndex.value]
+
+                        }else{
+
+                            sellerList[selectedIndex.value]
+
+                        }
+                        ,
+                        fontSize = 14.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Start,
+                        color = Color(0xFF000000),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.CenterStart)
+
+                    )
+
+                }
+
+                if (isSelectorClicked.value){
+
+                    Icon( painter = painterResource(R.drawable.ic_right),
+                        contentDescription = "",
+                        tint = Color(0xFFAB8A8A),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .rotate(270f)
+                            .align(Alignment.CenterEnd)
+
+                    )
+
+                }else{
+
+                    Icon( painter = painterResource(R.drawable.ic_right),
+                        contentDescription = "",
+                        tint = Color(0xFFAB8A8A),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .rotate(90f)
+                            .align(Alignment.CenterEnd)
+
+                    )
+
+                }
+
+            }//box
+
+
+            if (isSelectorClicked.value){
+
+                LazyColumn(
+                      modifier = Modifier
+                          .fillMaxWidth()
+
+                          .height(
+                              height = if (documentVisible) {
+
+                                  itemHeight * documentVisibleItemCount
+
+                              } else if (divisionsVisible) {
+
+                                  itemHeight * divisionsVisibleItemCount
+
+                              } else if (districtVisible) {
+
+                                  itemHeight * districtVisibleItemCount
+
+                              } else if (allianceVisible) {
+
+                                  itemHeight * allianceVisibleItemCount
+
+                              } else if (buildingVisible) {
+
+                                  itemHeight * buildingVisibleItemCount
+
+                              } else {
+
+                                  itemHeight * sellerVisibleItemCount
+
+                              }
+                          )
+
+                          .shadow(elevation = 2.dp, shape = RoundedCornerShape(10.dp))
+                          .clip(shape = RoundedCornerShape(10.dp))
+                          .background(color = Color(0xFFFFFFFF))
+                          .align(Alignment.CenterHorizontally),
+                    state = lazyState,
+                    contentPadding = PaddingValues(3.dp)
+
+                ) {
+
+                    itemsIndexed(
+                        items = if (documentVisible){
+
+                            documentList
+
+                        }else if (divisionsVisible){
+
+                            divisionList
+
+                        }else if (districtVisible){
+
+                            districtList
+
+                        }else if (allianceVisible){
+
+                            allianceList
+
+                        }else if (buildingVisible){
+
+                            buildingList
+
+                        }else{
+
+                            sellerList
+
+                        }
+                    ){index, item ->
+
+                        Box(
+
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(itemHeight)
+                                .clip(shape = RoundedCornerShape(12.dp))
+                                .clickable {
+                                    if (item.isNotEmpty()) item(item) else item("")
+                                    selectedIndex.value = index
+                                    isSelectorClicked.value = false
+                                }
+                                .padding(5.dp)
+
+                        ) {
+
+                            Text(text = item,
+                                fontSize = 14.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.Normal,
+                                color = Color(0xFF000000),
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 7.dp)
+                                    .align(Alignment.CenterStart)
+                            )
+
+                        }//box
+
+                    }
+
+                }//lazy
+
+            }
+
+
+        }//column
+
+    }//box
+
+}//fun end
+
+
+private fun documentRegistrationCalculation(
+    document : String,
+    division : String,
+    district : String,
+    alliance : String,
+    building : String,
+    seller : String,
+    documentPageCount : String,
+    landValue : String,
+    buildingValue : String
+) : Map<String, String>{
+
+
+    val regiFee = 1.1
+    val stampDuty = 5
+    val vat = 2
+
+    val d_documentPageCount = documentPageCount.toDouble()
+    val d_landValue = landValue.toDouble()
+    val d_buildingValue = buildingValue.toDouble()
+
+
+    val documentMap = mapOf(
+
+        "বিক্রয় দলিল" to 3.0,
+        "দান দলিল" to 1.0,
+        "হেবা দলিল" to 0.5,
+        "বিনিময় দলিল" to 3.0,
+        "বন্ধক দলিল" to 1.0,
+        "ইজারা দলিল" to 1.5,
+        "বায়না দলিল" to 1.0,
+        "পাওয়ার অব অ্যাটর্নি" to 1.0,
+        "উইল দলিল" to 0.0,
+        "বণ্টন দলিল" to 1.0,
+
+    )
+
+    val allianceMap = mapOf(
+        "সিটি কর্পোরেশন" to 2.0,
+        "পৌরসভা" to 1.5,
+        "ইউনিয়ন" to 1.0
+    )
+
+
+
 
 }//fun end
