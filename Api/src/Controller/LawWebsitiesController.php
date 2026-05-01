@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class LawWebsitiesController{
 
     public function websites(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $data = [
 

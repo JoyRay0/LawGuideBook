@@ -6,10 +6,13 @@ use App\Database\DB;
 use App\Helper\SanitizeHelper;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class SearchSuggestion{
 
     public function suggestion(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $searchData = (!empty($request->getParsedBody())) ? $request->getParsedBody() : "";
 

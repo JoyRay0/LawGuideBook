@@ -5,12 +5,15 @@ namespace App\Database;
 use Exception;
 use PDO;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class DB{
 
     private static $connection;
 
     private static function connect(){
+
+        ErrorHelper::register();
 
         if(!self::$connection){
 
@@ -32,6 +35,8 @@ class DB{
                 self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             }catch(Exception $e){
+
+                ErrorHelper::log("EXCEPTION", "{$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}");
 
                 $response = new Response();
 

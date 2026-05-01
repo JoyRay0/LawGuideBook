@@ -7,10 +7,13 @@ use App\Helper\CacheHelper;
 use App\Helper\PaginationHelper;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class CategoryController{
 
     public function all_category(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $data = [
 
@@ -91,6 +94,8 @@ class CategoryController{
 
 
     public function category( Request $request, Response $response, array $args){
+
+        ErrorHelper::register();
 
         $table_names = [
 

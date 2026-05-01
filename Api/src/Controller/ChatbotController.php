@@ -6,10 +6,13 @@ use App\Database\DB;
 use App\Helper\SanitizeHelper;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class ChatbotController{
 
     public function chatbot(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $message = (!empty($request->getParsedBody())) ? $request->getParsedBody() : ""; 
 
@@ -26,9 +29,9 @@ class ChatbotController{
 
         }
 
-        $s_user_message = SanitizeHelper::inputString($message['user_message']);
+        $s_user_message = SanitizeHelper::chatString($message['user_message']);
 
-        $result =  self::check_user_message($s_user_message, $response);
+        $result =  self::check_user_message($s_user_message);
 
         if($result !== null){
 
@@ -65,7 +68,7 @@ class ChatbotController{
         ৭. তুমি ব্যবহারকারীকে তুমি, তোমাকে বলে সম্মোধন করবে।
         ";
 
-        $context = "### তথ্যসূত্র (Reference Data):".$answer."### ব্যবহারকারীর প্রশ্ন (User Question): ". $s_user_message;
+        $context = "### তথ্যসূত্র (Reference Data):". $answer["question"] . $answer["answer"] ."### ব্যবহারকারীর প্রশ্ন (User Question): ". $s_user_message;
 
         //=============================
         //sending user message to ai

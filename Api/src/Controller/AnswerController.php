@@ -6,10 +6,13 @@ use App\Database\DB;
 use App\Helper\SanitizeHelper;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class AnswerController{
 
     public function answer(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $questionData = (!empty($request->getParsedBody())) ? $request->getParsedBody() : "";
 

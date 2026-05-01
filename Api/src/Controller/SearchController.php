@@ -7,10 +7,13 @@ use App\Helper\PaginationHelper;
 use App\Helper\SanitizeHelper;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class SearchController{
 
     public function search(Request $request, Response $response, array $args){
+
+        ErrorHelper::register();
 
         $searchInput = (!empty($request->getParsedBody())) ? $request->getParsedBody() : [];
         $page = (!isset($args['page'])) ? $args['page'] : 1;

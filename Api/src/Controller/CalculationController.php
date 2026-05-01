@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Helper\ErrorHelper;
 
 class CalculationController{
 
     public function calculation_limt_item(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $data = [
 
@@ -39,6 +42,8 @@ class CalculationController{
     }
 
     public function calculation_all_item(Request $request, Response $response){
+
+        ErrorHelper::register();
 
         $data = [
 
