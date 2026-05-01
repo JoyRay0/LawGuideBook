@@ -350,7 +350,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     override fun serverStatus(message: String) {
         serverStatus.value = message
-        ShortMessageHelper.toast(this, message)
+
     }
 
     override fun message(status: String) {
