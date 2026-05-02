@@ -41,6 +41,7 @@ if(isset($_ENV["DEBUG"]) && $_ENV["DEBUG"] === "false"){
 
 }
 
+$app->addRoutingMiddleware();
 $app->addBodyParsingMiddleware();
 $app->add(new HeaderMiddleware());
 

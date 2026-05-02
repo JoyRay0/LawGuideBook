@@ -7,7 +7,7 @@ class SanitizeHelper{
 
     public static function inputString(string $input) : string{
 
-        $data = trim(preg_replace("/[^p{L}\s\?]/u", "", $input) ?? "");
+        $data = trim(preg_replace("/[^\p{L}\p{M}\s\?]/u", "", $input) ?? "");
 
         return $data;
     }
