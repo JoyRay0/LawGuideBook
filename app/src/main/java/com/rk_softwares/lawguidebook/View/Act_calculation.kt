@@ -506,413 +506,372 @@ private fun InheritanceCalculator() {
 
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(7.dp)
                 .imePadding()
 
         ) {
 
             //land
 
-            Row(
+            Text( text = "১। জমি",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Start)
+
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Box(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(9.dp)
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFBEA1A1),
+                        shape = RoundedCornerShape(7.dp)
+                    )
+                    .padding(3.dp)
+                    .align(Alignment.CenterHorizontally)
 
             ) {
 
-                Spacer(modifier = Modifier.width(13.dp))
+                if (land.value.isEmpty()){
 
-                Text( text = "জমি:",
-                    fontSize = 15.sp,
-                    fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = Color(0xFF000000),
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .align(Alignment.CenterVertically)
-
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Box(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFBEA1A1),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(3.dp)
-                        .align(Alignment.CenterVertically)
-
-                ) {
-
-                    if (land.value.isEmpty()){
-
-                        Text(text = "০.০০ শতাংশ",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF9F7A7A),
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(start = 10.dp)
-                                .align(Alignment.CenterStart)
-                        )
-
-                    }
-
-                    BasicTextField(
-                        value = land.value,
-                        onValueChange = { land.value = it },
-                        textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
+                    Text(text = "০.০০ শতাংশ",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF9F7A7A),
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                         modifier = Modifier
-                            .fillMaxWidth(0.90f)
-                            .padding(5.dp)
+                            .wrapContentWidth()
+                            .padding(start = 10.dp)
                             .align(Alignment.CenterStart)
                     )
 
-                    if (land.value.isNotEmpty()){
+                }
 
-                        IconButton(
-                            onClick = { land.value = "" },
+                BasicTextField(
+                    value = land.value,
+                    onValueChange = { land.value = it },
+                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .padding(5.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                if (land.value.isNotEmpty()){
+
+                    IconButton(
+                        onClick = { land.value = "" },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(end = 5.dp)
+                            .clip(shape = CircleShape)
+                            .size(30.dp)
+                            .align(Alignment.CenterEnd)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear",
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .padding(end = 5.dp)
-                                .clip(shape = CircleShape)
-                                .size(30.dp)
-                                .align(Alignment.CenterEnd)
-                        ) {
+                                .size(18.dp)
+                                .align(Alignment.Center)
 
-                            Icon( painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Clear",
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .size(18.dp)
-                                    .align(Alignment.Center)
-
-                            )
-
-                        }
+                        )
 
                     }
 
-                }//box
+                }
 
-            }//row
+            }//box
 
             //gold
 
-            Row(
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text( text = "২। স্বর্ন:",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Start)
+
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Box(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(9.dp)
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFBEA1A1),
+                        shape = RoundedCornerShape(7.dp)
+                    )
+                    .padding(3.dp)
+                    .align(Alignment.Start)
 
             ) {
 
-                Spacer(modifier = Modifier.width(13.dp))
+                if (gold.value.isEmpty()){
 
-                Text( text = "স্বর্ন:",
-                    fontSize = 15.sp,
-                    fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = Color(0xFF000000),
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .align(Alignment.CenterVertically)
-
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Box(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFBEA1A1),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(3.dp)
-                        .align(Alignment.CenterVertically)
-
-                ) {
-
-                    if (gold.value.isEmpty()){
-
-                        Text(text = "০ ভরি",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF9F7A7A),
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(start = 10.dp)
-                                .align(Alignment.CenterStart)
-                        )
-
-                    }
-
-                    BasicTextField(
-                        value = gold.value,
-                        onValueChange = { gold.value = it },
-                        textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
+                    Text(text = "০ ভরি",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF9F7A7A),
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                         modifier = Modifier
-                            .fillMaxWidth(0.90f)
-                            .padding(5.dp)
+                            .wrapContentWidth()
+                            .padding(start = 10.dp)
                             .align(Alignment.CenterStart)
                     )
 
-                    if (gold.value.isNotEmpty()){
+                }
 
-                        IconButton(
-                            onClick = { gold.value = "" },
+                BasicTextField(
+                    value = gold.value,
+                    onValueChange = { gold.value = it },
+                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .padding(5.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                if (gold.value.isNotEmpty()){
+
+                    IconButton(
+                        onClick = { gold.value = "" },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(end = 5.dp)
+                            .clip(shape = CircleShape)
+                            .size(30.dp)
+                            .align(Alignment.CenterEnd)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear",
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .padding(end = 5.dp)
-                                .clip(shape = CircleShape)
-                                .size(30.dp)
-                                .align(Alignment.CenterEnd)
-                        ) {
+                                .size(18.dp)
+                                .align(Alignment.Center)
 
-                            Icon( painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Clear",
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .size(18.dp)
-                                    .align(Alignment.Center)
-
-                            )
-
-                        }
+                        )
 
                     }
 
-                }//box
+                }
 
-            }//row
+            }//box
 
             //silver
 
-            Row(
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text( text = "৩। রৌপ্য:",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Start)
+
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Box(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(9.dp)
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFBEA1A1),
+                        shape = RoundedCornerShape(7.dp)
+                    )
+                    .padding(3.dp)
+                    .align(Alignment.Start)
 
             ) {
 
-                Spacer(modifier = Modifier.width(13.dp))
+                if (silver.value.isEmpty()){
 
-                Text( text = "রৌপ্য:",
-                    fontSize = 15.sp,
-                    fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = Color(0xFF000000),
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .align(Alignment.CenterVertically)
-
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Box(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFBEA1A1),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(3.dp)
-                        .align(Alignment.CenterVertically)
-
-                ) {
-
-                    if (silver.value.isEmpty()){
-
-                        Text(text = "০ ভরি",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF9F7A7A),
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(start = 10.dp)
-                                .align(Alignment.CenterStart)
-                        )
-
-                    }
-
-                    BasicTextField(
-                        value = silver.value,
-                        onValueChange = { silver.value = it },
-                        textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
+                    Text(text = "০ ভরি",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF9F7A7A),
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                         modifier = Modifier
-                            .fillMaxWidth(0.90f)
-                            .padding(5.dp)
+                            .wrapContentWidth()
+                            .padding(start = 10.dp)
                             .align(Alignment.CenterStart)
                     )
 
-                    if (silver.value.isNotEmpty()){
+                }
 
-                        IconButton(
-                            onClick = { silver.value = "" },
+                BasicTextField(
+                    value = silver.value,
+                    onValueChange = { silver.value = it },
+                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .padding(5.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                if (silver.value.isNotEmpty()){
+
+                    IconButton(
+                        onClick = { silver.value = "" },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(end = 5.dp)
+                            .clip(shape = CircleShape)
+                            .size(30.dp)
+                            .align(Alignment.CenterEnd)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear",
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .padding(end = 5.dp)
-                                .clip(shape = CircleShape)
-                                .size(30.dp)
-                                .align(Alignment.CenterEnd)
-                        ) {
+                                .size(18.dp)
+                                .align(Alignment.Center)
 
-                            Icon( painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Clear",
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .size(18.dp)
-                                    .align(Alignment.Center)
-
-                            )
-
-                        }
+                        )
 
                     }
 
-                }//box
+                }
 
-            }//row
+            }//box
 
             //money
 
-            Row(
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text( text = "৪। টাকা:",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Start)
+
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Box(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(9.dp)
+                    .clip(shape = RoundedCornerShape(7.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFBEA1A1),
+                        shape = RoundedCornerShape(7.dp)
+                    )
+                    .padding(3.dp)
+                    .align(Alignment.Start)
 
             ) {
 
-                Spacer(modifier = Modifier.width(13.dp))
+                if (money.value.isEmpty()){
 
-                Text( text = "টাকা:",
-                    fontSize = 15.sp,
-                    fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = Color(0xFF000000),
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .align(Alignment.CenterVertically)
-
-                )
-
-                Spacer(modifier = Modifier.width(15.dp))
-
-                Box(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFBEA1A1),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(3.dp)
-                        .align(Alignment.CenterVertically)
-
-                ) {
-
-                    if (money.value.isEmpty()){
-
-                        Text(text = "০ টাকা",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF9F7A7A),
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(start = 10.dp)
-                                .align(Alignment.CenterStart)
-                        )
-
-                    }
-
-                    BasicTextField(
-                        value = money.value,
-                        onValueChange = { money.value = it },
-                        textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
+                    Text(text = "০ টাকা",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF9F7A7A),
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                         modifier = Modifier
-                            .fillMaxWidth(0.90f)
-                            .padding(5.dp)
+                            .wrapContentWidth()
+                            .padding(start = 10.dp)
                             .align(Alignment.CenterStart)
                     )
 
-                    if (money.value.isNotEmpty()){
+                }
 
-                        IconButton(
-                            onClick = { money.value = "" },
+                BasicTextField(
+                    value = money.value,
+                    onValueChange = { money.value = it },
+                    textStyle = TextStyle(color = Color(0xFF000000), fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .padding(5.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                if (money.value.isNotEmpty()){
+
+                    IconButton(
+                        onClick = { money.value = "" },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(end = 5.dp)
+                            .clip(shape = CircleShape)
+                            .size(30.dp)
+                            .align(Alignment.CenterEnd)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear",
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .padding(end = 5.dp)
-                                .clip(shape = CircleShape)
-                                .size(30.dp)
-                                .align(Alignment.CenterEnd)
-                        ) {
+                                .size(18.dp)
+                                .align(Alignment.Center)
 
-                            Icon( painter = painterResource(R.drawable.ic_close),
-                                contentDescription = "Clear",
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .size(18.dp)
-                                    .align(Alignment.Center)
-
-                            )
-
-                        }
+                        )
 
                     }
 
-                }//box
+                }
 
-            }//row
+            }//box
 
             Spacer(modifier = Modifier.height(7.dp))
 
@@ -999,6 +958,24 @@ private fun InheritanceCalculator() {
 
                 Spacer(modifier = Modifier.width(10.dp))
 
+                Text( text = "রিসেট",
+                    fontSize = 14.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF000000),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .clickable { isReset.value = true }
+                        .background(color = Color(0xFFD6E3D6))
+                        .padding(6.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
                 Text( text = "হিসাব করুন",
                     fontSize = 14.sp,
                     fontFamily = Bangla.banglaFont(),
@@ -1014,24 +991,6 @@ private fun InheritanceCalculator() {
                             !defaultChecked
                         ) { isCalculate.value = true }
                         .background(color = Color(0xFF4CAF50))
-                        .padding(6.dp)
-                        .align(Alignment.CenterVertically)
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text( text = "রিসেট",
-                    fontSize = 14.sp,
-                    fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFF000000),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .clickable { isReset.value = true }
-                        .background(color = Color(0xFFD6E3D6))
                         .padding(6.dp)
                         .align(Alignment.CenterVertically)
                 )
@@ -1263,7 +1222,7 @@ private fun DocumentRegistration() {
     var isReset = remember { mutableStateOf(false) }
     var isResultClicked = remember { mutableStateOf(false) }
 
-
+    //data input---
     var documentType = remember { mutableStateOf("") }
     var divisionType = remember { mutableStateOf("") }
     var districtType = remember { mutableStateOf("") }
@@ -1273,6 +1232,21 @@ private fun DocumentRegistration() {
     var documentPageCount = remember { mutableStateOf("") }
     var landValueCount = remember { mutableStateOf("") }
     var buildingValueCount = remember { mutableStateOf("") }
+
+    //data from calculation map
+    var regiValue = remember { mutableStateOf("০.০০") }
+    var stampDutyValue = remember { mutableStateOf("০.০০") }
+    var allianceValue = remember { mutableStateOf("০.০০") }
+    var sourceLandTax125 = remember { mutableStateOf("০.০০") }
+    var sourceLandTax126 = remember { mutableStateOf("০.০০") }
+    var sourceBuildingTax125 = remember { mutableStateOf("০.০০") }
+    var pageValue1 = remember { mutableStateOf("০.০০") }
+    var pageValue2 = remember { mutableStateOf("০.০০") }
+    var vatValue = remember { mutableStateOf("০.০০") }
+    var stampValue = remember { mutableStateOf("০.০০") }
+    var eFeeValue = remember { mutableStateOf("০.০০") }
+    var courtFeeValue = remember { mutableStateOf("০.০০") }
+    var totalValue = remember { mutableStateOf("০.০০") }
 
 
     val allType = if (buildingType.value == "হ্যাঁ"){
@@ -1296,6 +1270,7 @@ private fun DocumentRegistration() {
 
         if (isReset.value){
 
+            //input data
             documentType.value = ""
             divisionType.value = ""
             districtType.value = ""
@@ -1306,8 +1281,57 @@ private fun DocumentRegistration() {
             landValueCount.value = ""
             buildingValueCount.value = ""
 
+            //calculation data
+            regiValue.value = "০.০০"
+            stampDutyValue.value = "০.০০"
+            allianceValue.value = "০.০০"
+            sourceLandTax125.value = "০.০০"
+            sourceLandTax126.value = "০.০০"
+            sourceBuildingTax125.value = "০.০০"
+            pageValue1.value = "০.০০"
+            pageValue2.value = "০.০০"
+            vatValue.value = "০.০০"
+            stampValue.value = "০.০০"
+            eFeeValue.value = "০.০০"
+            courtFeeValue.value = "০.০০"
+            totalValue.value = "০.০০"
+
             isResultClicked.value = false
             isReset.value = false
+
+        }
+
+    }
+
+    //total calculation
+
+    LaunchedEffect(isResultClicked.value) {
+
+        if (allType && isResultClicked.value){
+
+            val totalCalculation = documentRegistrationCalculation(
+                document = documentType.value,
+                alliance = allianceType.value,
+                building = buildingType.value,
+                seller = sellerType.value,
+                documentPageCount = documentPageCount.value,
+                landValue = landValueCount.value,
+                buildingValue = buildingValueCount.value
+            )
+
+            regiValue.value = if (totalCalculation["regi"].toString() == "null" || totalCalculation["regi"].toString().isEmpty()) "০.০০" else totalCalculation["regi"].toString()
+            stampDutyValue.value = if (totalCalculation["stampDuty"].toString() == "null" || totalCalculation["stampDuty"].toString().isEmpty()) "০.০০" else totalCalculation["stampDuty"].toString()
+            vatValue.value = if (totalCalculation["vat"].toString() == "null" || totalCalculation["vat"].toString().isEmpty()) "০.০০" else totalCalculation["vat"].toString()
+            allianceValue.value = if (totalCalculation["alliance"].toString() == "null" || totalCalculation["alliance"].toString().isEmpty()) "০.০০" else totalCalculation["alliance"].toString()
+            pageValue1.value = if (totalCalculation["pageFee1"].toString() == "null" || totalCalculation["pageFee1"].toString().isEmpty()) "০.০০" else totalCalculation["pageFee1"].toString()
+            pageValue2.value = if (totalCalculation["pageFee2"].toString() == "null" || totalCalculation["pageFee2"].toString().isEmpty()) "০.০০" else totalCalculation["pageFee2"].toString()
+            sourceLandTax125.value = if (totalCalculation["sourceTax125"].toString() == "null" || totalCalculation["sourceTax125"].toString().isEmpty()) "০.০০" else totalCalculation["sourceTax125"].toString()
+            sourceLandTax126.value = if (totalCalculation["sourceTax126"].toString() == "null" || totalCalculation["sourceTax126"].toString().isEmpty()) "০.০০" else totalCalculation["sourceTax126"].toString()
+            sourceBuildingTax125.value = if (totalCalculation["sourceTaxBuilding125"].toString() == "null" || totalCalculation["sourceTaxBuilding125"].toString().isEmpty()) "০.০০" else totalCalculation["sourceTaxBuilding125"].toString()
+            eFeeValue.value = if (totalCalculation["eFee"].toString() == "null" || totalCalculation["eFee"].toString().isEmpty()) "০.০০" else totalCalculation["eFee"].toString()
+            courtFeeValue.value = if (totalCalculation["courtFee"].toString() == "null" || totalCalculation["courtFee"].toString().isEmpty()) "০.০০" else totalCalculation["courtFee"].toString()
+            stampValue.value = if (totalCalculation["stamp"].toString() == "null" || totalCalculation["stamp"].toString().isEmpty()) "০.০০" else totalCalculation["stamp"].toString()
+            totalValue.value = if (totalCalculation["total"].toString() == "null" || totalCalculation["total"].toString().isEmpty()) "০.০০" else totalCalculation["total"].toString()
 
         }
 
@@ -1757,19 +1781,81 @@ private fun DocumentRegistration() {
 
                 val result = buildString {
 
-                    append("| খাত | টাকা |\n")
-                    append("|----|--------|\n")
-                    append("| রেজিস্ট্রেশন ফি | ০ |\n")
-                    append("| স্ট্যাম্প শুল্ক | ০ |\n")
-                    append("| স্থানীয় সরকার কর | ০ |\n")
-                    append("| উৎস কর | ০ |\n")
-                    append("| ভ্যাট | ০ |\n")
-                    append("| ই-ফি | ০ |\n")
-                    append("| ঢ (এন) ফি (পৃষ্ঠা অনুযায়ী) | ০ |\n")
-                    append("| ঢঢ (এনএন) ফি (পৃষ্ঠা অনুযায়ী) | ০ |\n")
-                    append("| হলফনামার স্ট্যাম্প | ০ |\n")
-                    append("| নোটিশ / কোর্ট ফি | ০ |\n")
-                    append("| **মোট আনুমানিক খরচ** | **০** |\n")
+                    append("| খাত | শতকরা হার | টাকা |\n")
+                    append("|----|----|--------|\n")
+
+                    //==================================
+                    append("| রেজিস্ট্রেশন ফি | ১.৫% | ${regiValue.value} |\n")
+                    append("| স্ট্যাম্প শুল্ক | ১% | ${stampDutyValue.value} |\n")
+                    //==================================
+
+                    if (allianceType.value == "সিটি কর্পোরেশন"){
+
+                        append("| স্থানীয় সরকার কর | ২% | ${allianceValue.value} |\n")
+
+                    }else{
+
+                        append("| স্থানীয় সরকার কর | ৩% | ${allianceValue.value} |\n")
+
+                    }
+
+                    //====================================
+                    append("| উৎস কর ভূমি (ধারা ১২৫) | ২% | ${sourceLandTax125.value} |\n")
+                    //====================================
+
+                    if (sellerType.value == "ডেভেলপার / কোম্পানি"){
+
+                        append("| উৎস কর ভূমি (ধারা ১২৬) | ৫% | ${sourceLandTax126.value} |\n")
+
+                    }else{
+
+                        append("| উৎস কর ভূমি (ধারা ১২৬) | প্রযোজ্য নয় |  |\n")
+
+                    }
+
+                    if (buildingType.value == "হ্যাঁ" && buildingValueCount.value.isNotEmpty()){
+
+                        append("| উৎস কর স্থাপনা (ধারা ১২৫) | ৬% | ${sourceBuildingTax125.value} |\n")
+
+                    }else{
+
+                        append("| উৎস কর স্থাপনা (ধারা ১২৫) | প্রযোজ্য নয় |  |\n")
+
+                    }
+
+
+                    if (sellerType.value != "মূল মালিক"){
+
+                        append("| ভ্যাট | ২% | ${vatValue.value} |\n")
+
+                    }else{
+
+                        append("| ভ্যাট | প্রযোজ্য নয় |  |\n")
+
+                    }
+
+
+                    //====================================
+                    append("| ই-ফি |  | ${eFeeValue.value} |\n")
+                    //====================================
+
+                    if (documentPageCount.value.isNotEmpty()){
+
+                        append("| ঢ (এন) ফি (পৃষ্ঠা অনুযায়ী) | ২৪ টাকা/পৃষ্ঠা | ${pageValue1.value} |\n")
+                        append("| ঢঢ (এনএন) ফি (পৃষ্ঠা অনুযায়ী) | ৩৬ টাকা/পৃষ্ঠা | ${pageValue2.value} |\n")
+
+                    }else{
+
+                        append("| ঢ (এন) ফি (পৃষ্ঠা অনুযায়ী) |  | ${pageValue1.value} |\n")
+                        append("| ঢঢ (এনএন) ফি (পৃষ্ঠা অনুযায়ী) |  | ${pageValue2.value} |\n")
+
+                    }
+
+
+                    //================================
+                    append("| হলফনামার স্ট্যাম্প |  | ${stampValue.value} |\n")
+                    append("| নোটিশ / কোর্ট ফি |  | ${courtFeeValue.value} |\n")
+                    append("| **মোট আনুমানিক খরচ** |  | **${totalValue.value}** |\n")
 
                 }
 
@@ -1914,7 +2000,6 @@ private fun RegistrationSelectorHelper(
     val sellerList = arrayOf(
         "মূল মালিক",
         "ডেভেলপার / কোম্পানি",
-        "ব্যাংক / আর্থিক প্রতিষ্ঠান",
     )
 
 
@@ -2200,8 +2285,6 @@ private fun RegistrationSelectorHelper(
 
 private fun documentRegistrationCalculation(
     document : String,
-    division : String,
-    district : String,
     alliance : String,
     building : String,
     seller : String,
@@ -2211,16 +2294,81 @@ private fun documentRegistrationCalculation(
 ) : Map<String, String>{
 
 
-    val regiFee = 1.1
-    val stampDuty = 5
-    val vat = 2
+    val map = mutableMapOf<String, String>()
 
-    val d_documentPageCount = documentPageCount.toDouble()
-    val d_landValue = landValue.toDouble()
-    val d_buildingValue = buildingValue.toDouble()
+    val regiFee = 0.01
+    val stampDuty = 0.015
+    val allianceCount = if (alliance == "সিটি কর্পোরেশন") 0.02 else 0.03
+    val pageFee1 = 24.00
+    val pageFee2 = 36.00
+    val eFee = 100.00
+    val courtFee = 10.00
+    val stamp = 300.00
+    val vat = if (seller == "মূল মালিক") 0.0 else 0.02
+    val sourceTaxLand126 = if (seller == "ডেভেলপার / কোম্পানি") 0.05 else 0.0
+    val sourceTaxLand125 = 0.02
+    val sourceTaxBuilding125 = if (building == "হ্যাঁ") 0.06 else 0.0
+
+    val remaining = landValue.toDoubleOrNull() ?: 0.0
+    val d_documentRageCount = documentPageCount.toDoubleOrNull() ?: 0.0
+    val d_buildingValue = buildingValue.toDoubleOrNull() ?: 0.0
+
+    val _regi = (remaining * regiFee)
+    map["regi"] = Bangla.banglaNumber(_regi.toString())
 
 
-    val documentMap = mapOf(
+    val _stampDuty = (remaining * stampDuty)
+    map["stampDuty"] = Bangla.banglaNumber(_stampDuty.toString())
+
+    val _vat = (remaining * vat)
+    map["vat"] = Bangla.banglaNumber(_vat.toString())
+
+
+    val _alliance = (remaining * allianceCount)
+    map["alliance"] = Bangla.banglaNumber(_alliance.toString())
+
+
+    val _page1 = (pageFee1 * d_documentRageCount)
+    map["pageFee1"] = Bangla.banglaNumber(_page1.toString())
+
+
+    val _page2 = (pageFee2 * d_documentRageCount)
+    map["pageFee2"] = Bangla.banglaNumber(_page2.toString())
+
+
+    val _tax125 = (remaining * sourceTaxLand125)
+    map["sourceTax125"] = Bangla.banglaNumber(_tax125.toString())
+
+
+    val _tax126 = (remaining * sourceTaxLand126)
+    map["sourceTax126"] = Bangla.banglaNumber(_tax126.toString())
+
+    val _btax125 = (d_buildingValue * sourceTaxBuilding125)
+    map["sourceTaxBuilding125"] = Bangla.banglaNumber(_btax125.toString())
+
+
+    map["eFee"] = Bangla.banglaNumber(eFee.toString())
+
+    map["courtFee"] = Bangla.banglaNumber(courtFee.toString())
+
+    map["stamp"] = Bangla.banglaNumber(stamp.toString())
+
+
+    if (buildingValue.isNotEmpty()){
+
+        val _total = (_regi + _stampDuty + _alliance + _page1 + _page2 + _tax125 + _tax126 + _btax125 + eFee + courtFee + stamp + _vat)
+        map["total"] = Bangla.banglaNumber(_total.toString())
+
+    }else{
+
+        val _total = (_regi + _stampDuty + _alliance + _page1 + _page2 + _tax125 + _tax126 + eFee + courtFee + stamp + _vat)
+        map["total"] = Bangla.banglaNumber(_total.toString())
+
+    }
+
+
+
+/* val documentMap = mapOf(
 
         "বিক্রয় দলিল" to 3.0,
         "দান দলিল" to 1.0,
@@ -2233,15 +2381,8 @@ private fun documentRegistrationCalculation(
         "উইল দলিল" to 0.0,
         "বণ্টন দলিল" to 1.0,
 
-    )
+    )*/
 
-    val allianceMap = mapOf(
-        "সিটি কর্পোরেশন" to 2.0,
-        "পৌরসভা" to 1.5,
-        "ইউনিয়ন" to 1.0
-    )
-
-
-
+   return map
 
 }//fun end
