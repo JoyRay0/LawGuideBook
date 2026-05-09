@@ -70,6 +70,7 @@ import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.InternetChecker
 import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.SanitizationHelper
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.Items
@@ -158,7 +159,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                     searchClick = {
                         if (it.isNotBlank()) {
-                            presenter.searchAndHistoryToServer(it)
+                            presenter.searchAndHistoryToServer(SanitizationHelper.sanitizedSearch(it))
                             reloadHistory++
                         }},
                     historyTitleClick = { presenter.searchAndHistoryToServer(it) },
@@ -274,7 +275,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         searchSuggestionList.clear()
 
-                        if (it.isNotBlank()) presenter.searchSuggestion(it)
+                        if (it.isNotBlank()) presenter.searchSuggestion(SanitizationHelper.sanitizedSearch(it))
 
                     },
                     liveSuggestionList = searchSuggestionList,
@@ -745,6 +746,7 @@ private fun HomeScreen(
     calculationClick: (String) -> Unit = {},
     calculationList: List<Items> = emptyList(),
     lawWebsiteClick : () -> Unit = {},
+    govWebsitesClick : () -> Unit = {},
     status: String = ""
 ) {
 
@@ -844,6 +846,76 @@ private fun HomeScreen(
 
             }//box
             //law website btn
+
+            //important websites-------
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                        .clip(shape = RoundedCornerShape(16.dp))
+                        .clickable { govWebsitesClick() }
+                        //.border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
+                        .background(color = Color(0xFFFFFFFF))
+                        .padding(10.dp)
+
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(3.dp)
+                            .align(Alignment.CenterStart)
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_website),
+                            contentDescription = "Forward",
+                            tint = Color(0xFFB98C8C),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .size(20.dp)
+                                .align(Alignment.CenterVertically)
+
+                        )
+
+                        Spacer(modifier = Modifier.width(15.dp))
+
+                        Text(text = "সরকারি ওয়েবসাইট",
+                            fontSize = 15.sp,
+                            fontFamily = Bangla.banglaFont(),
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Start,
+                            color = Color(0xFF3F3838),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.CenterVertically)
+                        )
+
+                    }//row
+
+                    Icon( painter = painterResource(R.drawable.ic_right),
+                        contentDescription = "Forward",
+                        tint = Color(0xFFC99898),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .padding(3.dp)
+                            .align(Alignment.CenterEnd)
+
+                    )
+
+                }//box
+
+            }//box
+
+            //important websites-------
 
         }//column
 
