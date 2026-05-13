@@ -2,64 +2,32 @@ package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.rk_softwares.lawguidebook.Helper.Bangla
-import com.rk_softwares.lawguidebook.Helper.ComposeHelper
-import com.rk_softwares.lawguidebook.Helper.IntentHelper
-import com.rk_softwares.lawguidebook.Helper.InternetChecker
-import com.rk_softwares.lawguidebook.Helper.InternetStatus
-import com.rk_softwares.lawguidebook.Helper.KeyHelper
-import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import androidx.compose.ui.unit.*
+import com.rk_softwares.lawguidebook.Helper.*
 import com.rk_softwares.lawguidebook.Model.WebsiteData
 import com.rk_softwares.lawguidebook.Presenter.WebsitePresenter
-import com.rk_softwares.lawguidebook.Presenter.LawWebsites
+import com.rk_softwares.lawguidebook.Presenter.Websites
 import com.rk_softwares.lawguidebook.R
-import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.View.theme_main.LightNav
-import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
-import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import com.rk_softwares.lawguidebook.View.theme_main.*
 import kotlinx.coroutines.delay
 
-class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
+class Act_websites : ComponentActivity(), InternetStatus, Websites {
 
     private lateinit var presenter: WebsitePresenter
     private lateinit var internetChecker: InternetChecker
@@ -69,12 +37,16 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
     private val websiteList = mutableStateListOf<WebsiteData>()
     private var serverStatus = mutableStateOf("")
 
+    private var websiteIntent = mutableStateOf("")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         init()
+
+        websiteIntent.value = intent.getStringExtra(KeyHelper.website_IntentKey()) ?: ""
 
         setContent {
 
@@ -86,9 +58,13 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
             LaunchedEffect(isInternet.value) {
 
-                if (isInternet.value){
+                if (isInternet.value && websiteIntent.value == "law_websites"){
 
                     presenter.lawWebsites()
+
+                }else if (isInternet.value && websiteIntent.value == "gov_websites"){
+
+                    presenter.govWebsites()
 
                 }
 
@@ -96,19 +72,31 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
             LawGuideBookTheme {
                 LawWebsitesFullScreen(
-                    backClick = { finish() },
+                    backClick = {
+                        finish()
+                        websiteIntent.value = ""
+                                },
                     internet = isInternet.value,
                     websiteList = websiteList,
                     websiteTitleClick = {
 
                         IntentHelper.dataIntent(this, Act_browser::class.java,
-                            KeyHelper.lawWebsiteLink_IntentKey(), it)
+                            KeyHelper.websiteLink_IntentKey(), it)
 
                     },
                     serverStatus = serverStatus.value
                 )
             }
+
+            BackHandler {
+
+                finish()
+                websiteIntent.value = ""
+
+            }
+
         }
+
     }//on create===============================================
 
     private fun init(){

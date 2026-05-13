@@ -1,6 +1,6 @@
 package com.rk_softwares.lawguidebook.Presenter
 
-import com.rk_softwares.lawguidebook.Model.LawWebsiteModel
+import com.rk_softwares.lawguidebook.Model.WebsiteModel
 import com.rk_softwares.lawguidebook.Model.WebsiteData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,22 +8,22 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-interface LawWebsites{
+interface Websites{
 
     fun websiteList (list: List<WebsiteData>)
     fun serverStatus (status : String)
 
 }
 
-class LawWebsitePresenter(
-    private val view : LawWebsites
+class WebsitePresenter(
+    private val view : Websites
 ) {
 
-    private val model = LawWebsiteModel()
+    private val model = WebsiteModel()
     private val scopeIO = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    fun websitesData(){
+    fun lawWebsites(){
 
         view.serverStatus("websites_pending")
 
@@ -52,6 +52,40 @@ class LawWebsitePresenter(
                 }
 
             })
+
+        }
+
+    }
+
+    fun govWebsites(){
+
+        view.serverStatus("websites_pending")
+
+        scopeIO.launch {
+
+            model.allGovWebsiteLinks(
+                onSuccess = { result ->
+
+                    scopeMain.launch {
+
+                        view.serverStatus("websites_success")
+                        view.websiteList(result)
+
+                    }
+
+                }, onFailed = { isFailed ->
+
+                    if (isFailed){
+
+                        scopeMain.launch {
+
+                            view.serverStatus("websites_failed")
+
+                        }
+
+                    }
+
+                })
 
         }
 
