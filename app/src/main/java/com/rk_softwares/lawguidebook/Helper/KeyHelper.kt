@@ -7,7 +7,8 @@ object KeyHelper {
     fun sendTableName_IntentKey() : String { return "table_name" }
     fun otherApp_privacy_IntentKey() : String { return "other_app&privacy" }
     fun calculationTitle_IntentKey() : String { return "calculation" }
-    fun lawWebsiteLink_IntentKey() : String { return "law_website" }
+    fun websiteLink_IntentKey() : String { return "website_link" }
+    fun website_IntentKey() : String { return "website" }
 
 
 }
