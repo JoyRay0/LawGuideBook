@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,7 +49,7 @@ import com.rk_softwares.lawguidebook.Helper.InternetStatus
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.WebsiteData
-import com.rk_softwares.lawguidebook.Presenter.LawWebsitePresenter
+import com.rk_softwares.lawguidebook.Presenter.WebsitePresenter
 import com.rk_softwares.lawguidebook.Presenter.LawWebsites
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
@@ -62,7 +61,7 @@ import kotlinx.coroutines.delay
 
 class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
-    private lateinit var presenter: LawWebsitePresenter
+    private lateinit var presenter: WebsitePresenter
     private lateinit var internetChecker: InternetChecker
 
     //init------
@@ -74,9 +73,10 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
-            init()
+        init()
+
+        setContent {
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
@@ -88,12 +88,11 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
 
                 if (isInternet.value){
 
-                    presenter.websitesData()
+                    presenter.lawWebsites()
 
                 }
 
             }
-
 
             LawGuideBookTheme {
                 LawWebsitesFullScreen(
@@ -113,9 +112,13 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
     }//on create===============================================
 
     private fun init(){
-        presenter = LawWebsitePresenter(this)
+        presenter = WebsitePresenter(this)
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
         internetChecker.onStart()
     }
 
@@ -130,6 +133,7 @@ class Act_lawwebsites : ComponentActivity(), InternetStatus, LawWebsites {
     }
 
     override fun websiteList(list: List<WebsiteData>) {
+        websiteList.clear()
         websiteList.addAll(list)
     }
 
@@ -167,6 +171,7 @@ private fun LawWebsitesFullScreen(
         }
 
     }
+
     Scaffold(
         topBar = { Toolbar(
             backClick = { backClick() }
@@ -304,16 +309,13 @@ private fun Toolbar(
 @Preview(showBackground = true)
 @Composable
 private fun Item(
-    modifier: Modifier = Modifier,
     title : String = "Title",
     titleClick : () -> Unit = {},
 ) {
 
-    var isBookmarkVisible by remember { mutableStateOf(false) }
-
     Box(
 
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
 
