@@ -21,34 +21,42 @@ class InternetChecker(
     private val context: Context
 ) {
 
-    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+            as ConnectivityManager
+    private var scope: CoroutineScope? = null
+    private var isRegistered = false
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            scope.launch { view.isInternet(true) }
+            scope?.launch { view.isInternet(true) }
         }
 
         override fun onLost(network: Network) {
-            scope.launch { view.isInternet(false) }
+            scope?.launch { view.isInternet(false) }
         }
-
     }
 
-    fun onStart(){
+    fun onStart() {
+        if (isRegistered) return // double register ঠেকাবে
 
+        scope = CoroutineScope(Dispatchers.Main)
         cm.registerDefaultNetworkCallback(callback)
-        scope.launch { view.isInternet(isConnected()) }
-
-
+        isRegistered = true
+        scope?.launch { view.isInternet(isConnected()) }
     }
 
-    fun onStop(){
+    fun onStop() {
+        if (!isRegistered) return // double unregister ঠেকাবে
 
-        cm.unregisterNetworkCallback(callback)
-        scope.cancel()
-
+        try {
+            cm.unregisterNetworkCallback(callback)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } finally {
+            isRegistered = false
+            scope?.cancel()
+            scope = null
+        }
     }
 
     private fun isConnected(): Boolean {
