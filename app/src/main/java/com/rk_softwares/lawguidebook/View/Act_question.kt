@@ -60,9 +60,19 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
     private var serverStatus = mutableStateOf("")
 
+    private var toolbarText = mutableStateOf("")
+
+    private var tableName = mutableStateOf("")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
+        toolbarText.value = intent.getStringExtra(KeyHelper.sendTitle_IntentKey()) ?: ""
+        tableName.value = intent.getStringExtra(KeyHelper.sendTableName_IntentKey()) ?: ""
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -71,21 +81,11 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
                 darkIcons = true
             )
 
-            init()
-
-            internetChecker.onStart()
-
-            var toolbarText by remember { mutableStateOf("") }
-            var tableName by remember { mutableStateOf("") }
-
-            toolbarText = intent.getStringExtra(KeyHelper.sendTitle_IntentKey()) ?: ""
-            tableName = intent.getStringExtra(KeyHelper.sendTableName_IntentKey()) ?: ""
-
             LaunchedEffect(isInternet.value) {
 
                 if (isInternet.value){
 
-                    presenter.questionsFromServer(toolbarText, tableName)
+                    presenter.questionsFromServer(toolbarText.value, tableName.value)
 
                 }
 
@@ -95,10 +95,10 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
 
                 QuestionFullScreen(
                     backClick = {
-                        toolbarText = ""
+                        toolbarText.value = ""
                         finish()
                     },
-                    toolbarTitle = toolbarText,
+                    toolbarTitle = toolbarText.value,
                     questionList = questionsList,
                     questionClick = {
 
@@ -118,7 +118,7 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
             }
 
             BackHandler{
-                toolbarText = ""
+                toolbarText.value = ""
                 finish()
 
             }
@@ -132,6 +132,11 @@ class Act_question : ComponentActivity(), Questions, InternetStatus {//class====
         presenter = QuestionPresenter(this, bookmarkDatabase)
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {

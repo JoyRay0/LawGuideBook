@@ -108,17 +108,16 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
-            init()
+        init()
+
+        setContent {
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            internetChecker.onStart()
 
             var isSearchScreenList by remember { mutableStateOf(true) }
             var reloadHistory by remember { mutableIntStateOf(0) }
@@ -248,7 +247,9 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     categoryRetryClick = {
                         presenter.categoryItemFromServer()
                     },
-                    lawWebsiteClick = { IntentHelper.normalIntent(this, Act_lawwebsites::class.java) },
+                    lawWebsiteClick = {
+                        IntentHelper.dataIntent(this, Act_websites::class.java, KeyHelper.website_IntentKey(), "law_websites")
+                    },
                     calculationList = calculationList,
                     calculationClick = {
 
@@ -290,6 +291,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         searchSuggestionList.clear()
 
+                    },
+                    govWebsitesClick = {
+
+                        IntentHelper.dataIntent(this, Act_websites::class.java, KeyHelper.website_IntentKey(), "gov_websites")
+
                     }
 
                 )
@@ -309,6 +315,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {
@@ -401,7 +412,8 @@ private fun HomeFullScreen(
     updateClick: () -> Unit = {},
     liveSearchTitleChar: (String) -> Unit = {},
     liveSuggestionList: List<Items> = emptyList(),
-    suggestionTitleClick: (String) -> Unit = {}
+    suggestionTitleClick: (String) -> Unit = {},
+    govWebsitesClick: () -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -465,7 +477,8 @@ private fun HomeFullScreen(
                         calculationClick = { calculationClick(it) },
                         calculationList = calculationList,
                         lawWebsiteClick = { lawWebsiteClick() },
-                        status = serverStatus
+                        status = serverStatus,
+                        govWebsitesClick = { govWebsitesClick() }
                         )
 
                 1 ->
@@ -777,145 +790,91 @@ private fun HomeScreen(
 
             Spacer(modifier = Modifier.height(7.dp))
 
-            //law website btn
+            //websites
 
-            Box(
+            Text("ওয়েবসাইট",
+                fontSize = 15.sp,
+                fontFamily = Bangla.banglaFont(),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(start = 9.dp)
+                    .align(Alignment.Start)
+            )
+
+            Row(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(5.dp)
 
             ) {
 
-                Box(
+                val title = arrayOf(
+                    "আইনি",
+                    "সরকারি"
+                )
 
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
-                        .clip(shape = RoundedCornerShape(16.dp))
-                        .clickable { lawWebsiteClick() }
-                        //.border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
-                        .background(color = Color(0xFFFFFFFF))
-                        .padding(10.dp)
+                val icon = arrayOf(
+                    R.drawable.ic_website,
+                    R.drawable.ic_link
+                )
 
-                ) {
+                title.forEachIndexed { index, text ->
 
-                    Row(
+                    Row (
+
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .padding(3.dp)
-                            .align(Alignment.CenterStart)
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(5.dp)
+
                     ) {
 
-                        Icon( painter = painterResource(R.drawable.ic_website),
-                            contentDescription = "Forward",
-                            tint = Color(0xFFB98C8C),
+                        Box (
+
                             modifier = Modifier
-                                .wrapContentWidth()
-                                .size(20.dp)
-                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth()
+                                .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
+                                .clip(shape = RoundedCornerShape(14.dp))
+                                .clickable{ if (index == 0) lawWebsiteClick() else govWebsitesClick() }
+                                .background(color = Color(0xFFFFFFFF))
+                                .padding(12.dp)
 
-                        )
+                        ) {
 
-                        Spacer(modifier = Modifier.width(15.dp))
+                            Icon( painter = painterResource(icon[index]),
+                                contentDescription = "Forward",
+                                tint = Color(0xFFB98C8C),
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .size(if (index == 0) 20.dp else 17.dp)
+                                    .align(Alignment.CenterStart)
 
-                        Text(text = "আইনি ওয়েবসাইট",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = Color(0xFF3F3838),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .align(Alignment.CenterVertically)
-                        )
+                            )
 
-                    }//row
+                            Spacer(modifier = Modifier.width(9.dp))
 
-                    Icon( painter = painterResource(R.drawable.ic_right),
-                        contentDescription = "Forward",
-                        tint = Color(0xFFC99898),
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .padding(3.dp)
-                            .align(Alignment.CenterEnd)
+                            Text(text = text,
+                                fontSize = 15.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.Normal,
+                                textAlign = TextAlign.Start,
+                                color = Color(0xFF3F3838),
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .align(Alignment.Center)
+                            )
 
-                    )
+                        }//row
 
-                }//box
+                    }//box
 
-            }//box
-            //law website btn
+                }//loop
 
-            //important websites-------
-            Box(
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-
-            ) {
-
-                Box(
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
-                        .clip(shape = RoundedCornerShape(16.dp))
-                        .clickable { govWebsitesClick() }
-                        //.border(width = 1.dp, color = Color(0xFFF1B2B2), shape = RoundedCornerShape(12.dp))
-                        .background(color = Color(0xFFFFFFFF))
-                        .padding(10.dp)
-
-                ) {
-
-                    Row(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .padding(3.dp)
-                            .align(Alignment.CenterStart)
-                    ) {
-
-                        Icon( painter = painterResource(R.drawable.ic_website),
-                            contentDescription = "Forward",
-                            tint = Color(0xFFB98C8C),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .size(20.dp)
-                                .align(Alignment.CenterVertically)
-
-                        )
-
-                        Spacer(modifier = Modifier.width(15.dp))
-
-                        Text(text = "সরকারি ওয়েবসাইট",
-                            fontSize = 15.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = Color(0xFF3F3838),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .align(Alignment.CenterVertically)
-                        )
-
-                    }//row
-
-                    Icon( painter = painterResource(R.drawable.ic_right),
-                        contentDescription = "Forward",
-                        tint = Color(0xFFC99898),
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .padding(3.dp)
-                            .align(Alignment.CenterEnd)
-
-                    )
-
-                }//box
-
-            }//box
-
-            //important websites-------
+            }//row
 
         }//column
 

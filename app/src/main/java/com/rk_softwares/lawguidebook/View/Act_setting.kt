@@ -69,9 +69,10 @@ class Act_setting : ComponentActivity(), Home {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
-            init()
+        init()
+
+        setContent {
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,

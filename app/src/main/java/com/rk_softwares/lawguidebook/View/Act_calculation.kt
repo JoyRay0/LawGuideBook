@@ -58,6 +58,11 @@ class Act_calculation : ComponentActivity(), InternetStatus {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
+        toolbarText.value = intent.getStringExtra(KeyHelper.calculationTitle_IntentKey()) ?: ""
+
         setContent {
             
             ThemeHelper.SystemUi(
@@ -65,15 +70,6 @@ class Act_calculation : ComponentActivity(), InternetStatus {
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            init()
-
-            if (savedInstanceState == null){
-
-                toolbarText.value = intent.getStringExtra(KeyHelper.calculationTitle_IntentKey()) ?: ""
-
-            }
-
 
             LawGuideBookTheme {
 
@@ -101,12 +97,15 @@ class Act_calculation : ComponentActivity(), InternetStatus {
 
         internetChecker = InternetChecker(this, this)
 
-        internetChecker.onStart()
-
     }
 
     override fun isInternet(internet: Boolean) {
        isInternet.value = internet
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {

@@ -66,17 +66,18 @@ class Act_browser : ComponentActivity(), InternetStatus {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
-            init()
+        init()
+
+        website.value = intent.getStringExtra(KeyHelper.websiteLink_IntentKey()) ?: ""
+
+        setContent {
 
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            website.value = intent.getStringExtra(KeyHelper.lawWebsiteLink_IntentKey()) ?: ""
 
             LawGuideBookTheme {
 
@@ -104,6 +105,10 @@ class Act_browser : ComponentActivity(), InternetStatus {
 
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
         internetChecker.onStart()
     }
 

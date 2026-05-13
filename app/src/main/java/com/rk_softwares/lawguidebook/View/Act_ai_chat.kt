@@ -79,6 +79,9 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -86,10 +89,6 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            init()
-
-            internetChecker.onStart()
 
             var messageId by remember { mutableIntStateOf(0) }
             var userMessage by remember { mutableStateOf("") }
@@ -168,6 +167,11 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
         chatPresenter = ChatPresenter(this, chatDatabase, cacheHelper)
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {

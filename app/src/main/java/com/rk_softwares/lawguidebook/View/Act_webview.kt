@@ -51,9 +51,16 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
 
     private var isInternet = mutableStateOf(false)
 
+    private var intentText = mutableStateOf("")
+
+    private var websiteLink = mutableStateOf("")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -62,22 +69,15 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
                 darkIcons = true
             )
 
-            init()
+            intentText.value = intent.getStringExtra(KeyHelper.otherApp_privacy_IntentKey()) ?: ""
 
-            var intentText by remember { mutableStateOf("") }
-            var websiteLink by remember { mutableStateOf("") }
+            if (intentText.value == "other_apps"){
 
-            internetChecker.onStart()
-
-            intentText = intent.getStringExtra(KeyHelper.otherApp_privacy_IntentKey()) ?: ""
-
-            if (intentText == "other_apps"){
-
-                websiteLink = "https://sites.google.com/view/rk-softwares-official-site"
+                websiteLink.value = "https://sites.google.com/view/rk-softwares-official-site"
 
             }else{
 
-                websiteLink = "https://sites.google.com/view/lawguidebookapp/home"
+                websiteLink.value = "https://sites.google.com/view/lawguidebookapp/home"
 
             }
 
@@ -87,10 +87,10 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
                 WebViewFullScreen(
                     backClick = {
                         finish()
-                        intentText = ""
-                        websiteLink = ""
+                        intentText.value = ""
+                        websiteLink.value = ""
                     },
-                    websiteLink = websiteLink,
+                    websiteLink = websiteLink.value,
                     internet = isInternet.value
                 )
 
@@ -98,8 +98,8 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
 
             BackHandler{
                 finish()
-                intentText = ""
-                websiteLink = ""
+                intentText.value = ""
+                websiteLink.value = ""
             }
         }
     }//on create=================================
@@ -108,6 +108,11 @@ class Act_webview : ComponentActivity(), InternetStatus {//class================
 
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {

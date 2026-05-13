@@ -64,6 +64,9 @@ class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationIte
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -72,10 +75,6 @@ class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationIte
                 darkIcons = true
             )
 
-            init()
-            internetChecker.onStart()
-
-            
             LaunchedEffect(isInternet.value) {
 
                 if (isInternet.value){
@@ -112,6 +111,11 @@ class Act_calculation_item : ComponentActivity(), InternetStatus, CalculationIte
         internetChecker = InternetChecker(this, this)
         presenter = CalculationItemPresenter(this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {

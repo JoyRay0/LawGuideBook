@@ -77,6 +77,9 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -84,8 +87,6 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
                 navColor = LightNav,
                 darkIcons = true
             )
-
-            init()
 
             var toolBarText by remember { mutableStateOf("") }
 
@@ -100,8 +101,6 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
                 if (toolBarText.isNotEmpty())  presenter.answerFromServer(toolBarText)
 
             }
-
-            internetChecker.onStart()
 
             LawGuideBookTheme {
                 AnswerFullScreen(
@@ -131,6 +130,11 @@ class Act_answer : ComponentActivity(), Answer, InternetStatus {//class=========
         presenter = AnswerPresenter(this)
         internetChecker = InternetChecker(this, this)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        internetChecker.onStart()
     }
 
     override fun onDestroy() {
