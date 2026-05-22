@@ -10,11 +10,10 @@ import com.rk_softwares.lawguidebook.Model.ChatMessage
 class ChatDatabase(
     val context: Context
 ) : SQLiteOpenHelper(context, "chat.db", null, 6)  {
-
-    private val TABLE_NAME = "chat_history"
     private lateinit var db: SQLiteDatabase
 
-    companion object{
+    private companion object{
+        const val TABLE_NAME = "chat_history"
         const val COL_ID = "id"
         const val COL_MESSAGE = "message"
         const val COL_SENDER = "sender_type"
@@ -131,7 +130,15 @@ class ChatDatabase(
 
         val db = dbOpen(true)
 
-        db.delete(TABLE_NAME, null, null)
+        try {
+
+            db.delete(TABLE_NAME, null, null)
+
+        }catch (e : Exception){
+
+            e.printStackTrace()
+
+        }
 
     }
 

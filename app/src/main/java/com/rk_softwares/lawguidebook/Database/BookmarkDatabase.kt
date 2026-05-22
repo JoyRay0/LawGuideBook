@@ -9,13 +9,19 @@ class BookmarkDatabase
     (val context : Context)
     : SQLiteOpenHelper(context, "bookmark.db", null, 2)
 {
-
-    private val TABLE_NAME = "bookmark"
     private lateinit var db : SQLiteDatabase
+
+    private companion object{
+
+        const val TABLE_NAME = "bookmark"
+        const val QUESTION = "question"
+
+
+    }
 
     override fun onCreate(db: SQLiteDatabase?) {
 
-        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT)"
+        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, $QUESTION TEXT)"
 
         db?.execSQL(create_sql)
 
@@ -42,7 +48,7 @@ class BookmarkDatabase
 
             val cv = ContentValues()
 
-            cv.put("question", question)
+            cv.put(QUESTION, question)
 
             db.insert(TABLE_NAME, null, cv)
 
@@ -67,7 +73,7 @@ class BookmarkDatabase
 
             while (cursor.moveToNext()){
 
-                val question = cursor.getString(cursor.getColumnIndexOrThrow("question"))
+                val question = cursor.getString(cursor.getColumnIndexOrThrow(QUESTION))
 
                 list.add(Items(question = question))
 
@@ -90,7 +96,7 @@ class BookmarkDatabase
 
         return try {
 
-            db.delete(TABLE_NAME, "question = ?", arrayOf(question)) > 0
+            db.delete(TABLE_NAME, "$QUESTION = ?", arrayOf(question)) > 0
 
 
         }catch (e : Exception){
@@ -117,7 +123,7 @@ class BookmarkDatabase
 
         try {
 
-            cursor = db.rawQuery("SELECT question FROM $TABLE_NAME WHERE question = ?", arrayOf(question))
+            cursor = db.rawQuery("SELECT $QUESTION FROM $TABLE_NAME WHERE $QUESTION = ?", arrayOf(question))
 
             if (cursor.moveToFirst()){
 
