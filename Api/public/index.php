@@ -2,6 +2,7 @@
 require __DIR__ . '/Api/vendor/autoload.php';
 
 
+use App\Controller\GovtWebsitesController;
 use App\Controller\InitController;
 use App\Middleware\HeaderMiddleware;
 use Dotenv\Dotenv;
@@ -54,13 +55,15 @@ $app->get('/calculation_limit', CalculationController::class .':calculation_limt
 
 $app->get('/calculation_all', CalculationController::class .':calculation_all_item');
 
-$app->get('/websites', LawWebsitiesController::class .':websites');
+$app->get('/law_websites', LawWebsitiesController::class .':law_website');
 
 $app->get('/all_category', CategoryController::class .':all_category');
 
 $app->get('/ads', AdController::class .':ads');
 
 $app->get('/app_update', AppFeatureController::class .':app_update');
+
+$app->get('/govt_websites', GovtWebsitesController::class .':govt_website');
 
 
 //POST Request

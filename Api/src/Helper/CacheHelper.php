@@ -9,7 +9,6 @@ class CacheHelper{
 
     private static $cache;
 
-    
     private static function init(){
 
         if(!self::$cache){

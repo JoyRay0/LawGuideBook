@@ -8,7 +8,7 @@ use App\Helper\ErrorHelper;
 
 class LawWebsitiesController{
 
-    public function websites(Request $request, Response $response){
+    public function law_website(Request $request, Response $response){
 
         ErrorHelper::register();
 
