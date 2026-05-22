@@ -113,20 +113,18 @@ class HomePresenter(
 
             val deleted = homeModel.dbBookmarkDeleteOne(title) ?: false
 
-            if (deleted){
+            withContext(Dispatchers.Main){
 
-                withContext(Dispatchers.Main){
+                if (deleted){
 
                     view.message("ডিলিট হয়েছে")
                     view.onBookmarkList(homeModel.dbGetAllBookmark())
 
+                }else{
+                    view.message("ডিলিট হয়নি")
                 }
 
-            }else{
-                view.message("ডিলিট হয়নি")
             }
-
-
 
         }
 

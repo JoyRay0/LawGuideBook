@@ -1,6 +1,7 @@
 package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -25,6 +27,7 @@ import com.rk_softwares.lawguidebook.Presenter.WebsitePresenter
 import com.rk_softwares.lawguidebook.Presenter.Websites
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
 class Act_websites : ComponentActivity(), InternetStatus, Websites {
@@ -40,6 +43,7 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
     private var websiteIntent = mutableStateOf("")
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,6 +54,8 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
 
         setContent {
 
+            var isApiDataLoaded = remember { mutableStateOf(false) }
+
             ThemeHelper.SystemUi(
                 statusBarColor = LightStatusBar,
                 navColor = LightNav,
@@ -58,11 +64,16 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
 
             LaunchedEffect(isInternet.value) {
 
-                if (isInternet.value && websiteIntent.value == "law_websites"){
+                if (!isInternet.value) return@LaunchedEffect
+                if (isApiDataLoaded.value) return@LaunchedEffect
+
+                isApiDataLoaded.value = true
+
+                if (websiteIntent.value == "law_websites"){
 
                     presenter.lawWebsites()
 
-                }else if (isInternet.value && websiteIntent.value == "gov_websites"){
+                }else {
 
                     presenter.govWebsites()
 
@@ -75,6 +86,7 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
                     backClick = {
                         finish()
                         websiteIntent.value = ""
+                        websiteList.clear()
                                 },
                     internet = isInternet.value,
                     websiteList = websiteList,
@@ -92,6 +104,7 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
 
                 finish()
                 websiteIntent.value = ""
+                websiteList.clear()
 
             }
 
@@ -123,6 +136,8 @@ class Act_websites : ComponentActivity(), InternetStatus, Websites {
     override fun websiteList(list: List<WebsiteData>) {
         websiteList.clear()
         websiteList.addAll(list)
+
+        ShortMessageHelper.toast(this, list.size.toString())
     }
 
     override fun serverStatus(status: String) {

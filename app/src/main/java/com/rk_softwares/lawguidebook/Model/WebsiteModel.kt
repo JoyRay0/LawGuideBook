@@ -1,16 +1,9 @@
 package com.rk_softwares.lawguidebook.Model
 
 import android.util.Log
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rk_softwares.lawguidebook.Helper.ApiLinks
 import com.rk_softwares.lawguidebook.Helper.OkHttpWrapper
-import com.rk_softwares.lawguidebook.Helper.SecurityKey
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import okio.IOException
-import java.lang.Exception
 
 data class Websites(
 
@@ -33,7 +26,7 @@ data class WebsiteData(
     @SerializedName("title")
     val title : String = "",
 
-    @SerializedName("website_link")
+    @SerializedName("website_link", alternate = (arrayOf("url")))
     val websiteLink : String = "",
 
     @SerializedName("device_id")
@@ -41,15 +34,38 @@ data class WebsiteData(
 
 )
 
-class LawWebsiteModel {
+class WebsiteModel {
 
-    fun allWebsiteLinks(
+    fun allLawWebsiteLinks(
         onSuccess : (List<WebsiteData>) -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
         OkHttpWrapper()
-            .url(ApiLinks.getWebsitesLink())
+            .url(ApiLinks.getLawWebsitesLink())
+            .execute(Websites::class.java, onSuccess = { result ->
+
+                if (result.status == "Success"){
+
+                    onSuccess(result.data)
+
+                }else{
+
+                    onFailed(true)
+
+                }
+
+            }, onFailed = {onFailed(it)}, onError = {})
+
+    }//fun end
+
+    fun allGovWebsiteLinks(
+        onSuccess : (List<WebsiteData>) -> Unit = {},
+        onFailed : (Boolean) -> Unit = {}
+    ){
+
+        OkHttpWrapper()
+            .url(ApiLinks.getGovtWebsites())
             .execute(Websites::class.java, onSuccess = { result ->
 
                 if (result.status == "Success"){

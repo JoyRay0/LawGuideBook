@@ -360,6 +360,10 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         searchSuggestionList.addAll(list)
     }
 
+    override fun notificationList(list: List<Items>) {
+        TODO("Not yet implemented")
+    }
+
     override fun serverStatus(message: String) {
         serverStatus.value = message
 
@@ -530,11 +534,10 @@ private fun HomeFullScreen(
 
 }//fun end
 
-
 @Preview(showBackground = true)
 @Composable
 private fun Toolbar(
-
+    notificationClick : () -> Unit = {},
     settingClick: () -> Unit = {},
     updateStatus: Boolean = false,
     updateClick : () -> Unit = {}
@@ -542,6 +545,7 @@ private fun Toolbar(
 ) {
 
     var isUpdate = remember(updateStatus) { mutableStateOf(updateStatus) }
+    var isNotificationClick = remember { mutableStateOf(false) }
 
     Box(
 
@@ -606,12 +610,69 @@ private fun Toolbar(
 
                 }
 
+                //==================
+                //notification
+                //==================
+
+                Box(
+
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .clip(shape = CircleShape)
+                        .clickable{
+                            notificationClick()
+                            isNotificationClick.value = true
+                        }
+                        .align(Alignment.CenterVertically)
+                        .size(32.dp)
+
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .background(color = Color.Transparent)
+                            .align(Alignment.Center)
+
+                    ) {
+
+                        Icon( painter = painterResource(R.drawable.ic_notifications),
+                            contentDescription = "Setting",
+                            tint = LightToolBarIcon,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .size(22.dp)
+                                .align(Alignment.Center)
+
+                        )
+
+                        if (!isNotificationClick.value){
+
+                            Box(
+                                modifier = Modifier
+                                    .width(8.dp)
+                                    .height(8.dp)
+                                    .clip(shape = CircleShape)
+                                    .background(color = Color(0xFFF44336))
+                                    .align(Alignment.TopEnd)
+
+                            )
+
+                        }
+
+                    }//box
+
+                }//box
+
+
+
+                Spacer(modifier = Modifier.width(5.dp))
+
                 IconButton(
                     onClick = { settingClick() },
                     modifier = Modifier
                         .wrapContentWidth()
                         .clip(shape = CircleShape)
-                        //.background(color = Color(0xFF00BCD4))
                         .size(32.dp)
                         .align(Alignment.CenterVertically)
 

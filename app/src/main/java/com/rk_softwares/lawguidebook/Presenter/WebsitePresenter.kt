@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Presenter
 
+import android.util.Log
 import com.rk_softwares.lawguidebook.Model.WebsiteModel
 import com.rk_softwares.lawguidebook.Model.WebsiteData
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +30,7 @@ class WebsitePresenter(
 
         scopeIO.launch {
 
-            model.allWebsiteLinks(
+            model.allLawWebsiteLinks(
                 onSuccess = { result ->
 
                     scopeMain.launch {

@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -92,15 +93,17 @@ private fun SplashFullScreen() {
 
             Box(
 
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color(0xFFFFFFFF))
 
             ) {
 
-                Image( painter = painterResource(R.drawable.img_law),
+                Image( painter = painterResource(R.drawable.law),
                     contentDescription = "",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(140.dp)
+                        .size(150.dp)
                         .align(Alignment.Center)
 
                 )
