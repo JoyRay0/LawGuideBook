@@ -33,14 +33,25 @@ data class Home(
 )
 
 data class Items(
-    val id : Int = 0,
+    val id : String = "",
+
     val image : String = "",
+
     val title : String = "",
+
     val question : String = "",
+
     val deviceId : String = "",
+
     val search : String = "",
+
     @SerializedName("t_name")
-    val tableName : String = ""
+    val tableName : String = "",
+
+    val description : String = "",
+
+    @SerializedName("is_new")
+    val isNew : Boolean = false
 )
 
 class HomeModel(
