@@ -12,14 +12,14 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_main1"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_main1_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LawGuideBook"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".View.Act_gov_websites"
+            android:name=".View.Act_notification"
             android:exported="false"
             android:label="@string/title_activity_act_gov_websites"
             android:theme="@style/Theme.LawGuideBook" />
