@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -20,10 +20,10 @@ import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.rk_softwares.lawguidebook.Database.NotificationDatabase
 import com.rk_softwares.lawguidebook.Helper.*
 import com.rk_softwares.lawguidebook.Model.*
 import com.rk_softwares.lawguidebook.Presenter.*
-import com.rk_softwares.lawguidebook.Presenter.Home
 import com.rk_softwares.lawguidebook.Presenter.Notification
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.*
@@ -35,6 +35,8 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     private lateinit var internetChecker : InternetChecker
 
     private lateinit var presenter: NotificationPresenter
+
+    private lateinit var notificationDatabase: NotificationDatabase
 
 
     private var isInternet = mutableStateOf(false)
@@ -48,6 +50,8 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
 
         init()
 
+        //insert()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -56,12 +60,20 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
                 darkIcons = true
             )
 
+            presenter.getAllNotification()
+
             LawGuideBookTheme {
 
                 NotificationFullScreen(
                     backClick = { finish() },
                     internet = isInternet.value,
-                    notificationList = notificationList
+                    notificationList = notificationList,
+                    notificationTitleClick = {
+
+                        presenter.updateNotificationStatus(it)
+
+
+                    }
                 )
 
             }
@@ -71,7 +83,8 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     private fun init() {
 
         internetChecker = InternetChecker(this, this)
-        presenter = NotificationPresenter(this)
+        notificationDatabase = NotificationDatabase(this)
+        presenter = NotificationPresenter(this, notificationDatabase)
 
     }
 
@@ -83,6 +96,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     override fun onDestroy() {
         super.onDestroy()
         internetChecker.onStop()
+        presenter.onDestroy()
     }
 
     override fun isInternet(internet: Boolean) {
@@ -94,9 +108,81 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         notificationList.addAll(list)
     }
 
-    override fun notificationStatus(status: String) {
+    override fun message(status: String) {
 
         ShortMessageHelper.toast(this, status)
+
+    }
+
+    override fun hasUnseenNotification(isSeen: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    fun insert(){
+
+        presenter.deleteAllNotification()
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "1",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "2",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "3",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "4",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "5",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+
+        presenter.insertNotification(
+            data = NotificationData(
+                id = "6",
+                title = "নতুন নোটিফিকেশন",
+                description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
+                        "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
+                isSeen = false
+            )
+        )
+        
+
 
     }
 
@@ -113,6 +199,7 @@ private fun NotificationFullScreen(
 
     var isInternetDialogVisible by remember { mutableStateOf(false) }
     var lazyState = rememberLazyListState()
+    var isMenuVisible = remember { mutableStateOf(false) }
 
     LaunchedEffect(internet) {
 
@@ -133,7 +220,8 @@ private fun NotificationFullScreen(
     Scaffold(
 
         topBar = { Toolbar(
-            backClick = { backClick() }
+            backClick = { backClick() },
+            menuClick = { isMenuVisible.value = true }
         ) },
 
         modifier = Modifier
@@ -147,6 +235,14 @@ private fun NotificationFullScreen(
 
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ){
+
+                    if (isMenuVisible.value) isMenuVisible.value = false
+
+                }
                 .padding(innerPadding)
 
         ) {
@@ -154,6 +250,42 @@ private fun NotificationFullScreen(
             //========================================
             //Notification list
             //=========================================
+
+            if (notificationList.isEmpty()){
+
+                Column(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+
+                ) {
+
+                    Image( painter = painterResource(R.drawable.img_notification),
+                        contentDescription = "Notification",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(90.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(text = "কোন নোটিফিকেশন নেই",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .align(Alignment.CenterHorizontally)
+                        )
+
+                }
+
+
+            }
 
             LazyColumn(
                 state = lazyState,
@@ -164,16 +296,29 @@ private fun NotificationFullScreen(
 
                 items(
                     items = notificationList,
-                    key = { it.id }
+                    //key = { it.id }
                 ){it ->
 
                     Item(
                         title = it.title,
                         description = it.description,
-                        titleClick = { notificationTitleClick(it.id) }
+                        titleClick = { notificationTitleClick(it.id) },
+                        backgroundColor = if (!it.isSeen) Color(0xFFFDECFF) else Color.Transparent
                     )
 
                 }
+
+            }
+
+            //Menu item
+
+            if (!isMenuVisible.value){
+
+                ToolbarMenu(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopEnd)
+                )
 
             }
 
@@ -199,6 +344,7 @@ private fun NotificationFullScreen(
 @Composable
 private fun Toolbar(
     backClick : () -> Unit = {},
+    menuClick : () -> Unit = {}
 ) {
 
     Box(
@@ -212,8 +358,9 @@ private fun Toolbar(
         Row(
 
             modifier = Modifier
-                .fillMaxWidth()
+                .wrapContentWidth()
                 .padding(3.dp)
+                .align(Alignment.CenterStart)
 
         ) {
 
@@ -239,6 +386,39 @@ private fun Toolbar(
 
         }//row
 
+        Row(
+
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(3.dp)
+                .align(Alignment.CenterEnd)
+
+        ) {
+
+            IconButton(
+                onClick = { menuClick() },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = CircleShape)
+                    .size(35.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
+
+                Icon( painter = painterResource(R.drawable.ic_vertical_three_dot),
+                    contentDescription = "Back",
+                    tint = LightToolBarIcon,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+
+                )
+
+            }
+
+            Spacer(modifier = Modifier.width(3.dp))
+
+        }//row
+
     }//box
 
 }//fun end
@@ -250,14 +430,22 @@ private fun Item(
     title : String = "Title",
     description : String = "Description",
     titleClick : () -> Unit = {},
+    backgroundColor : Color = Color.Transparent
 ) {
 
     var isDescriptionVisible = remember { mutableStateOf(false) }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            false
+        }
+    )
 
     val rotation by animateFloatAsState(
         targetValue = if (isDescriptionVisible.value) 270f else 90f,
         label = ""
     )
+
 
     Column(
 
@@ -267,80 +455,213 @@ private fun Item(
 
     ) {
 
-        Box(
+        SwipeToDismissBox(
+            state = dismissState,
+            enableDismissFromStartToEnd = false,
+            enableDismissFromEndToStart = true,
+            backgroundContent = {
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(12.dp))
-                .clickable {
-                    titleClick()
-                    isDescriptionVisible.value = !isDescriptionVisible.value
-                }
+                Box(
 
-                //.background(color = Color(0xFFFFFFFF))
-                .border(width = 1.dp, color = Color(0xFFFAC8C8), shape = RoundedCornerShape(12.dp))
-                .padding(7.dp)
-                .align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(shape = RoundedCornerShape(12.dp))
+                        .background(color = Color.Red)
+                        .padding(10.dp),
+                    contentAlignment = Alignment.CenterEnd
+
+                ) {
+
+                    Icon( painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(20.dp)
+                            .align(Alignment.CenterEnd)
+
+                    )
+
+                }//box
+
+            }
 
         ) {
-
-            Text(text = title,
-                fontSize = 15.sp,
-                fontFamily = Bangla.banglaFont(),
-                fontWeight = FontWeight.Normal,
-                textAlign = TextAlign.Start,
-                color = Color(0xFF000000),
-                modifier = Modifier
-                    .fillMaxWidth(0.93f)
-                    .padding(3.dp)
-                    .align(Alignment.CenterStart)
-            )
-
-            Icon( painter = painterResource(R.drawable.ic_right),
-                contentDescription = "Right",
-                tint = Color.Gray,
-                modifier = Modifier
-                    .rotate(rotation)
-                    .wrapContentWidth()
-                    .align(Alignment.CenterEnd)
-
-            )
-
-        }//box
-
-        if (isDescriptionVisible.value){
-
-
-            Spacer(modifier = Modifier.height(10.dp))
 
             Box(
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(10.dp))
-                    .border(width = 1.dp, color = Color(0xFFFFD7D7),shape = RoundedCornerShape(10.dp))
-                    .padding(5.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable {
+                        titleClick()
+                        isDescriptionVisible.value = !isDescriptionVisible.value
+                    }
+
+                    .background(color = backgroundColor)
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFFAC8C8),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(7.dp)
+
+
+                    .align(Alignment.CenterVertically)
 
             ) {
 
-                Text(text = description,
+                Text(text = title,
                     fontSize = 15.sp,
                     fontFamily = Bangla.banglaFont(),
-                    fontWeight = FontWeight.Normal,
-                    color = Color(0xFF000000),
-                    textAlign = TextAlign.Justify,
+                    fontWeight = FontWeight.W600,
+                    textAlign = TextAlign.Start,
+                    color = Color(0xFF524747),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
+                        .fillMaxWidth(0.93f)
+                        .padding(3.dp)
+                        .align(Alignment.CenterStart)
+                )
+
+                Icon( painter = painterResource(R.drawable.ic_right),
+                    contentDescription = "Right",
+                    tint = Color.Gray,
+                    modifier = Modifier
+                        .rotate(rotation)
+                        .wrapContentWidth()
+                        .align(Alignment.CenterEnd)
 
                 )
+
+            }//box
+
+        }//swipe to dismiss box
+
+
+        if (isDescriptionVisible.value){
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Box(
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp)
+
+            ) {
+
+                Box(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFFFD7D7),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .padding(6.dp)
+                        .align(Alignment.Center)
+
+                ) {
+
+                    Text(text = description,
+                        fontSize = 14.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Justify,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(3.dp)
+                            .align(Alignment.Center)
+
+                    )
+
+                }//box
 
             }//box
 
         }
 
     }//column
+
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+private fun ToolbarMenu(modifier: Modifier = Modifier) {
+
+    Box(
+
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(5.dp),
+        contentAlignment = Alignment.TopEnd
+
+    ) {
+
+        Column(
+
+            modifier = Modifier
+                .wrapContentWidth()
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(10.dp))
+                .clip(shape = RoundedCornerShape(10.dp))
+                .background(color = Color.White)
+                .padding(3.dp)
+                .align(Alignment.CenterEnd)
+
+        ) {
+
+            //=====================================
+            // Delete All
+            //=====================================
+            Row(
+
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clickable{}
+                    .padding(5.dp)
+
+            ) {
+
+                Spacer(modifier = Modifier.width(3.dp))
+                
+                Icon(painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = "",
+                    tint = Color(0xFF524747),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(20.dp)
+                        .padding(3.dp)
+                        .align(Alignment.CenterVertically)
+
+                )
+
+                Spacer(modifier = Modifier.width(7.dp))
+
+                Text( text = "সব ডিলিট",
+                    fontSize = 14.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF000000),
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(3.dp)
+                        .align(Alignment.CenterVertically)
+
+                )
+
+                Spacer(modifier = Modifier.width(3.dp))
+
+            }//row
+
+        }//column
+
+    }//box
 
 }//fun end
 

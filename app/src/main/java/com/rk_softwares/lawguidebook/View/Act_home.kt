@@ -296,6 +296,11 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
                         IntentHelper.dataIntent(this, Act_websites::class.java, KeyHelper.website_IntentKey(), "gov_websites")
 
+                    },
+                    notificationClick = {
+
+                        IntentHelper.normalIntent(this, Act_notification::class.java)
+
                     }
 
                 )
@@ -360,10 +365,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         searchSuggestionList.addAll(list)
     }
 
-    override fun notificationList(list: List<Items>) {
-        TODO("Not yet implemented")
-    }
-
     override fun serverStatus(message: String) {
         serverStatus.value = message
 
@@ -417,7 +418,9 @@ private fun HomeFullScreen(
     liveSearchTitleChar: (String) -> Unit = {},
     liveSuggestionList: List<Items> = emptyList(),
     suggestionTitleClick: (String) -> Unit = {},
-    govWebsitesClick: () -> Unit = {}
+    govWebsitesClick: () -> Unit = {},
+    notificationClick: () -> Unit = {},
+    redDotVisible: Boolean = false
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -442,6 +445,8 @@ private fun HomeFullScreen(
     Scaffold(
 
         topBar = { Toolbar(
+            redDotVisible = redDotVisible,
+            notificationClick = { notificationClick() },
             settingClick = {settingClick()},
             updateStatus = updateStatus,
             updateClick = {updateClick()}
@@ -540,12 +545,12 @@ private fun Toolbar(
     notificationClick : () -> Unit = {},
     settingClick: () -> Unit = {},
     updateStatus: Boolean = false,
-    updateClick : () -> Unit = {}
-
+    updateClick : () -> Unit = {},
+    redDotVisible : Boolean = false
 ) {
 
     var isUpdate = remember(updateStatus) { mutableStateOf(updateStatus) }
-    var isNotificationClick = remember { mutableStateOf(false) }
+    var isNotificationClick = remember(redDotVisible) { mutableStateOf(redDotVisible) }
 
     Box(
 
@@ -654,6 +659,10 @@ private fun Toolbar(
                                     .height(8.dp)
                                     .clip(shape = CircleShape)
                                     .background(color = Color(0xFFF44336))
+                                    .offset(
+                                        y = (-8).dp,
+                                        x = 0.dp
+                                    )
                                     .align(Alignment.TopEnd)
 
                             )
