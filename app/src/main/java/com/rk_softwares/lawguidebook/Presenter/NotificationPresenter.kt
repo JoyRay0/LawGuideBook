@@ -13,7 +13,8 @@ import kotlinx.coroutines.withContext
 interface Notification{
 
     fun notificationList (list: List<NotificationData>)
-    fun notificationStatus (status: String)
+    fun message (status: String)
+    fun hasUnseenNotification (isSeen : Boolean)
 
 }
 
@@ -28,8 +29,6 @@ class NotificationPresenter(
 
     fun notificationFromServer(){
 
-        view.serverStatus("notification_pending")
-
         scopeIO.launch {
 
             model.notificationFromServer(
@@ -37,22 +36,13 @@ class NotificationPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("notification_success")
                         view.notificationList(result)
 
                     }
 
                 }, onFailed = { isFailed ->
 
-                    if (isFailed){
 
-                        scopeMain.launch {
-
-                            view.serverStatus("notification_failed")
-
-                        }
-
-                    }
 
                 })
 
@@ -106,12 +96,12 @@ class NotificationPresenter(
 
                 if (isDeleted){
 
-                    view.notificationStatus("ডিলিট হয়েছে")
+                    view.message("ডিলিট হয়েছে")
                     view.notificationList(model.getAllNotification())
 
                 }else{
 
-                    view.notificationStatus("ডিলিট হয়নি")
+                    view.message("ডিলিট হয়নি")
 
                 }
 
@@ -130,7 +120,49 @@ class NotificationPresenter(
 
             withContext(Dispatchers.Main) {
 
-                view.notificationStatus("সব ডিলিট হয়েছে")
+                view.message("সব ডিলিট হয়েছে")
+
+            }
+
+        }
+
+    }//fun end
+
+    fun isNotificationSeen(){
+
+        scopeIO.launch {
+
+            val isSeen = model.isNotificationSeen()
+
+            withContext(Dispatchers.Main){
+
+                if (isSeen != null && isSeen){
+
+                    view.hasUnseenNotification(isSeen = true)
+
+                }else{
+
+                    view.hasUnseenNotification(isSeen = false)
+
+                }
+
+            }
+
+        }
+
+    }//fun end
+
+    fun updateNotificationStatus(id : String){
+
+        if (id.isEmpty()) return
+
+        scopeIO.launch {
+
+            model.updateNotificationStatus(id)
+
+            withContext(Dispatchers.Main){
+
+                view.notificationList(model.getAllNotification())
 
             }
 

@@ -29,7 +29,10 @@ data class NotificationData(
     val description : String = "",
 
     @SerializedName("is_new")
-    val isNew : Boolean = false
+    val isNew : Boolean = false,
+
+    @SerializedName("is_seen")
+    val isSeen : Boolean = false
 
 )
 
@@ -89,6 +92,18 @@ class NotificationModel(
     fun deleteAllNotification(){
 
         notificationDB?.deleteAll()
+
+    }
+
+    fun isNotificationSeen() : Boolean?{
+
+        return notificationDB?.hasUnseenNotification()
+
+    }
+
+    fun updateNotificationStatus(id: String){
+
+        notificationDB?.updateNotificationStatus(id)
 
     }
 
