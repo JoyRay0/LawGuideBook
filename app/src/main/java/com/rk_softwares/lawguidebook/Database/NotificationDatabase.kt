@@ -5,12 +5,13 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.Model.NotificationData
 
 class NotificationDatabase(
     val context: Context
-) : SQLiteOpenHelper(context, "notification.db", null, 1) {
+) : SQLiteOpenHelper(context, "notification.db", null, 2) {
 
     private companion object{
 
@@ -19,6 +20,7 @@ class NotificationDatabase(
         const val NOTIFICATION_TITLE = "title"
         const val NOTIFICATION_DESCRIPTION = "description"
         const val IS_SEEN = "is_seen"
+        const val IS_NEW = "is_new"
 
     }
     private lateinit var db : SQLiteDatabase
@@ -34,10 +36,7 @@ class NotificationDatabase(
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
 
-        /*
-        val new_item = "";
-
-        val upgrade_sql = "AFTER TABLE $TABLE_NAME ADD COLUMN $new_item"
+        val upgrade_sql = "ALTER TABLE $TABLE_NAME ADD COLUMN $IS_NEW INTEGER DEFAULT 0"
 
         if (oldVersion < 2){
 
@@ -45,7 +44,7 @@ class NotificationDatabase(
 
         }
 
-         */
+
 
     }
 
@@ -53,7 +52,7 @@ class NotificationDatabase(
     //Insert notification id and is_seen
     //====================================
 
-    fun insert(id : String, title : String, description : String, isSeen : Boolean) {
+    fun insert(id : String, title : String, description : String, isNew : Boolean) {
 
         if (id.isEmpty() || title.isEmpty() || description.isEmpty()) return
 
@@ -68,7 +67,8 @@ class NotificationDatabase(
             cv.put(NOTIFICATION_ID, id)
             cv.put(NOTIFICATION_TITLE, title)
             cv.put(NOTIFICATION_DESCRIPTION, description)
-            cv.put(IS_SEEN, if (isSeen) 1 else 0)
+            cv.put(IS_SEEN, 0)
+            cv.put(IS_NEW, if (isNew) 1 else 0)
 
             db.insert(TABLE_NAME, null, cv)
 
@@ -95,20 +95,22 @@ class NotificationDatabase(
 
         try {
 
-            cursor = db.rawQuery("SELECT * FROM $TABLE_NAME ORDER BY id DESC", null)
+            cursor = db.rawQuery("SELECT * FROM $TABLE_NAME ORDER BY id DESC LIMIT 20", null)
 
             while (cursor.moveToNext()){
 
                 val id = cursor.getString(cursor.getColumnIndexOrThrow(NOTIFICATION_ID))
                 val title = cursor.getString(cursor.getColumnIndexOrThrow(NOTIFICATION_TITLE))
                 val description = cursor.getString(cursor.getColumnIndexOrThrow(NOTIFICATION_DESCRIPTION))
-                val is_new = cursor.getInt(cursor.getColumnIndexOrThrow(IS_SEEN))
+                val is_new = cursor.getInt(cursor.getColumnIndexOrThrow(IS_NEW))
+                val is_seen = cursor.getInt(cursor.getColumnIndexOrThrow(IS_SEEN))
 
                 list.add(NotificationData(
                     id = id,
                     title = title,
                     description = description,
-                    isNew = if (is_new == 1) true else false
+                    isNew = if (is_new == 1) true else false,
+                    isSeen = if (is_seen == 1) true else false
                 ))
 
             }
@@ -225,19 +227,18 @@ class NotificationDatabase(
 
         val isDataAvailable = checkDuplicate(id)
 
+        if (!isDataAvailable) return
+
         val db = dbOpen(true)
 
         try {
 
             val cv = ContentValues()
 
-            if (isDataAvailable){
+            cv.put(IS_SEEN, 1)
+            cv.put(IS_NEW, 0)
 
-                cv.put(IS_SEEN, 1)
-
-                db.update(TABLE_NAME, cv, "WHERE $NOTIFICATION_ID = ?", arrayOf(id))
-
-            }
+            db.update(TABLE_NAME, cv, "$NOTIFICATION_ID = ?", arrayOf(id))
 
         }catch (e : Exception){
 
@@ -246,7 +247,7 @@ class NotificationDatabase(
         }
 
 
-    }
+    }//fun end
 
     private fun checkDuplicate(id: String): Boolean{
 
