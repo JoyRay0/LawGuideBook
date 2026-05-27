@@ -52,6 +52,8 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
 
         //insert()
 
+        presenter.deleteAllNotification()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -239,8 +241,7 @@ private fun NotificationFullScreen(
                     indication = null,
                     interactionSource = null
                 ){
-
-                    if (isMenuVisible.value) isMenuVisible.value = false
+                    isMenuVisible.value = false
 
                 }
                 .padding(innerPadding)
@@ -271,7 +272,7 @@ private fun NotificationFullScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(text = "কোন নোটিফিকেশন নেই",
+                    Text(text = "কোন নোটিফিকেশন নেই।",
                         fontSize = 15.sp,
                         fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
@@ -285,26 +286,28 @@ private fun NotificationFullScreen(
                 }
 
 
-            }
+            }else{
 
-            LazyColumn(
-                state = lazyState,
-                modifier = Modifier
-                    .fillMaxWidth()
+                LazyColumn(
+                    state = lazyState,
+                    modifier = Modifier
+                        .fillMaxWidth()
 
-            ) {
+                ) {
 
-                items(
-                    items = notificationList,
-                    //key = { it.id }
-                ){it ->
+                    items(
+                        items = notificationList,
+                        //key = { it.id }
+                    ){it ->
 
-                    Item(
-                        title = it.title,
-                        description = it.description,
-                        titleClick = { notificationTitleClick(it.id) },
-                        backgroundColor = if (!it.isSeen) Color(0xFFFDECFF) else Color.Transparent
-                    )
+                        Item(
+                            title = it.title,
+                            description = it.description,
+                            titleClick = { notificationTitleClick(it.id) },
+                            backgroundColor = if (!it.isSeen) Color(0xFFFDECFF) else Color.Transparent
+                        )
+
+                    }
 
                 }
 
