@@ -107,4 +107,10 @@ class NotificationModel(
 
     }
 
+    fun updateAllNotificationStatus(){
+
+        notificationDB?.updateAllNotificationStatus()
+
+    }
+
 }

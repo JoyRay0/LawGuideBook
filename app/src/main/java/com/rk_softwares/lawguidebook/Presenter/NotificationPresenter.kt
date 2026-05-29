@@ -121,6 +121,7 @@ class NotificationPresenter(
             withContext(Dispatchers.Main) {
 
                 view.message("সব ডিলিট হয়েছে")
+                view.notificationList(model.getAllNotification())
 
             }
 
@@ -169,6 +170,22 @@ class NotificationPresenter(
         }
 
     }//fun end
+
+    fun updateAllNotificationStatus(){
+
+        scopeIO.launch {
+
+            model.updateAllNotificationStatus()
+
+            withContext(Dispatchers.Main){
+
+                view.notificationList(model.getAllNotification())
+
+            }
+
+        }
+
+    }
 
     fun onDestroy(){
         scopeIO.cancel()
