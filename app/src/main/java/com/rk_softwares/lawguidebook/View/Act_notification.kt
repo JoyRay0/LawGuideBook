@@ -2,6 +2,7 @@ package com.rk_softwares.lawguidebook.View
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,7 +51,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
 
         init()
 
-        //insert()
+        insert()
 
         setContent {
 
@@ -61,24 +62,36 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
             )
 
             presenter.getAllNotification()
+            presenter.isNotificationSeen()
 
             LawGuideBookTheme {
 
                 NotificationFullScreen(
-                    backClick = { finish() },
+                    backClick = {
+                        IntentHelper.normalIntent(this, Act_home::class.java)
+                        finishAffinity()
+                                },
                     internet = isInternet.value,
                     notificationList = notificationList,
                     notificationTitleClick = {
 
                         presenter.updateNotificationStatus(it)
 
-
                     },
                     deleteAll = { presenter.deleteAllNotification() },
-                    markAsRead = { presenter.updateAllNotificationStatus() }
+                    markAsRead = { presenter.updateAllNotificationStatus() },
+                    deleteClick = { presenter.deleteNotification(it) }
                 )
 
             }
+
+            BackHandler {
+
+                IntentHelper.normalIntent(this, Act_home::class.java)
+                finishAffinity()
+
+            }
+
         }
     }//on create==============================
 
@@ -117,7 +130,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     }
 
     override fun hasUnseenNotification(isSeen: Boolean) {
-        TODO("Not yet implemented")
+        ShortMessageHelper.toast(this, isSeen.toString())
     }
 
     fun insert(){
@@ -127,7 +140,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "1",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন1",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
@@ -137,7 +150,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "2",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন2",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
@@ -147,7 +160,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "3",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন3",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
@@ -157,7 +170,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "4",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন4",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
@@ -167,7 +180,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "5",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন5",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
@@ -177,13 +190,12 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
         presenter.insertNotification(
             data = NotificationData(
                 id = "6",
-                title = "নতুন নোটিফিকেশন",
+                title = "নতুন নোটিফিকেশন6",
                 description = "সম্ভবত github-readme-streak-stats.herokuapp.com বা stats image URL এর কারণে error আসতেছে।\n" +
                         "অনেক সময় GitHub README stats service down থাকে বা username ভুল থাকলে error দেখায়।",
                 isSeen = false
             )
         )
-        
 
 
     }
@@ -198,7 +210,8 @@ private fun NotificationFullScreen(
     notificationList : List<NotificationData> = emptyList(),
     notificationTitleClick : (String) -> Unit = {},
     deleteAll: () -> Unit = {},
-    markAsRead: () -> Unit = {}
+    markAsRead: () -> Unit = {},
+    deleteClick: (String) -> Unit = {}
 ) {
 
     var isInternetDialogVisible by remember { mutableStateOf(false) }
@@ -313,7 +326,8 @@ private fun NotificationFullScreen(
                                 title = it.title,
                                 description = it.description,
                                 titleClick = { notificationTitleClick(it.id) },
-                                backgroundColor = if (!it.isSeen) Color(0xFFFDECFF) else Color.Transparent
+                                deleteClick = { deleteClick(it.id) },
+                                isNewNotification = !it.isSeen
                             )
 
                         }
@@ -457,10 +471,12 @@ private fun Item(
     title : String = "Title",
     description : String = "Description",
     titleClick : () -> Unit = {},
-    backgroundColor : Color = Color.Transparent
+    deleteClick : () -> Unit = {},
+    isNewNotification : Boolean = false
 ) {
 
     var isDescriptionVisible = remember { mutableStateOf(false) }
+    var isDeleteIconVisible = remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
         targetValue = if (isDescriptionVisible.value) 270f else 90f,
@@ -479,12 +495,21 @@ private fun Item(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape = RoundedCornerShape(12.dp))
-                .clickable {
-                    titleClick()
-                    isDescriptionVisible.value = !isDescriptionVisible.value
-                }
+                .combinedClickable(
+                    onClick = {
 
-                .background(color = backgroundColor)
+                        titleClick()
+                        isDescriptionVisible.value = !isDescriptionVisible.value
+                        isDeleteIconVisible.value = false
+
+                    },
+                    onLongClick = {
+
+                        isDescriptionVisible.value = false
+                        isDeleteIconVisible.value = true
+
+                    }
+                )
                 .border(
                     width = 1.dp,
                     color = Color(0xFFFAC8C8),
@@ -498,24 +523,55 @@ private fun Item(
             Text(text = title,
                 fontSize = 15.sp,
                 fontFamily = Bangla.banglaFont(),
-                fontWeight = FontWeight.W600,
+                fontWeight = if (isNewNotification) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Start,
-                color = Color(0xFF524747),
+                color = if (isNewNotification) Color(0xFF000000) else Color(0xFF504646),
                 modifier = Modifier
                     .fillMaxWidth(0.93f)
                     .padding(3.dp)
                     .align(Alignment.CenterStart)
             )
 
-            Icon( painter = painterResource(R.drawable.ic_right),
-                contentDescription = "Right",
-                tint = Color.Gray,
-                modifier = Modifier
-                    .rotate(rotation)
-                    .wrapContentWidth()
-                    .align(Alignment.CenterEnd)
+            if (isDeleteIconVisible.value){
 
-            )
+                IconButton(
+                    onClick = {
+                        deleteClick()
+                        isDeleteIconVisible.value = false
+                              },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .clip(shape = CircleShape)
+                        //.background(color = Color(0xFFA48989))
+                        .size(30.dp)
+                        .align(Alignment.CenterEnd)
+                ) {
+
+                    Icon( painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = "Delete",
+                        tint = Color(0xFF333030),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .size(20.dp)
+                            .align(Alignment.Center)
+
+                    )
+
+                }
+
+            }else{
+
+                Icon( painter = painterResource(R.drawable.ic_right),
+                    contentDescription = "Right",
+                    tint = Color.Gray,
+                    modifier = Modifier
+                        .rotate(rotation)
+                        .wrapContentWidth()
+                        .align(Alignment.CenterEnd)
+
+                )
+
+            }
 
         }//box
 
