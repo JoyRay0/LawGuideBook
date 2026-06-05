@@ -355,8 +355,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
     override fun hasUnseenNotification(isSeen: Boolean) {
         isUnseenNotificationAvailable.value = isSeen
-
-        ShortMessageHelper.toast(this, isSeen.toString())
     }
 
     override fun appUpdateStatus(version: String) {

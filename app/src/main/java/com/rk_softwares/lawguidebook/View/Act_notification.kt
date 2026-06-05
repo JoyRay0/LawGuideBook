@@ -130,7 +130,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     }
 
     override fun hasUnseenNotification(isSeen: Boolean) {
-        ShortMessageHelper.toast(this, isSeen.toString())
+        
     }
 
     fun insert(){
