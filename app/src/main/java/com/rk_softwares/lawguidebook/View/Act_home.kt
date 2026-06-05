@@ -7,39 +7,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.grid.*
 
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.*
 import androidx.compose.material3.*
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -54,37 +32,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
-import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
-import com.rk_softwares.lawguidebook.View.theme_main.LightNav
-import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
-import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
+import com.rk_softwares.lawguidebook.View.theme_main.*
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
-import com.rk_softwares.lawguidebook.Helper.Bangla
-import com.rk_softwares.lawguidebook.Helper.ComposeHelper
-import com.rk_softwares.lawguidebook.Helper.IntentHelper
-import com.rk_softwares.lawguidebook.Helper.InternetChecker
-import com.rk_softwares.lawguidebook.Helper.InternetStatus
-import com.rk_softwares.lawguidebook.Helper.KeyHelper
-import com.rk_softwares.lawguidebook.Helper.SanitizationHelper
-import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
-import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Database.NotificationDatabase
+import com.rk_softwares.lawguidebook.Helper.*
 import com.rk_softwares.lawguidebook.Model.Items
-import com.rk_softwares.lawguidebook.Presenter.Home
-import com.rk_softwares.lawguidebook.Presenter.HomePresenter
+import com.rk_softwares.lawguidebook.Model.NotificationData
+import com.rk_softwares.lawguidebook.Presenter.*
 import com.rk_softwares.lawguidebook.R
-import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.delay
 
-class Act_home : ComponentActivity(), Home, InternetStatus {
+class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
     private lateinit var historyDB : HistoryDatabase
     private lateinit var bookmarkDatabase: BookmarkDatabase
+    private lateinit var notificationDatabase: NotificationDatabase
     private lateinit var presenter: HomePresenter
+    private lateinit var nPresenter : NotificationPresenter
 
     private lateinit var internetChecker: InternetChecker
 
@@ -100,8 +68,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
     private var serverStatus = mutableStateOf("")
     private var appUpdate = mutableStateOf("")
     private var versionName = mutableStateOf("")
-
     private var isUpdateAvailable = mutableStateOf(false)
+    private var isUnseenNotificationAvailable = mutableStateOf(false)
 
     private val appPackageName = "com.rk_softwares.lawguidebook"
 
@@ -137,6 +105,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
             }
 
             presenter.appUpdate()
+            nPresenter.notificationFromServer()
+            nPresenter.isNotificationSeen()
 
             // Checking For App Update
 
@@ -300,9 +270,10 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
                     notificationClick = {
 
                         IntentHelper.normalIntent(this, Act_notification::class.java)
+                        finishAffinity()
 
-                    }
-
+                    },
+                    redDotVisible = isUnseenNotificationAvailable.value
                 )
 
             }
@@ -316,9 +287,13 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
         bookmarkDatabase = BookmarkDatabase(this)
 
+        notificationDatabase = NotificationDatabase(this)
+
         presenter = HomePresenter(this, historyDB, bookmarkDatabase)
 
         internetChecker = InternetChecker(this, this)
+
+        nPresenter = NotificationPresenter(this, notificationDatabase)
 
     }
 
@@ -333,6 +308,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
         bookmarkDatabase.closeDB()
         presenter.onDestroy()
         internetChecker.onStop()
+        nPresenter.onDestroy()
     }
 
     override fun onHistoryList(list: List<Items>) {
@@ -370,7 +346,17 @@ class Act_home : ComponentActivity(), Home, InternetStatus {
 
     }
 
+    override fun notificationList(list: List<NotificationData>) {
+        TODO("Not yet implemented")
+    }
+
     override fun message(status: String) {
+    }
+
+    override fun hasUnseenNotification(isSeen: Boolean) {
+        isUnseenNotificationAvailable.value = isSeen
+
+        ShortMessageHelper.toast(this, isSeen.toString())
     }
 
     override fun appUpdateStatus(version: String) {
@@ -420,7 +406,7 @@ private fun HomeFullScreen(
     suggestionTitleClick: (String) -> Unit = {},
     govWebsitesClick: () -> Unit = {},
     notificationClick: () -> Unit = {},
-    redDotVisible: Boolean = false
+    redDotVisible: Boolean = false,
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -546,11 +532,11 @@ private fun Toolbar(
     settingClick: () -> Unit = {},
     updateStatus: Boolean = false,
     updateClick : () -> Unit = {},
-    redDotVisible : Boolean = false
+    redDotVisible : Boolean = false,
 ) {
 
     var isUpdate = remember(updateStatus) { mutableStateOf(updateStatus) }
-    var isNotificationClick = remember(redDotVisible) { mutableStateOf(redDotVisible) }
+    var isUnseenNotification = remember(redDotVisible) { mutableStateOf(redDotVisible) }
 
     Box(
 
@@ -626,7 +612,6 @@ private fun Toolbar(
                         .clip(shape = CircleShape)
                         .clickable{
                             notificationClick()
-                            isNotificationClick.value = true
                         }
                         .align(Alignment.CenterVertically)
                         .size(32.dp)
@@ -651,7 +636,7 @@ private fun Toolbar(
 
                         )
 
-                        if (!isNotificationClick.value){
+                        if (isUnseenNotification.value){
 
                             Box(
                                 modifier = Modifier
