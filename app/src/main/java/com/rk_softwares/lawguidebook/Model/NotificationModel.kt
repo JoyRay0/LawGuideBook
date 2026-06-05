@@ -44,7 +44,7 @@ class NotificationModel(
     private val notificationList = mutableListOf<NotificationData>()
 
     fun notificationFromServer(
-        onSuccess : (List<NotificationData>) -> Unit = {},
+        onSuccess : () -> Unit = {},
         onFailed : (Boolean) -> Unit = {}
     ){
 
@@ -54,7 +54,18 @@ class NotificationModel(
 
                 if (result.status == "Success"){
 
-                    onSuccess(result.data)
+                    result.data.forEach {
+
+                        insertNotification(
+                            id = it.id,
+                            title = it.title,
+                            description = it.description,
+                            isNew = it.isNew
+                        )
+
+                    }
+
+                    onSuccess()
 
                 }else{
 
