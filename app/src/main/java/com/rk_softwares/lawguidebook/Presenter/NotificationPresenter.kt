@@ -1,5 +1,6 @@
 package com.rk_softwares.lawguidebook.Presenter
 
+import android.util.Log
 import com.rk_softwares.lawguidebook.Database.NotificationDatabase
 import com.rk_softwares.lawguidebook.Model.NotificationData
 import com.rk_softwares.lawguidebook.Model.NotificationModel
@@ -32,19 +33,7 @@ class NotificationPresenter(
         scopeIO.launch {
 
             model.notificationFromServer(
-                onSuccess = { result ->
-
-                    scopeMain.launch {
-
-                        view.notificationList(result)
-
-                    }
-
-                }, onFailed = { isFailed ->
-
-
-
-                })
+                onSuccess = {}, onFailed = {})
 
         }
 
@@ -84,13 +73,13 @@ class NotificationPresenter(
 
     }
 
-    fun deleteNotification(data: NotificationData? = null){
+    fun deleteNotification(id: String){
 
-        if (data == null) return
+        if (id.isEmpty()) return
 
         scopeIO.launch {
 
-            val isDeleted = model.deleteNotification(id = data.id) ?: false
+            val isDeleted = model.deleteNotification(id = id) ?: false
 
             withContext(Dispatchers.Main){
 
@@ -134,7 +123,6 @@ class NotificationPresenter(
         scopeIO.launch {
 
             val isSeen = model.isNotificationSeen()
-
             withContext(Dispatchers.Main){
 
                 if (isSeen != null && isSeen){
