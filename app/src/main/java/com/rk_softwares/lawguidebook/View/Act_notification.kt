@@ -130,7 +130,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
     }
 
     override fun hasUnseenNotification(isSeen: Boolean) {
-        
+
     }
 
     fun insert(){
@@ -523,7 +523,7 @@ private fun Item(
             Text(text = title,
                 fontSize = 15.sp,
                 fontFamily = Bangla.banglaFont(),
-                fontWeight = if (isNewNotification) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (isNewNotification) FontWeight.SemiBold else FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = if (isNewNotification) Color(0xFF000000) else Color(0xFF504646),
                 modifier = Modifier
