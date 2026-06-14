@@ -15,6 +15,14 @@ interface CalculationItemView{
 
 }
 
+enum class CalculationStatus(val value : String){
+
+    CalculationPending("calculation_item_pending"),
+    CalculationSuccess("calculation_item_success"),
+    CalculationFailed("calculation_item_failed")
+
+}
+
 class CalculationItemPresenter(
     private val view : CalculationItemView
 ) {
@@ -26,7 +34,7 @@ class CalculationItemPresenter(
 
     fun calculationDataFromServer(){
 
-        view.serverStatus("calculation_item_pending")
+        view.serverStatus(CalculationStatus.CalculationPending.value)
 
         scopeIO.launch {
 
@@ -34,7 +42,7 @@ class CalculationItemPresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("calculation_item_success")
+                    view.serverStatus(CalculationStatus.CalculationSuccess.value)
                     view.onCalculationList(result)
 
                 }
@@ -45,7 +53,7 @@ class CalculationItemPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("calculation_item_failed")
+                        view.serverStatus(CalculationStatus.CalculationFailed.value)
 
                     }
 

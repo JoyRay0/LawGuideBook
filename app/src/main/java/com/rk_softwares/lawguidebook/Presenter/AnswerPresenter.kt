@@ -15,6 +15,14 @@ interface Answer{
 
 }
 
+enum class AnswerStatus(val value : String){
+
+    AnswerPending("answer_pending"),
+    AnswerSuccess("answer_success"),
+    AnswerFailed("answer_failed")
+
+}
+
 class AnswerPresenter(
     private val view : Answer
 ) {
@@ -25,7 +33,7 @@ class AnswerPresenter(
     private val scopeMain = CoroutineScope(Dispatchers.Main + SupervisorJob())
     fun answerFromServer(question : String){
 
-        view.serverStatus("answer_pending")
+        view.serverStatus(AnswerStatus.AnswerPending.value)
 
         scopeIO.launch {
 
@@ -36,7 +44,7 @@ class AnswerPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("answer_success")
+                        view.serverStatus(AnswerStatus.AnswerSuccess.value)
                         view.answer(result)
 
                     }
@@ -48,7 +56,7 @@ class AnswerPresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("answer_failed")
+                            view.serverStatus(AnswerStatus.AnswerFailed.value)
 
                         }
 

@@ -20,6 +20,16 @@ interface ChatView{
     fun cacheStatus(status : String)
 }
 
+enum class ChatStatus(val value : String){
+
+    ChatPending("chat_pending"),
+    ChatSuccess("chat_success"),
+    ChatFailed("chat_failed"),
+    ChatCacheShowed("showed"),
+    ChatCacheNotShowed("")
+
+}
+
 class ChatPresenter(
     private val view : ChatView,
     private val db : ChatDatabase,
@@ -53,7 +63,7 @@ class ChatPresenter(
 
         if (message.isEmpty()) return
 
-        view.messageStatus("chat_pending")
+        view.messageStatus(ChatStatus.ChatPending.value)
 
         scopeIO.launch{
 
@@ -68,7 +78,7 @@ class ChatPresenter(
                 scopeMain.launch{
 
                     view.messages(model.getAllMessage())
-                    view.messageStatus("chat_success")
+                    view.messageStatus(ChatStatus.ChatSuccess.value)
 
                 }
 
@@ -78,7 +88,7 @@ class ChatPresenter(
 
                     scopeMain.launch{
 
-                        view.messageStatus("chat_failed")
+                        view.messageStatus(ChatStatus.ChatFailed.value)
 
                     }
 
@@ -142,7 +152,7 @@ class ChatPresenter(
 
         model.cacheSet(key, value)
 
-        view.cacheStatus("showed")
+        view.cacheStatus(ChatStatus.ChatCacheShowed.value)
 
     }
 
@@ -152,11 +162,11 @@ class ChatPresenter(
 
         if (!data.isNullOrEmpty()){
 
-            view.cacheStatus("showed")
+            view.cacheStatus(ChatStatus.ChatCacheShowed.value)
 
         }else{
 
-            view.cacheStatus("")
+            view.cacheStatus(ChatStatus.ChatCacheNotShowed.value)
 
         }
 

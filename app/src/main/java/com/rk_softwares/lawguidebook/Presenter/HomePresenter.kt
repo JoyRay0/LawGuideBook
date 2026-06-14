@@ -25,7 +25,29 @@ interface Home{
 
     fun appUpdateStatus(version: String)
 
+}
 
+enum class HomeStatus(val value : String){
+
+    MessageDeleteSuccess("ডিলিট হয়েছে"),
+    MessageDeleteFailed("ডিলিট হয়নি"),
+    MessageSaved("সেভ হয়েছে"),
+
+    SearchPending("search_pending"),
+    SearchSuccess("search_success"),
+    SearchFailed("search_failed"),
+
+    CategoryPending("category_pending"),
+    CategorySuccess("category_success"),
+    CategoryFailed("category_failed"),
+
+    CalculationLimitPending("calculation_limit_pending"),
+    CalculationLimitSuccess("calculation_limit_success"),
+    CalculationLimitFailed("calculation_limit_failed"),
+
+    SuggestionPending("suggestion_pending"),
+    SuggestionSuccess("suggestion_success"),
+    SuggestionFailed("suggestion_failed"),
 }
 
 class HomePresenter(
@@ -62,7 +84,7 @@ class HomePresenter(
 
             withContext(Dispatchers.Main){
 
-                view.message("ডিলিট হয়েছে")
+                view.message(HomeStatus.MessageDeleteSuccess.value)
 
             }
 
@@ -96,7 +118,7 @@ class HomePresenter(
 
             withContext(Dispatchers.Main){
 
-                view.message("সেভ হয়েছে")
+                view.message(HomeStatus.MessageSaved.value)
                 view.onBookmarkList(homeModel.dbGetAllBookmark())
 
             }
@@ -117,11 +139,11 @@ class HomePresenter(
 
                 if (deleted){
 
-                    view.message("ডিলিট হয়েছে")
+                    view.message(HomeStatus.MessageDeleteSuccess.value)
                     view.onBookmarkList(homeModel.dbGetAllBookmark())
 
                 }else{
-                    view.message("ডিলিট হয়নি")
+                    view.message(HomeStatus.MessageDeleteFailed.value)
                 }
 
             }
@@ -134,7 +156,7 @@ class HomePresenter(
 
         if (title.isEmpty()) return
 
-        view.serverStatus("search_pending")
+        view.serverStatus(HomeStatus.SearchPending.value)
 
         scopeIO.launch {
 
@@ -152,7 +174,7 @@ class HomePresenter(
 
                 scopeMain.launch{
 
-                    view.serverStatus("search_success")
+                    view.serverStatus(HomeStatus.SearchSuccess.value)
                     view.onSearchList(result)
 
                 }
@@ -163,7 +185,7 @@ class HomePresenter(
 
                     scopeMain.launch{
 
-                        view.serverStatus("search_failed")
+                        view.serverStatus(HomeStatus.SearchFailed.value)
 
                     }
 
@@ -212,7 +234,7 @@ class HomePresenter(
 
     fun categoryItemFromServer(){
 
-        view.serverStatus("category_pending")
+        view.serverStatus(HomeStatus.CategoryPending.value)
 
         scopeIO.launch {
 
@@ -220,7 +242,7 @@ class HomePresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("category_success")
+                    view.serverStatus(HomeStatus.CategorySuccess.value)
                     view.onCategoryList(result)
 
                 }
@@ -231,7 +253,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("category_failed")
+                        view.serverStatus(HomeStatus.CategoryFailed.value)
 
                     }
 
@@ -246,7 +268,7 @@ class HomePresenter(
 
     fun calculationLimitItemFromServer(){
 
-        view.serverStatus("calculation_limit_pending")
+        view.serverStatus(HomeStatus.CalculationLimitPending.value)
 
         scopeIO.launch {
 
@@ -254,7 +276,7 @@ class HomePresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("calculation_limit_success")
+                    view.serverStatus(HomeStatus.CalculationLimitSuccess.value)
                     view.onCalculationList(result)
 
                 }
@@ -265,7 +287,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("calculation_limit_failed")
+                        view.serverStatus(HomeStatus.CalculationLimitFailed.value)
 
                     }
 
@@ -316,7 +338,7 @@ class HomePresenter(
 
     fun searchSuggestion(char : String){
 
-        view.serverStatus("suggestion_pending")
+        view.serverStatus(HomeStatus.SuggestionPending.value)
 
         scopeIO.launch {
 
@@ -328,7 +350,7 @@ class HomePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("suggestion_success")
+                        view.serverStatus(HomeStatus.SuggestionSuccess.value)
                         view.onSearchSuggestionList(result)
 
                     }
@@ -340,7 +362,7 @@ class HomePresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("suggestion_failed")
+                            view.serverStatus(HomeStatus.SuggestionFailed.value)
 
                         }
 

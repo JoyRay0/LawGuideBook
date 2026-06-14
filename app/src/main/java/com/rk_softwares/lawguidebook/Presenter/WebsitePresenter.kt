@@ -16,6 +16,14 @@ interface Websites{
 
 }
 
+enum class WebsiteStatus(val value : String){
+
+    WebsitePending("websites_pending"),
+    WebsiteSuccess("websites_success"),
+    WebsiteFailed("websites_failed"),
+
+}
+
 class WebsitePresenter(
     private val view : Websites
 ) {
@@ -26,7 +34,7 @@ class WebsitePresenter(
 
     fun lawWebsites(){
 
-        view.serverStatus("websites_pending")
+        view.serverStatus(WebsiteStatus.WebsitePending.value)
 
         scopeIO.launch {
 
@@ -35,7 +43,7 @@ class WebsitePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("websites_success")
+                        view.serverStatus(WebsiteStatus.WebsiteSuccess.value)
                         view.websiteList(result)
 
                     }
@@ -46,7 +54,7 @@ class WebsitePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("websites_failed")
+                        view.serverStatus(WebsiteStatus.WebsiteFailed.value)
 
                     }
 
@@ -60,7 +68,7 @@ class WebsitePresenter(
 
     fun govWebsites(){
 
-        view.serverStatus("websites_pending")
+        view.serverStatus(WebsiteStatus.WebsitePending.value)
 
         scopeIO.launch {
 
@@ -69,7 +77,7 @@ class WebsitePresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("websites_success")
+                        view.serverStatus(WebsiteStatus.WebsiteSuccess.value)
                         view.websiteList(result)
 
                     }
@@ -80,7 +88,7 @@ class WebsitePresenter(
 
                         scopeMain.launch {
 
-                            view.serverStatus("websites_failed")
+                            view.serverStatus(WebsiteStatus.WebsiteFailed.value)
 
                         }
 

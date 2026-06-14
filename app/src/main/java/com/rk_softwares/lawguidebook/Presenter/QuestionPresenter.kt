@@ -18,6 +18,14 @@ interface Questions{
 
 }
 
+enum class QuestionStatus(val value : String){
+
+    QuestionPending("question_pending"),
+    QuestionSuccess("question_success"),
+    QuestionFailed("question_failed"),
+
+}
+
 class QuestionPresenter(
     private val view : Questions,
     private val db : BookmarkDatabase
@@ -48,7 +56,7 @@ class QuestionPresenter(
 
         if (category.isEmpty() && tName.isEmpty()) return
 
-        view.serverStatus("question_pending")
+        view.serverStatus(QuestionStatus.QuestionPending.value)
 
         scopeIO.launch{
 
@@ -59,7 +67,7 @@ class QuestionPresenter(
 
                 scopeMain.launch {
 
-                    view.serverStatus("question_success")
+                    view.serverStatus(QuestionStatus.QuestionSuccess.value)
                     view.questionList(result)
 
                 }
@@ -70,7 +78,7 @@ class QuestionPresenter(
 
                     scopeMain.launch {
 
-                        view.serverStatus("question_failed")
+                        view.serverStatus(QuestionStatus.QuestionFailed.value)
 
                     }
 
