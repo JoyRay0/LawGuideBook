@@ -19,6 +19,11 @@
         android:theme="@style/Theme.LawGuideBook"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".View.Act_quiz"
+            android:exported="false"
+            android:label="@string/title_activity_act_quiz"
+            android:theme="@style/Theme.LawGuideBook" />
+        <activity
             android:name=".View.Act_notification"
             android:exported="false"
             android:label="@string/title_activity_act_gov_websites"
