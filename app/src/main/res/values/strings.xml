@@ -10,4 +10,5 @@
     <string name="title_activity_act_lawwebsites">Act_lawwebsites</string>
     <string name="title_activity_act_browser">Act_browser</string>
     <string name="title_activity_act_gov_websites">Act_gov_websites</string>
+    <string name="title_activity_act_quiz">Act_quiz</string>
 </resources>
