@@ -192,12 +192,12 @@ class NotificationDatabase(
 
                 if (isSeen == 0){
 
-                    hasUnseen = false
+                    hasUnseen = true
                     break
 
                 }else{
 
-                    hasUnseen = true
+                    hasUnseen = false
 
                 }
 
@@ -246,8 +246,32 @@ class NotificationDatabase(
 
         }
 
-
     }//fun end
+
+    //============================================
+    //All notification status update
+    //============================================
+
+    fun updateAllNotificationStatus(){
+
+        val db = dbOpen(true)
+
+        try {
+
+            val cv = ContentValues()
+
+            cv.put(IS_SEEN, 1)
+            cv.put(IS_NEW, 0)
+
+            db.update(TABLE_NAME, cv, null, null)
+
+        }catch (e : Exception){
+
+            e.printStackTrace()
+
+        }
+
+    }
 
     private fun checkDuplicate(id: String): Boolean{
 
