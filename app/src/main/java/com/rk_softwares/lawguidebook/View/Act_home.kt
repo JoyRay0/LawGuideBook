@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -18,19 +20,25 @@ import androidx.compose.material3.*
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.core.net.toUri
@@ -273,7 +281,10 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                         finishAffinity()
 
                     },
-                    redDotVisible = isUnseenNotificationAvailable.value
+                    redDotVisible = isUnseenNotificationAvailable.value,
+                    quizCompleted = 0,
+                    totalQuizCount = 0,
+                    quizClick = { IntentHelper.normalIntent(this, Act_quiz::class.java) }
                 )
 
             }
@@ -405,6 +416,9 @@ private fun HomeFullScreen(
     govWebsitesClick: () -> Unit = {},
     notificationClick: () -> Unit = {},
     redDotVisible: Boolean = false,
+    quizCompleted: Int = 0,
+    totalQuizCount: Int = 0,
+    quizClick: () -> Unit = {}
     ) {
 
     var screen by remember { mutableIntStateOf(0) }
@@ -471,7 +485,10 @@ private fun HomeFullScreen(
                         calculationList = calculationList,
                         lawWebsiteClick = { lawWebsiteClick() },
                         status = serverStatus,
-                        govWebsitesClick = { govWebsitesClick() }
+                        govWebsitesClick = { govWebsitesClick() },
+                        quizCompleted = quizCompleted,
+                        totalQuizCount = totalQuizCount,
+                        quizClick = { quizClick() }
                         )
 
                 1 ->
@@ -608,7 +625,7 @@ private fun Toolbar(
                     modifier = Modifier
                         .wrapContentWidth()
                         .clip(shape = CircleShape)
-                        .clickable{
+                        .clickable {
                             notificationClick()
                         }
                         .align(Alignment.CenterVertically)
@@ -813,7 +830,10 @@ private fun HomeScreen(
     calculationList: List<Items> = emptyList(),
     lawWebsiteClick : () -> Unit = {},
     govWebsitesClick : () -> Unit = {},
-    status: String = ""
+    status: String = "",
+    quizCompleted: Int = 0,
+    totalQuizCount: Int = 0,
+    quizClick: () -> Unit = {}
 ) {
 
     Box(
@@ -832,7 +852,17 @@ private fun HomeScreen(
 
             AiChatBot(aiChatClick = aiChatClick)
 
-            Spacer(modifier = Modifier.height(7.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Quiz(
+                quizCompleted = quizCompleted,
+                totalQuizCount = totalQuizCount,
+                quizClick = { quizClick() }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            //Spacer(modifier = Modifier.height(7.dp))
 
             Calculator(
                 moreClick = { moreClick() },
@@ -841,9 +871,11 @@ private fun HomeScreen(
                 status = status
             )
 
-            Spacer(modifier = Modifier.height(7.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
+            //=========================
             //websites
+            //=========================
 
             Text("ওয়েবসাইট",
                 fontSize = 15.sp,
@@ -892,7 +924,7 @@ private fun HomeScreen(
                                 .fillMaxWidth()
                                 .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
                                 .clip(shape = RoundedCornerShape(14.dp))
-                                .clickable{ if (index == 0) lawWebsiteClick() else govWebsitesClick() }
+                                .clickable { if (index == 0) lawWebsiteClick() else govWebsitesClick() }
                                 .background(color = Color(0xFFFFFFFF))
                                 .padding(12.dp)
 
@@ -2041,7 +2073,7 @@ private fun SearchSuggestions(
                             .fillMaxWidth()
                             .height(itemHeight)
                             //.background(color = Color(0x2F000000))
-                            .clickable{ suggestionTitleClick(it.question) }
+                            .clickable { suggestionTitleClick(it.question) }
                             .padding(start = 8.dp, end = 8.dp, top = 5.dp, bottom = 5.dp)
 
                     ) {
@@ -2082,4 +2114,167 @@ private fun SearchSuggestions(
 
     }//box
     
+}//fun end
+
+
+@Preview(showBackground = true)
+@Composable
+fun Quiz(
+    quizCompleted : Int = 9,
+    totalQuizCount : Int = 10,
+    quizClick : () -> Unit = {}
+) {
+
+    val progress = if (totalQuizCount != 0){
+
+        quizCompleted.toFloat() / totalQuizCount.toFloat()
+
+    }else 0f
+
+    Box(
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+
+    ) {
+
+        Box(
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                .clip(shape = RoundedCornerShape(16.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ){ quizClick() }
+                .background(color = Color(0xFFFFFFFF))
+                .padding(7.dp)
+
+        ) {
+
+            Column(
+
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .align(Alignment.CenterStart)
+
+            ) {
+
+                Text( text = "সাপ্তাহিক শেখার অগ্রগতি",
+                    fontSize = 15.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Start,
+                    color = Color(0xFF3B3939),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(5.dp)
+                        .align(Alignment.Start)
+
+                )
+
+                Text( text = "নিয়মিত অনুশীলনের মাধ্যমে আইনি জ্ঞানকে আরও শক্তিশালী করুন।",
+                    fontSize = 13.sp,
+                    fontFamily = Bangla.banglaFont(),
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Start,
+                    color = Color(0xFF676565),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(5.dp)
+                        .align(Alignment.Start)
+
+                )
+
+            }//column
+
+            Box(
+
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterEnd)
+
+            ) {
+
+                CircularProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .size(80.dp)
+                        .padding(5.dp)
+                        .align(Alignment.CenterEnd),
+                    color = Color(0xFF7FB441),
+                    strokeWidth = 10.dp,
+                    strokeCap = StrokeCap.Butt,
+                    trackColor = Color(0xFFECEAEA),
+                    gapSize = 0.dp
+
+                )
+
+                Text(
+                    buildAnnotatedString {
+
+                        withStyle(
+                            style = SpanStyle(
+
+                                color = if (quizCompleted == totalQuizCount) Color(0xFF000000) else Color(
+                                    0xFF5E5E5E
+                                ),
+                                fontSize = 14.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = if (quizCompleted == totalQuizCount) FontWeight.SemiBold else FontWeight.Normal
+
+                            )
+                        ) {
+
+                            append(Bangla.banglaNumber(quizCompleted.toString()))
+
+                        }
+
+                        withStyle(
+                            style = SpanStyle(
+
+                                color = Color(0xFF000000),
+                                fontSize = 14.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.SemiBold
+
+                            )
+                        ) {
+
+                            append(" / ")
+
+                        }
+
+                        withStyle(
+                            style = SpanStyle(
+
+                                color = Color(0xFF000000),
+                                fontSize = 14.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.SemiBold
+
+                            )
+                        ) {
+
+                            append(Bangla.banglaNumber(totalQuizCount.toString()))
+
+                        }
+
+
+                    },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.Center)
+                    )
+
+
+            }//box
+
+        }//box
+
+    }//box
+
 }//fun end
