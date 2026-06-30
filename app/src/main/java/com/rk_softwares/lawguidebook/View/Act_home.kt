@@ -2149,7 +2149,7 @@ fun Quiz(
                     indication = null,
                     interactionSource = null
                 ){ quizClick() }
-                .background(color = Color(0xFFFFFFFF))
+                .background(color = Color(0xFFFAEBFD))
                 .padding(7.dp)
 
         ) {
@@ -2208,7 +2208,7 @@ fun Quiz(
                     color = Color(0xFF7FB441),
                     strokeWidth = 10.dp,
                     strokeCap = StrokeCap.Butt,
-                    trackColor = Color(0xFFECEAEA),
+                    trackColor = Color(0xFFFFFFFF),
                     gapSize = 0.dp
 
                 )
