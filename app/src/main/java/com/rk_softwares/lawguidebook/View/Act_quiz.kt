@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,11 +13,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
@@ -36,6 +40,7 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightNav
 import com.rk_softwares.lawguidebook.View.theme_main.LightStatusBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
+import kotlinx.coroutines.delay
 
 class Act_quiz : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,11 +156,29 @@ private fun Item(
     optionB: String = "১৯৭২",
     optionC : String = "১৯৭৫",
     optionD: String = "১৯৮১",
-    answer : String = "১৯৭২"
+    answer : String = "১৯৭২",
+    userSelectedItem : Int? = null,
+    userSelectedInput : (Int) -> Unit = {}
 ) {
 
-    var is_correct_answer = remember { mutableStateOf(false) }
-    var isOptionsVisible = remember { mutableStateOf(true) }
+    var isOptionsVisible = remember { mutableStateOf(false) }
+    var selectedIndex = remember { mutableStateOf(userSelectedItem) }
+    var isAnswerClicked = remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(userSelectedItem) {
+
+        selectedIndex.value = userSelectedItem
+        if (userSelectedItem != null) isAnswerClicked.value = true
+
+    }
+
+    val currentSelected = selectedIndex.value ?: userSelectedItem
+
+    val arrowAnimation = animateFloatAsState(
+        targetValue = if (isOptionsVisible.value) 270f else 90f,
+        label = "",
+    )
 
     Column(
 
@@ -183,8 +206,10 @@ private fun Item(
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
                 color = Color(0xFF000000),
+                maxLines = if (!isOptionsVisible.value) 1 else Int.MAX_VALUE,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.94f)
                     .padding(5.dp)
                     .align(Alignment.CenterStart)
 
@@ -195,7 +220,7 @@ private fun Item(
                 tint = Color(0xFF736E6E),
                 modifier = Modifier
                     .wrapContentWidth()
-                    .rotate(if (isOptionsVisible.value) 270f else 90f)
+                    .rotate(arrowAnimation.value)
                     .align(Alignment.CenterEnd)
 
             )
@@ -237,7 +262,16 @@ private fun Item(
                                 .fillMaxWidth()
                                 .border(width = 1.dp, color = Color(0xFFDEDCDC), shape = RoundedCornerShape(13.dp))
                                 .clip(shape = RoundedCornerShape(13.dp))
-                                .clickable{ if (text == answer) is_correct_answer.value = true else is_correct_answer.value = false }
+                                .clickable(
+                                    enabled = if (isAnswerClicked.value) false else true
+                                ){
+                                    selectedIndex.value = index
+
+                                    isAnswerClicked.value = true
+
+                                    userSelectedInput(index)
+                                }
+                                .alpha(alpha = if (!isAnswerClicked.value || selectedIndex.value == index) 1f else 0.5f)
                                 .padding(9.dp)
 
                         ) {
@@ -261,12 +295,28 @@ private fun Item(
                                 textAlign = TextAlign.Start,
                                 color = Color(0xFF000000),
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth(0.92f)
                                     .padding(start = 2.dp)
                                     .align(Alignment.CenterVertically)
                             )
 
+                            if (currentSelected == index){
 
+                                val isCorrect = options[index] == answer
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Icon( painter = painterResource(if (isCorrect) R.drawable.ic_ok else R.drawable.ic_wrong),
+                                    contentDescription = "",
+                                    tint = Color(0xFF5E5C5C),
+                                    modifier = Modifier
+                                        .wrapContentWidth()
+                                        .size( if (isCorrect) 21.dp else 17.dp)
+                                        .align(Alignment.CenterVertically)
+
+                                )
+
+                            }
 
                         }//row
 
