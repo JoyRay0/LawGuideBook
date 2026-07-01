@@ -14,7 +14,7 @@ class HistoryDatabase(
 
     override fun onCreate(db: SQLiteDatabase?) {
 
-        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT)"
+        val create_sql = "CREATE TABLE IF NOT EXISTS $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT)"
 
         db?.execSQL(create_sql)
 

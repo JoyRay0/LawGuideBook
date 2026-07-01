@@ -24,7 +24,7 @@ class ChatDatabase(
 
     override fun onCreate(db: SQLiteDatabase?) {
 
-        val create_sql = "CREATE TABLE $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, sender_type TEXT NOT NULL, is_user INTEGER NOT NULL DEFAULT 0, timestamp TEXT NOT NULL)"
+        val create_sql = "CREATE TABLE IF NOT EXISTS $TABLE_NAME (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, sender_type TEXT NOT NULL, is_user INTEGER NOT NULL DEFAULT 0, timestamp TEXT NOT NULL)"
 
         db?.execSQL(create_sql)
 
