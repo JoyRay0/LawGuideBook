@@ -18,3 +18,5 @@ local.properties
 /app/src/main/java/com/rk_softwares/lawguidebook/Helper/SecurityKey.kt
 /app/src/main/java/com/rk_softwares/lawguidebook/Helper/App.kt
 /app/src/main/java/com/rk_softwares/lawguidebook/Helper/ApiLinks.kt
+*.log
+
