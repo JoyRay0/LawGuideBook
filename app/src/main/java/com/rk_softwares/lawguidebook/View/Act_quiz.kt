@@ -9,8 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rk_softwares.lawguidebook.Helper.Bangla
+import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
@@ -71,11 +75,14 @@ private fun QuizFullScreen(
     backClick: () -> Unit = {}
 ) {
 
+    val context = LocalContext.current
+
     Scaffold(
 
         topBar = { Toolbar( backClick = backClick ) },
         modifier = Modifier
             .fillMaxSize()
+            .background(color = LightToolBar)
             .systemBarsPadding()
 
     ) { innerPadding ->
@@ -87,8 +94,6 @@ private fun QuizFullScreen(
                 .padding(innerPadding)
 
         ) {
-
-            Item()
 
 
         }//box
@@ -115,6 +120,7 @@ private fun Toolbar(
 
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(5.dp)
                 .align(Alignment.CenterStart)
 
         ) {
@@ -168,7 +174,12 @@ private fun Item(
 
     LaunchedEffect(userSelectedItem) {
 
-        selectedIndex.value = userSelectedItem
+        if (userSelectedItem != null) {
+
+            selectedIndex.value = if ( userSelectedItem > -1) userSelectedItem - 1 else -1
+
+        }else selectedIndex.value = userSelectedItem
+
         if (userSelectedItem != null) isAnswerClicked.value = true
 
     }
@@ -196,7 +207,7 @@ private fun Item(
                 .clip(shape = RoundedCornerShape(13.dp))
                 .clickable{ isOptionsVisible.value = !isOptionsVisible.value }
                 .background(color = Color(0xFFFFFFFF))
-                .padding(7.dp)
+                .padding(10.dp)
 
         ) {
 
@@ -210,7 +221,7 @@ private fun Item(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth(0.94f)
-                    .padding(5.dp)
+                    .padding(3.dp)
                     .align(Alignment.CenterStart)
 
             )
@@ -269,10 +280,10 @@ private fun Item(
 
                                     isAnswerClicked.value = true
 
-                                    userSelectedInput(index)
+                                    userSelectedInput(index + 1)
                                 }
                                 .alpha(alpha = if (!isAnswerClicked.value || selectedIndex.value == index) 1f else 0.5f)
-                                .padding(9.dp)
+                                .padding(12.dp)
 
                         ) {
 
