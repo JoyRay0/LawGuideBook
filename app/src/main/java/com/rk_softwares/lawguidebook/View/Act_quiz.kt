@@ -75,7 +75,6 @@ private fun QuizFullScreen(
     backClick: () -> Unit = {}
 ) {
 
-    val context = LocalContext.current
 
     Scaffold(
 
