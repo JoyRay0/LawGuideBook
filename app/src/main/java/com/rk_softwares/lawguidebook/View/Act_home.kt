@@ -282,8 +282,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
                     },
                     redDotVisible = isUnseenNotificationAvailable.value,
-                    quizCompleted = 0,
-                    totalQuizCount = 0,
+                    quizCompleted = 5,
+                    totalQuizCount = 7,
                     quizClick = { IntentHelper.normalIntent(this, Act_quiz::class.java) }
                 )
 
@@ -852,7 +852,7 @@ private fun HomeScreen(
 
             AiChatBot(aiChatClick = aiChatClick)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             
             Quiz(
                 quizCompleted = quizCompleted,
@@ -860,7 +860,7 @@ private fun HomeScreen(
                 quizClick = { quizClick() }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             //Spacer(modifier = Modifier.height(7.dp))
 
@@ -2125,17 +2125,27 @@ fun Quiz(
     quizClick : () -> Unit = {}
 ) {
 
-    val progress = if (totalQuizCount != 0){
+    var progress = remember { mutableStateOf(0f) }
 
-        quizCompleted.toFloat() / totalQuizCount.toFloat()
+    LaunchedEffect(quizCompleted, totalQuizCount) {
 
-    }else 0f
+        if (quizCompleted <= -1) return@LaunchedEffect
+        if (totalQuizCount <= -1) return@LaunchedEffect
+
+        progress.value = if (totalQuizCount > 0){
+
+            quizCompleted.toFloat() / totalQuizCount.toFloat()
+
+        }else 0f
+
+    }
+
 
     Box(
 
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp)
+            .padding(9.dp)
 
     ) {
 
@@ -2199,7 +2209,7 @@ fun Quiz(
             ) {
 
                 CircularProgressIndicator(
-                    progress = { progress },
+                    progress = { progress.value },
                     modifier = Modifier
                         .wrapContentWidth()
                         .size(80.dp)
