@@ -65,7 +65,9 @@
             android:exported="false"
             android:label="@string/title_activity_act_splash"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.LawGuideBook" />
+            android:theme="@style/Theme.LawGuideBook"
+            android:windowSoftInputMode="adjustResize"
+            />
         <activity
             android:name=".View.Act_webview"
             android:exported="false"
