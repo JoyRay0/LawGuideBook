@@ -122,7 +122,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
                         chatPresenter.userSendMessage(message = userMessage)
 
                     },
-                    userCheckedMessage = if (cacheStatus.value == "showed") true else false ,
+                    userChecked = if (cacheStatus.value == "showed") true else false ,
                     alertCloseClick = { chatPresenter.setCache("alert_message", "showed") },
 
                     copyClick = {
@@ -209,6 +209,7 @@ class Act_ai_chat : ComponentActivity(), ChatView, InternetStatus{
 }//class=====================================
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 private fun ChatFullScreen(
@@ -219,7 +220,7 @@ private fun ChatFullScreen(
     deleteClick: () -> Unit = {},
     deleteAllMessage: () -> Unit = {},
     sendClick: () -> Unit = {},
-    userCheckedMessage : Boolean = true,
+    userChecked : Boolean = false,
     alertCloseClick: () -> Unit = {},
     copyClick: () -> Unit = {},
     resultAvailableStatus : String = "",
@@ -230,6 +231,7 @@ private fun ChatFullScreen(
     var isDeleteDialogVisible by remember { mutableStateOf(false) }
     var isPopUpMenuVisible by remember { mutableStateOf(false) }
     var isInternetDialogVisible by remember { mutableStateOf(false) }
+    var isAlertDialogVisible = remember { mutableStateOf(true) }
 
     LaunchedEffect(internet) {
 
@@ -247,6 +249,12 @@ private fun ChatFullScreen(
 
     }
 
+    LaunchedEffect(userChecked) {
+
+        if (userChecked) isAlertDialogVisible.value = false else isAlertDialogVisible.value = true
+
+    }
+
     Scaffold(
         topBar = { Toolbar(
             backClick = { backClick() },
@@ -255,7 +263,8 @@ private fun ChatFullScreen(
 
         bottomBar = { ChatNav(
             message = { message(it) },
-            sendClick = { sendClick() }
+            sendClick = { sendClick() },
+            userChecked = userChecked
         ) },
 
         modifier = Modifier
@@ -372,14 +381,30 @@ private fun ChatFullScreen(
 
             }
 
-            if (!userCheckedMessage){
+            if (isAlertDialogVisible.value){
 
-                AlertDialog(
+                val sheetState = rememberModalBottomSheetState()
+
+                ModalBottomSheet(
+
+                    onDismissRequest = {
+                        isAlertDialogVisible.value = false
+
+                                       },
+                    sheetState = sheetState,
+                    dragHandle = null,
+                    containerColor = Color(0xFFFFFFFF),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center),
-                    alertCloseClick = { alertCloseClick() }
-                )
+
+
+                ) {
+
+                    AlertDialog(
+                        alertCloseClick = { alertCloseClick() }
+                    )
+
+                }
 
             }
 
@@ -513,10 +538,22 @@ private fun Toolbar(
 @Composable
 private fun ChatNav(
     message : (String) -> Unit = {},
-    sendClick : () -> Unit = {}
+    sendClick : () -> Unit = {},
+    userChecked: Boolean = false
 ) {
 
     var inputMessage by remember { mutableStateOf("") }
+    var isSendButtonVisible = remember { mutableStateOf(false) }
+
+    LaunchedEffect(userChecked, inputMessage) {
+
+        if (userChecked){
+
+            if (inputMessage.isBlank()) isSendButtonVisible.value = false else isSendButtonVisible.value = true
+
+        }
+
+    }
 
     Box(
 
@@ -538,6 +575,7 @@ private fun ChatNav(
                 )
                 .background(color = Color(0xFFFFFFFF))
                 .padding(7.dp)
+                .imePadding()
 
         ) {
 
@@ -545,8 +583,15 @@ private fun ChatNav(
 
                 modifier = Modifier
                     .fillMaxWidth(0.89f)
+                    .clip(shape = RoundedCornerShape(14.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFD0BABA),
+                        shape = RoundedCornerShape(14.dp)
+                    )
                     .align(Alignment.CenterVertically)
-                    .imePadding()
+                    .padding(5.dp)
+
 
             ) {
 
@@ -560,7 +605,7 @@ private fun ChatNav(
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .padding(start = 10.dp)
+                            .padding(start = 7.dp)
                             .align(Alignment.CenterStart)
                     )
 
@@ -576,13 +621,7 @@ private fun ChatNav(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(shape = RoundedCornerShape(16.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFD0BABA),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(7.dp)
+                        .padding(5.dp)
                         .align(Alignment.CenterStart)
                 )
 
@@ -596,12 +635,12 @@ private fun ChatNav(
                     inputMessage = ""
                     sendClick()
                           },
-                enabled = if (inputMessage.isBlank()) false else true,
+                enabled = if (!isSendButtonVisible.value) false else true,
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
                     //.background(color = Color(0xFF00BCD4))
-                    .alpha(if (inputMessage.isBlank()) 0.5f else 1f)
+                    .alpha(if (!isSendButtonVisible.value) 0.5f else 1f)
                     .size(35.dp)
                     .align(Alignment.CenterVertically)
             ) {
@@ -611,6 +650,7 @@ private fun ChatNav(
                     tint = Color(0xFFD849F1),
                     modifier = Modifier
                         .wrapContentWidth()
+                        .size(28.dp)
                         .align(Alignment.CenterVertically)
 
                 )
@@ -987,7 +1027,6 @@ private fun PopUpMenu(
 @Preview(showBackground = true)
 @Composable
 fun AlertDialog(
-    modifier: Modifier = Modifier,
     alertCloseClick : () -> Unit = {}
 ) {
 
@@ -995,9 +1034,9 @@ fun AlertDialog(
 
     Box(
 
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(15.dp)
+            //.padding(10.dp)
 
     ) {
 
@@ -1005,15 +1044,12 @@ fun AlertDialog(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 7.dp, shape = RoundedCornerShape(14.dp))
-                .clip(shape = RoundedCornerShape(14.dp))
-                .background(color = Color(0xFFFFFFFF))
                 .padding(10.dp)
                 .align(Alignment.Center)
 
         ) {
 
-            Text(text = "আমাদের AI আইসিস্ট্যান্ট আপনােক আইনি ধারনা দিতে প্রস্তত। " +
+            Text(text = "আমাদের AI আইনি অ্যাসিস্ট্যান্ট আপনােক আইনি ধারনা দিতে প্রস্তত। " +
                     "তবে এটি কোনো পেশাদার আইনজীবীর সরাসরি বিকল্প নয়। " +
                     "প্রতিটি আইনি বিষয়ের দিকগুলো ভিন্ন হতে পারে, তাই এই অ্যাপ থেকে প্রাপ্ত তথ্যগুলো প্রাথমিক গাইডলাইন হিসেবে বিবেচনা করুন।" +
                     "যেকোনো আইনি বাধ্যবাধকতা বা দাপ্তরিক কাজে ব্যবহারের আগে তথ্যগুলো সংশ্লিষ্ট আইন বিশেষজ্ঞের দ্বারা যাচাই করে নেওয়ার জন্য বিশেষ অনুরোধ রইলো।",
@@ -1076,7 +1112,7 @@ fun AlertDialog(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(text = "ঠিক আছে",
-                fontSize = 13.sp,
+                fontSize = 15.sp,
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
@@ -1094,6 +1130,8 @@ fun AlertDialog(
                     .alpha(if (isChecked) 1f else 0.5f)
                     .align(Alignment.End)
                 )
+
+            Spacer(modifier = Modifier.height(5.dp))
 
         }//column
 
