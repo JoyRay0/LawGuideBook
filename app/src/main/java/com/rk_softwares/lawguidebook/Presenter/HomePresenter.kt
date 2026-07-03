@@ -82,9 +82,13 @@ class HomePresenter(
 
             homeModel.dbHistoryDeleteAll()
 
+            val historyList = homeModel.dbGetAllHistory()
+
             withContext(Dispatchers.Main){
 
                 view.message(HomeStatus.MessageDeleteSuccess.value)
+
+                view.onHistoryList(historyList)
 
             }
 
