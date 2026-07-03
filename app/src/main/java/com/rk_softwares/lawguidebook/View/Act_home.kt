@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -53,6 +54,7 @@ import com.rk_softwares.lawguidebook.Model.NotificationData
 import com.rk_softwares.lawguidebook.Presenter.*
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
@@ -96,7 +98,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
             )
 
             var isSearchScreenList by remember { mutableStateOf(true) }
-            var reloadHistory by remember { mutableIntStateOf(0) }
 
             try {
 
@@ -104,12 +105,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
             }catch (e : PackageManager.NameNotFoundException){
                 e.printStackTrace()
-            }
-
-            LaunchedEffect(reloadHistory) {
-
-                presenter.getAllHistory()
-
             }
 
             presenter.appUpdate()
@@ -137,10 +132,9 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                     searchClick = {
                         if (it.isNotBlank()) {
                             presenter.searchAndHistoryToServer(SanitizationHelper.sanitizedSearch(it))
-                            reloadHistory++
                         }},
                     historyTitleClick = { presenter.searchAndHistoryToServer(it) },
-                    historyClick = { reloadHistory++ },
+                    historyClick = { presenter.getAllHistory() },
                     searchItemClick = {
 
                         IntentHelper.dataIntent(
@@ -205,6 +199,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                         historyList.clear()
                         searchList.clear()
                         bookmarkList.clear()
+                        searchSuggestionList.clear()
                                        },
                     navHomeClick = {
 
@@ -213,6 +208,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                         historyList.clear()
                         searchList.clear()
                         bookmarkList.clear()
+                        searchSuggestionList.clear()
 
                     },
                     navBookmark = {
@@ -220,6 +216,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                         historyList.clear()
                         searchList.clear()
                         bookmarkList.clear()
+                        searchSuggestionList.clear()
                                   },
                     serverStatus = serverStatus.value,
                     categoryRetryClick = {
@@ -1361,6 +1358,7 @@ private fun SearchScreen(
     var searchScreenDataLoading by remember { mutableStateOf(false) }
     var isHistoryListEmpty by remember { mutableStateOf(false) }
     var isSuggestionListEmpty by remember { mutableStateOf(false) }
+    var isSearchButtonClicked = remember { mutableStateOf(false) }
 
     if (serverStatus == "search_pending") searchScreenDataLoading = true else searchScreenDataLoading = false
     if (searchList.isNotEmpty()) searchScreenDataLoading = false
@@ -1447,7 +1445,7 @@ private fun SearchScreen(
 
         LaunchedEffect(isHistoryListEmpty) {
 
-            delay(2000)
+            delay(2000.milliseconds)
 
             isHistoryListEmpty = if (historyList.isEmpty()) true else false
 
@@ -1487,6 +1485,7 @@ private fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
+                .imePadding()
 
         ) {
 
@@ -1499,28 +1498,48 @@ private fun SearchScreen(
                     isSearchScreenVisible = !isSearchScreenVisible
                     historyClick()
                     isHistoryListEmpty = false
+                    isSearchButtonClicked.value = true
                 },
                 historyTitle = historyTitle,
                 searchClick = {
                     searchClick(it)
                     searchScreenDataLoading = true
+                    isSearchButtonClicked.value = true
                 },
                 liveSearchTitleChar = {
                     liveSearchTitleChar(it)
-                    if (it.isNotBlank()) isSuggestionListEmpty = true else isSuggestionListEmpty = false
+                    if (it.isNotBlank()){
+
+                        isSuggestionListEmpty = true
+
+                        isSearchButtonClicked.value = false
+
+                    } else{
+
+                        isSuggestionListEmpty = false
+
+                        isSearchButtonClicked.value = true
+                    }
                 }
             )
 
+
+
             if (isSuggestionListEmpty){
 
-                SearchSuggestions(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
-                    list = liveSuggestionList,
-                    suggestionTitleClick = { suggestionTitleClick(it) }
+                if (!isSearchButtonClicked.value){
 
-                )
+                    SearchSuggestions(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
+                        list = liveSuggestionList,
+                        suggestionTitleClick = {
+                            suggestionTitleClick(it)
+                        }
+                    )
+
+                }
 
             }
 
@@ -1579,9 +1598,8 @@ private fun SearchBarHelper(
                     .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp))
                     .clip(shape = RoundedCornerShape(12.dp))
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(2.dp)
+                    .padding(6.dp)
                     .align(Alignment.CenterVertically)
-                    .imePadding()
 
             ) {
 
@@ -1599,7 +1617,7 @@ private fun SearchBarHelper(
                         tint = Color(0xFF000000),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(24.dp)
+                            .size(28.dp)
                             .align(Alignment.CenterVertically)
 
                     )
@@ -1617,7 +1635,7 @@ private fun SearchBarHelper(
                         if (searchFiled.isEmpty()){
 
                             Text("যেকোনো আইনি বিষয় সার্চ করুন",
-                                fontSize = 14.sp,
+                                fontSize = 15.sp,
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 color = Color(0xFF695D5D),
@@ -1700,10 +1718,10 @@ private fun SearchBarHelper(
                 modifier = Modifier
                     .wrapContentWidth()
                     .shadow(elevation = 3.dp, shape = RoundedCornerShape(14.dp))
-                    .clip(shape = RoundedCornerShape(12.dp))
+                    .clip(shape = RoundedCornerShape(14.dp))
                     .clickable { historyIconClick() }
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(9.dp)
+                    .padding(12.dp)
                     .align(Alignment.CenterVertically)
 
             ) {
@@ -1713,7 +1731,7 @@ private fun SearchBarHelper(
                     tint = Color(0xFF000000),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(24.dp)
+                        .size(30.dp)
                         .align(Alignment.Center)
 
                 )
@@ -1784,7 +1802,7 @@ private fun QuestionItem(
 
                     }
                 )
-                .padding(6.dp)
+                .padding(8.dp)
                 .align(Alignment.Center)
 
         ) {
@@ -1899,7 +1917,7 @@ private fun HistoryItem(
                 )
 
                 //.background(color = Color(0xFFFFFFFF))
-                .padding(5.dp)
+                .padding(8.dp)
                 .align(Alignment.Center)
 
         ) {
@@ -2032,7 +2050,7 @@ private fun SearchSuggestions(
 
     val lazyState = rememberLazyListState()
 
-    val itemHeight = 40.dp
+    val itemHeight = 50.dp
     val maxItems = 6
     val visibleCount = if (list.size > maxItems) maxItems else list.size
 
@@ -2066,45 +2084,55 @@ private fun SearchSuggestions(
                     items = list,
                     //key = { it.title }
                 ){ it->
-                    
-                    Row(
+
+                    Box(
 
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(itemHeight)
-                            //.background(color = Color(0x2F000000))
-                            .clickable { suggestionTitleClick(it.question) }
-                            .padding(start = 8.dp, end = 8.dp, top = 5.dp, bottom = 5.dp)
+                            .padding(5.dp)
 
                     ) {
 
-                        Icon( painter = painterResource(R.drawable.ic_search),
-                            contentDescription = "",
-                            tint = Color(0xFF776666),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .size(17.dp)
-                                .align(Alignment.CenterVertically)
+                        Row(
 
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(text = it.question,
-                            fontSize = 14.sp,
-                            fontFamily = Bangla.banglaFont(),
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF000000),
-                            textAlign = TextAlign.Start,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .align(Alignment.CenterVertically)
+                                .height(itemHeight)
+                                .clip(shape = RoundedCornerShape(12.dp))
+                                .clickable { suggestionTitleClick(it.question) }
+                                .padding(7.dp)
+
+                        ) {
+
+                            Icon( painter = painterResource(R.drawable.ic_search),
+                                contentDescription = "",
+                                tint = Color(0xFF776666),
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .size(20.dp)
+                                    .align(Alignment.CenterVertically)
+
                             )
 
-                    }//row
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Text(text = it.question,
+                                fontSize = 15.sp,
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.Normal,
+                                color = Color(0xFF000000),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically)
+                            )
+
+                        }//row
+
+                    }//box
                     
                 }
 
