@@ -17,7 +17,12 @@ data class Quiz(
 data class QuizData(
 
     val title : String = "",
-    val answer : String = ""
+    val optionA : String = "",
+    val optionB : String = "",
+    val optionC : String = "",
+    val optionD : String = "",
+    val answer : String = "",
+    val userInput : Int = 0
 
 
 )
