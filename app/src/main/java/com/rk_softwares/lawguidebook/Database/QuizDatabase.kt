@@ -36,7 +36,7 @@ $OPTIONS_B TEXT NOT NULL,
 $OPTIONS_C TEXT NOT NULL, 
 $OPTIONS_D TEXT NOT NULL, 
 $ANSWER TEXT NOT NULL, 
-$USER_INPUT TEXT DEFAULT 0,
+$USER_INPUT INTEGER DEFAULT 0,
 $VERSION TEXT NOT NULL
 )""".trimIndent()
 
@@ -158,7 +158,7 @@ $VERSION TEXT NOT NULL
         userSelectedItem : Int
     ){
 
-        if (title.isEmpty() || userSelectedItem > 0) return
+        if (title.isEmpty() || (userSelectedItem > 0 && userSelectedItem > 4)) return
 
         if (!checkDuplicate(title)) return
 
@@ -187,7 +187,7 @@ $VERSION TEXT NOT NULL
 
         var cursor : Cursor? = null
 
-        var isExists = false
+        var isExists = true
 
         try {
 
@@ -195,7 +195,7 @@ $VERSION TEXT NOT NULL
 
             if (cursor.moveToFirst()){
 
-                isExists = true
+                isExists = false
 
             }
 
@@ -206,8 +206,43 @@ $VERSION TEXT NOT NULL
             cursor?.close()
         }
 
-
         return isExists
+
+    }
+
+    fun quizCount(totalQuiz: (Int) -> Unit, totalQuizCompleted: (Int) -> Unit){
+
+        val quizTitleListCount : MutableList<String> = mutableListOf()
+        val quizCompletedCount : MutableList<Int> = mutableListOf()
+
+        val db = dbOpen()
+        var cursor : Cursor? = null
+
+        try {
+
+            cursor = db.rawQuery("SELECT $TITLE, $USER_INPUT FROM $TABLE_NAME", null)
+
+            while (cursor.moveToNext()){
+
+                val title = cursor.getString(cursor.getColumnIndexOrThrow(TITLE))
+                val userInput = cursor.getInt(cursor.getColumnIndexOrThrow(USER_INPUT))
+
+                quizTitleListCount.add(title)
+
+                if (userInput > 0) quizCompletedCount.add(userInput)
+
+            }
+
+        }catch (e : Exception){
+
+            e.printStackTrace()
+
+        }finally {
+            cursor?.close()
+        }
+
+        totalQuiz(quizTitleListCount.size)       /* Total quiz count via title */
+        totalQuizCompleted(quizCompletedCount.size)         /* Total quiz completed count via user input */
 
     }
 
