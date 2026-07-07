@@ -54,8 +54,6 @@ class QuestionPresenter(
 
     fun questionsFromServer(category : String, tName : String){
 
-        if (category.isEmpty() && tName.isEmpty()) return
-
         view.serverStatus(QuestionStatus.QuestionPending.value)
 
         scopeIO.launch{

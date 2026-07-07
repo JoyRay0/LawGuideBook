@@ -11,6 +11,7 @@ class QuizDatabase(val context: Context) : SQLiteOpenHelper(context, "quiz.db", 
 
     private companion object{
 
+        const val VERSION = "version"
         const val TABLE_NAME = "quiz"
         const val ID = "id"
         const val TITLE = "title"
@@ -35,7 +36,9 @@ $OPTIONS_B TEXT NOT NULL,
 $OPTIONS_C TEXT NOT NULL, 
 $OPTIONS_D TEXT NOT NULL, 
 $ANSWER TEXT NOT NULL, 
-$USER_INPUT TEXT DEFAULT 0)""".trimIndent()
+$USER_INPUT TEXT DEFAULT 0,
+$VERSION TEXT NOT NULL
+)""".trimIndent()
 
         db?.execSQL(sql)
 
@@ -52,10 +55,11 @@ $USER_INPUT TEXT DEFAULT 0)""".trimIndent()
         optionC : String,
         optionD : String,
         answer : String,
+        version: String
     ){
 
         if (title.isEmpty() || optionA.isEmpty() || optionB.isEmpty() || optionC.isEmpty() || optionD.isEmpty()
-            || answer.isEmpty()){
+            || answer.isEmpty() || version.isEmpty()){
 
             return
 
@@ -75,6 +79,7 @@ $USER_INPUT TEXT DEFAULT 0)""".trimIndent()
             cv.put(OPTIONS_C, optionC)
             cv.put(OPTIONS_D, optionD)
             cv.put(ANSWER, answer)
+            cv.put(VERSION, version)
 
             db.insert(TABLE_NAME, null, cv)
 
@@ -83,7 +88,6 @@ $USER_INPUT TEXT DEFAULT 0)""".trimIndent()
             e.printStackTrace()
 
         }
-
 
     }//fun end
 
@@ -176,6 +180,36 @@ $USER_INPUT TEXT DEFAULT 0)""".trimIndent()
         }
 
     }//fun end
+
+    fun isNewVersion(version : String) : Boolean{
+
+        val db = dbOpen()
+
+        var cursor : Cursor? = null
+
+        var isExists = false
+
+        try {
+
+            cursor = db.rawQuery("SELECT $VERSION FROM $TABLE_NAME WHERE $VERSION = ?", arrayOf(version))
+
+            if (cursor.moveToFirst()){
+
+                isExists = true
+
+            }
+
+        }catch (e : Exception){
+            e.printStackTrace()
+
+        }finally {
+            cursor?.close()
+        }
+
+
+        return isExists
+
+    }
 
     private fun checkDuplicate(title : String) : Boolean{
 
