@@ -76,10 +76,13 @@ dependencies {
     implementation("androidx.browser:browser:1.9.0")
 
     implementation("io.ktor:ktor-client-android:3.4.3")
-    implementation("io.ktor:ktor-client-content-negotiation:3.4.3")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.4.3")
-    implementation("io.ktor:ktor-client-okhttp:3.4.3")
-    implementation("io.ktor:ktor-client-logging:3.4.3")
+    implementation("io.ktor:ktor-client-content-negotiation:3.5.1")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.1")
+    implementation("io.ktor:ktor-client-okhttp:3.5.1")
+    implementation("io.ktor:ktor-client-logging:3.5.1")
+
+    testImplementation("org.mockito:mockito-core:5.+")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.+")
 
     //implementation("com.github.razaghimahdi:Compose-Loading-Dots:1.2.3")
 
