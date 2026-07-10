@@ -7,12 +7,12 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.rk_softwares.lawguidebook.Model.QuizData
 
-class QuizDatabase(val context: Context) : SQLiteOpenHelper(context, "quiz.db", null, 1) {
+class QuizDatabase(val context: Context) : SQLiteOpenHelper(context, "quiz.db", null, 2) {
 
     private companion object{
 
         const val VERSION = "version"
-        const val TABLE_NAME = "quiz"
+        const val TABLE_NAME = "quiz_table"
         const val ID = "id"
         const val TITLE = "title"
         const val OPTIONS_A = "option_a"
@@ -158,7 +158,7 @@ $VERSION TEXT NOT NULL
         userSelectedItem : Int
     ){
 
-        if (title.isEmpty() || (userSelectedItem > 0 && userSelectedItem > 4)) return
+        if (title.isEmpty() || userSelectedItem < 0) return
 
         if (!checkDuplicate(title)) return
 
@@ -168,7 +168,6 @@ $VERSION TEXT NOT NULL
 
         try {
 
-            cv.put(TITLE, title)
             cv.put(USER_INPUT, userSelectedItem)
 
             db.update(TABLE_NAME, cv, "$TITLE = ?", arrayOf(title))
@@ -241,7 +240,7 @@ $VERSION TEXT NOT NULL
             cursor?.close()
         }
 
-        totalQuiz(quizTitleListCount.size)       /* Total quiz count via title */
+        totalQuiz(quizTitleListCount.size)                  /* Total quiz count via title */
         totalQuizCompleted(quizCompletedCount.size)         /* Total quiz completed count via user input */
 
     }
@@ -277,7 +276,7 @@ $VERSION TEXT NOT NULL
 
     private fun dbOpen(isWriteable : Boolean = false) : SQLiteDatabase{
 
-        if (!::db.isInitialized && !db.isOpen){
+        if (!::db.isInitialized || !db.isOpen){
 
             db = if (isWriteable) writableDatabase else readableDatabase
 
