@@ -51,8 +51,6 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
 
         init()
 
-        insert()
-
         setContent {
 
             ThemeHelper.SystemUi(
@@ -60,6 +58,8 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
                 navColor = LightNav,
                 darkIcons = true
             )
+
+            insert()
 
             presenter.getAllNotification()
             presenter.isNotificationSeen()
@@ -133,7 +133,7 @@ class Act_notification : ComponentActivity(), InternetStatus, Notification {
 
     }
 
-    fun insert(){
+    private fun insert(){
 
         //presenter.deleteAllNotification()
 
@@ -288,14 +288,14 @@ private fun NotificationFullScreen(
                             contentDescription = "Notification",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .size(90.dp)
+                                .size(ScreenSize().responsiveImageSize(80, 90, 100))
                                 .align(Alignment.CenterHorizontally)
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(text = "কোন নোটিফিকেশন নেই।",
-                            fontSize = 15.sp,
+                            fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                             fontFamily = Bangla.banglaFont(),
                             fontWeight = FontWeight.Normal,
                             color = Color(0xFF000000),
@@ -400,7 +400,7 @@ private fun Toolbar(
 
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(3.dp)
+                .padding(ScreenSize().responsivePadding(3, 6, 9))
                 .align(Alignment.CenterStart)
 
         ) {
@@ -410,7 +410,7 @@ private fun Toolbar(
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
-                    .size(35.dp)
+                    .size(ScreenSize().responsiveImageSize(35, 38, 41))
                     .align(Alignment.CenterVertically)
             ) {
 
@@ -419,7 +419,7 @@ private fun Toolbar(
                     tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(22.dp)
+                        .size(ScreenSize().responsiveImageSize(22, 25, 28))
 
                 )
 
@@ -431,7 +431,7 @@ private fun Toolbar(
 
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(3.dp)
+                .padding(ScreenSize().responsivePadding(3, 6, 9))
                 .align(Alignment.CenterEnd)
 
         ) {
@@ -441,7 +441,7 @@ private fun Toolbar(
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
-                    .size(35.dp)
+                    .size(ScreenSize().responsivePadding(35, 38, 41))
                     .align(Alignment.CenterVertically)
             ) {
 
@@ -450,7 +450,7 @@ private fun Toolbar(
                     tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(20.dp)
+                        .size(ScreenSize().responsivePadding(20, 23, 26))
 
                 )
 
@@ -515,13 +515,13 @@ private fun Item(
                     color = Color(0xFFFAC8C8),
                     shape = RoundedCornerShape(12.dp)
                 )
-                .padding(7.dp)
+                .padding(ScreenSize().responsivePadding(7, 10, 13))
                 .align(Alignment.CenterHorizontally)
 
         ) {
 
             Text(text = title,
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = if (isNewNotification) FontWeight.SemiBold else FontWeight.Normal,
                 textAlign = TextAlign.Start,
@@ -552,7 +552,7 @@ private fun Item(
                         tint = Color(0xFF333030),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(20.dp)
+                            .size(ScreenSize().responsiveImageSize(20, 23, 26))
                             .align(Alignment.Center)
 
                     )
@@ -567,6 +567,7 @@ private fun Item(
                     modifier = Modifier
                         .rotate(rotation)
                         .wrapContentWidth()
+                        .size(ScreenSize().responsiveImageSize(20, 24, 28))
                         .align(Alignment.CenterEnd)
 
                 )
@@ -597,13 +598,13 @@ private fun Item(
                             color = Color(0xFFFFD7D7),
                             shape = RoundedCornerShape(10.dp)
                         )
-                        .padding(6.dp)
+                        .padding(ScreenSize().responsivePadding(6, 9, 12))
                         .align(Alignment.Center)
 
                 ) {
 
                     Text(text = description,
-                        fontSize = 14.sp,
+                        fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                         fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         color = Color(0xFF000000),
@@ -646,11 +647,11 @@ private fun ToolbarMenu(
         Column(
 
             modifier = Modifier
-                .width(170.dp)
+                .width(ScreenSize().responsiveHeightWidth(140, 170, 190))
                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(10.dp))
                 .clip(shape = RoundedCornerShape(10.dp))
                 .background(color = Color.White)
-                .padding(5.dp)
+                .padding(ScreenSize().responsivePadding(5, 8, 11))
                 .align(Alignment.CenterEnd)
 
         ) {
@@ -681,7 +682,7 @@ private fun ToolbarMenu(
                         tint = Color(0xFF524747),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(17.dp)
+                            .size(ScreenSize().responsiveImageSize(17, 21, 24))
                             .align(Alignment.CenterVertically)
 
                     )
@@ -689,7 +690,7 @@ private fun ToolbarMenu(
                     Spacer(modifier = Modifier.width(9.dp))
 
                     Text( text = text,
-                        fontSize = 14.sp,
+                        fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                         fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         color = Color(0xFF000000),
