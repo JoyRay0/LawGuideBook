@@ -4,12 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -20,7 +17,6 @@ import androidx.compose.foundation.text.*
 import androidx.compose.material3.*
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,21 +44,25 @@ import com.rk_softwares.lawguidebook.View.theme_main.*
 import com.rk_softwares.lawguidebook.Database.BookmarkDatabase
 import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Database.NotificationDatabase
+import com.rk_softwares.lawguidebook.Database.QuizDatabase
 import com.rk_softwares.lawguidebook.Helper.*
 import com.rk_softwares.lawguidebook.Model.Items
 import com.rk_softwares.lawguidebook.Model.NotificationData
+import com.rk_softwares.lawguidebook.Model.QuizData
 import com.rk_softwares.lawguidebook.Presenter.*
 import com.rk_softwares.lawguidebook.R
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
-class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
+class Act_home : ComponentActivity(), Home, InternetStatus, Notification, Quiz {
 
     private lateinit var historyDB : HistoryDatabase
     private lateinit var bookmarkDatabase: BookmarkDatabase
     private lateinit var notificationDatabase: NotificationDatabase
     private lateinit var presenter: HomePresenter
     private lateinit var nPresenter : NotificationPresenter
+    private lateinit var qPresenter : QuizPresenter
+    private lateinit var qdb : QuizDatabase
 
     private lateinit var internetChecker: InternetChecker
 
@@ -80,6 +80,8 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
     private var versionName = mutableStateOf("")
     private var isUpdateAvailable = mutableStateOf(false)
     private var isUnseenNotificationAvailable = mutableStateOf(false)
+    private var totalQuizCount = mutableStateOf(0)
+    private var totalQuizCompleted = mutableStateOf(0)
 
     private val appPackageName = "com.rk_softwares.lawguidebook"
 
@@ -97,6 +99,12 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
                 darkIcons = true
             )
 
+            presenter.appUpdate()
+            nPresenter.notificationFromServer()
+            nPresenter.isNotificationSeen()
+            qPresenter.quizFromServer()
+            qPresenter.quizCount()
+
             var isSearchScreenList by remember { mutableStateOf(true) }
 
             try {
@@ -106,10 +114,6 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
             }catch (e : PackageManager.NameNotFoundException){
                 e.printStackTrace()
             }
-
-            presenter.appUpdate()
-            nPresenter.notificationFromServer()
-            nPresenter.isNotificationSeen()
 
             // Checking For App Update
 
@@ -279,9 +283,12 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
                     },
                     redDotVisible = isUnseenNotificationAvailable.value,
-                    quizCompleted = 5,
-                    totalQuizCount = 7,
-                    quizClick = { IntentHelper.normalIntent(this, Act_quiz::class.java) }
+                    quizCompleted = totalQuizCompleted.value,
+                    totalQuizCount = totalQuizCount.value,
+                    quizClick = {
+                        IntentHelper.normalIntent(this, Act_quiz::class.java)
+                        finishAffinity()
+                    }
                 )
 
             }
@@ -303,6 +310,10 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
 
         nPresenter = NotificationPresenter(this, notificationDatabase)
 
+        qdb = QuizDatabase(this)
+
+        qPresenter = QuizPresenter(this, qdb)
+
     }
 
     override fun onStart() {
@@ -317,6 +328,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
         presenter.onDestroy()
         internetChecker.onStop()
         nPresenter.onDestroy()
+        qPresenter.onDestroy()
     }
 
     override fun onHistoryList(list: List<Items>) {
@@ -355,7 +367,7 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
     }
 
     override fun notificationList(list: List<NotificationData>) {
-        TODO("Not yet implemented")
+
     }
 
     override fun message(status: String) {
@@ -374,7 +386,22 @@ class Act_home : ComponentActivity(), Home, InternetStatus, Notification {
         isInternet.value = internet
     }
 
-}// class====================================================
+    override fun quizList(list: List<QuizData>) {
+
+    }
+
+    override fun quizCount(tQuiz: Int, cQuiz: Int) {
+
+        totalQuizCount.value = tQuiz
+
+        totalQuizCompleted.value = cQuiz
+    }
+
+    override fun dbStatus(status: String) {
+
+    }
+
+}
 
 
 @Preview(showBackground = true)
@@ -567,7 +594,7 @@ private fun Toolbar(
         ) {
 
             Text("আইনি গাইডবুক",
-                fontSize = 17.sp,
+                fontSize = ScreenSize().responsiveTextSize(17, 19, 21),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF9C27B0),
@@ -592,7 +619,7 @@ private fun Toolbar(
                         modifier = Modifier
                             .wrapContentWidth()
                             .clip(shape = CircleShape)
-                            .size(32.dp)
+                            .size(ScreenSize().responsiveImageSize(32, 35, 38))
                             .align(Alignment.CenterVertically)
 
                     ) {
@@ -602,7 +629,7 @@ private fun Toolbar(
                             tint = LightToolBarIcon,
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .size(19.dp)
+                                .size(ScreenSize().responsiveImageSize(19, 22, 25))
                                 .align(Alignment.CenterVertically)
 
                         )
@@ -643,7 +670,7 @@ private fun Toolbar(
                             tint = LightToolBarIcon,
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .size(22.dp)
+                                .size(ScreenSize().responsiveImageSize(22, 25, 28))
                                 .align(Alignment.Center)
 
                         )
@@ -679,7 +706,7 @@ private fun Toolbar(
                     modifier = Modifier
                         .wrapContentWidth()
                         .clip(shape = CircleShape)
-                        .size(32.dp)
+                        .size(ScreenSize().responsiveImageSize(32, 35, 38))
                         .align(Alignment.CenterVertically)
 
                 ) {
@@ -689,7 +716,7 @@ private fun Toolbar(
                         tint = LightToolBarIcon,
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(19.dp)
+                            .size(ScreenSize().responsiveImageSize(19, 22, 25))
                             .align(Alignment.CenterVertically)
 
                     )
@@ -721,7 +748,7 @@ private fun BottomNav(
 
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(ScreenSize().responsiveHeightWidth(50, 60, 70))
             .shadow(elevation = 3.dp)
             .background(color = Color(0xFFFFFFFF)),
         horizontalArrangement = Arrangement.SpaceAround
@@ -791,15 +818,18 @@ private fun BottomNavHelper(
                     .clip(shape = RoundedCornerShape(17.dp))
                     .clickable { navClick() }
                     .background(color = if (selected) Color(0xFFB5E9FF) else Color.Transparent)
-                    .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-                    .size(20.dp)
+                    .padding(start = ScreenSize().responsivePadding(16, 19, 21),
+                        end = ScreenSize().responsivePadding(16, 19, 21),
+                        top = ScreenSize().responsivePadding(4, 6, 8),
+                        bottom = ScreenSize().responsivePadding(4, 6, 8))
+                    .size(ScreenSize().responsiveImageSize(20, 23, 26))
                     .align(Alignment.CenterHorizontally)
             )
 
             //Spacer(modifier = Modifier.height(2.dp))
 
             Text( text = labelText,
-                fontSize = 12.sp,
+                fontSize = ScreenSize().responsiveTextSize(12, 14, 16),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = if (selected) Color(0xFFCC3AE5) else Color.Gray,
@@ -875,7 +905,7 @@ private fun HomeScreen(
             //=========================
 
             Text("ওয়েবসাইট",
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -923,7 +953,7 @@ private fun HomeScreen(
                                 .clip(shape = RoundedCornerShape(14.dp))
                                 .clickable { if (index == 0) lawWebsiteClick() else govWebsitesClick() }
                                 .background(color = Color(0xFFFFFFFF))
-                                .padding(12.dp)
+                                .padding(ScreenSize().responsivePadding(12, 15, 18))
 
                         ) {
 
@@ -932,7 +962,7 @@ private fun HomeScreen(
                                 tint = Color(0xFFB98C8C),
                                 modifier = Modifier
                                     .wrapContentWidth()
-                                    .size(if (index == 0) 20.dp else 17.dp)
+                                    .size(if (index == 0) ScreenSize().responsiveImageSize(20, 22, 24) else ScreenSize().responsiveImageSize(17, 19, 21))
                                     .align(Alignment.CenterStart)
 
                             )
@@ -940,7 +970,7 @@ private fun HomeScreen(
                             Spacer(modifier = Modifier.width(9.dp))
 
                             Text(text = text,
-                                fontSize = 15.sp,
+                                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 textAlign = TextAlign.Start,
@@ -987,7 +1017,7 @@ private fun AiChatBot(
                 .clip(shape = RoundedCornerShape(16.dp))
                 .clickable { aiChatClick() }
                 .background(color = Color(0xFFFFFFFF))
-                .padding(11.dp)
+                .padding(ScreenSize().responsivePadding(11, 14, 17))
 
 
         ) {
@@ -998,14 +1028,14 @@ private fun AiChatBot(
                 contentDescription = "Ai",
                 modifier = Modifier
                     .wrapContentWidth()
-                    .size(18.dp)
+                    .size(ScreenSize().responsiveImageSize(18, 21, 24))
                     .align(Alignment.CenterVertically)
             )
 
             Spacer(modifier = Modifier.width(14.dp))
 
             Text(text = "আইনি সহায়ক AI",
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF494343),
@@ -1057,7 +1087,7 @@ private fun Calculator(
             ) {
 
                 Text("ক্যালকুলেটর",
-                    fontSize = 15.sp,
+                    fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                     fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -1074,13 +1104,13 @@ private fun Calculator(
                         .wrapContentWidth()
                         .clip(shape = RoundedCornerShape(12.dp))
                         .clickable { moreClick() }
-                        .padding(5.dp)
+                        .padding(ScreenSize().responsivePadding(5, 8, 11))
                         .align(Alignment.CenterEnd)
 
                 ) {
 
                     Text("আরো দেখুন",
-                        fontSize = 12.sp,
+                        fontSize = ScreenSize().responsiveTextSize(12, 14, 16),
                         fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
@@ -1095,7 +1125,7 @@ private fun Calculator(
                         tint = Color(0xFF796868),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(20.dp)
+                            .size(ScreenSize().responsiveImageSize(20, 23,25))
                             .align(Alignment.CenterVertically)
 
                     )
@@ -1122,11 +1152,12 @@ private fun Calculator(
                                 .fillMaxWidth()
                                 .padding(7.dp),
                             shape = 14.dp,
-                            innerPadding = 40.dp
+                            innerPadding = ScreenSize().responsivePadding(40, 45, 50)
                         )
                     }
 
                 }else{
+
 
                     items(
                         items = calculationList ?: emptyList(),
@@ -1150,22 +1181,22 @@ private fun Calculator(
                                     .clickable { calculationClick(it.title) }
                                     .background(color = Color(0xFFFFFFFF))
                                     .align(Alignment.Center)
-                                    .padding(10.dp)
+                                    .padding(ScreenSize().responsivePadding(10, 13, 16))
 
                             ) {
 
                                 AsyncImage( model = it.image,
                                     contentDescription = "Calculation",
                                     modifier = Modifier
-                                        .width(30.dp)
-                                        .height(30.dp)
+                                        .width(ScreenSize().responsiveImageSize(30, 35, 40))
+                                        .height(ScreenSize().responsiveImageSize(30, 35, 40))
                                         .align(Alignment.CenterHorizontally)
                                 )
 
                                 Spacer(modifier = Modifier.height(4.dp))
 
                                 Text(text = it.title,
-                                    fontSize = 12.sp,
+                                    fontSize = ScreenSize().responsiveTextSize(12, 14, 16),
                                     fontFamily = Bangla.banglaFont(),
                                     fontWeight = FontWeight.Normal,
                                     color = Color(0xFF000000),
@@ -1180,11 +1211,12 @@ private fun Calculator(
 
                         }//box
 
-                    }
+                    }//items
 
                 }
 
-            }
+            }//lazy column
+
         }//column
 
     }//box
@@ -1227,7 +1259,7 @@ private fun ListScreen(
                             .fillMaxWidth()
                             .padding(12.dp),
                         shape = 12.dp,
-                        innerPadding = 45.dp
+                        innerPadding = ScreenSize().responsivePadding(45, 55, 65)
                     )
 
                 }
@@ -1268,7 +1300,7 @@ private fun ListGridHelper(
 
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(ScreenSize().responsivePadding(10, 13, 15)),
 
     ) {
 
@@ -1292,9 +1324,9 @@ private fun ListGridHelper(
             Box(
 
                 modifier = Modifier
-                    .width(50.dp)
-                    .height(50.dp)
-                    .padding(5.dp)
+                    .width(ScreenSize().responsiveHeightWidth(50, 60, 70))
+                    .height(ScreenSize().responsiveHeightWidth(50, 60, 70))
+                    .padding(ScreenSize().responsivePadding(5, 8, 11))
                     .align(Alignment.CenterHorizontally)
 
             ) {
@@ -1313,7 +1345,7 @@ private fun ListGridHelper(
             }//box
 
             Text(text = gridText,
-                fontSize = 13.sp,
+                fontSize = ScreenSize().responsiveTextSize(13, 15, 17),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
@@ -1321,8 +1353,8 @@ private fun ListGridHelper(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .width(110.dp)
-                    .padding(5.dp)
+                    .width(ScreenSize().responsiveHeightWidth(110, 140, 150))
+                    .padding(ScreenSize().responsivePadding(5, 8, 11))
                     .align(Alignment.CenterHorizontally)
                 )
 
@@ -1385,7 +1417,7 @@ private fun SearchScreen(
 
                 Spacer(modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp))
+                    .height(ScreenSize().responsiveHeightWidth(55, 65, 75)))
 
             }
 
@@ -1436,7 +1468,7 @@ private fun SearchScreen(
                 contentDescription = "Search",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(100.dp)
+                    .size(ScreenSize().responsiveImageSize(90, 100, 110))
                     .align(Alignment.Center)
 
             )
@@ -1598,7 +1630,7 @@ private fun SearchBarHelper(
                     .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp))
                     .clip(shape = RoundedCornerShape(12.dp))
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(6.dp)
+                    .padding(ScreenSize().responsivePadding(4, 6, 8))
                     .align(Alignment.CenterVertically)
 
             ) {
@@ -1617,7 +1649,7 @@ private fun SearchBarHelper(
                         tint = Color(0xFF000000),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(28.dp)
+                            .size(ScreenSize().responsiveImageSize(23, 25, 27))
                             .align(Alignment.CenterVertically)
 
                     )
@@ -1635,7 +1667,7 @@ private fun SearchBarHelper(
                         if (searchFiled.isEmpty()){
 
                             Text("যেকোনো আইনি বিষয় সার্চ করুন",
-                                fontSize = 15.sp,
+                                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 color = Color(0xFF695D5D),
@@ -1653,7 +1685,11 @@ private fun SearchBarHelper(
                                 searchFiled = it
                                 liveSearchTitleChar(it)
                                             },
-                            textStyle = TextStyle(fontSize = 15.sp, fontFamily = Bangla.banglaFont(), fontWeight = FontWeight.Normal, color = Color.Black),
+                            textStyle = TextStyle(
+                                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
+                                fontFamily = Bangla.banglaFont(),
+                                fontWeight = FontWeight.Normal,
+                                color = Color.Black),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.CenterStart),
@@ -1689,7 +1725,7 @@ private fun SearchBarHelper(
                             .wrapContentWidth()
                             .clip(shape = CircleShape)
                             //.background(color = Color.Blue)
-                            .size(30.dp)
+                            .size(ScreenSize().responsiveImageSize(30, 40, 50))
                             .align(Alignment.CenterEnd)
 
                     ) {
@@ -1699,7 +1735,7 @@ private fun SearchBarHelper(
                             tint = Color.DarkGray,
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .size(20.dp)
+                                .size(ScreenSize().responsiveImageSize(20, 22, 24))
                                 .align(Alignment.Center)
 
                         )
@@ -1721,7 +1757,7 @@ private fun SearchBarHelper(
                     .clip(shape = RoundedCornerShape(14.dp))
                     .clickable { historyIconClick() }
                     .background(color = Color(0xFFFFFFFF))
-                    .padding(12.dp)
+                    .padding(ScreenSize().responsivePadding(12, 15, 18))
                     .align(Alignment.CenterVertically)
 
             ) {
@@ -1731,7 +1767,7 @@ private fun SearchBarHelper(
                     tint = Color(0xFF000000),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(30.dp)
+                        .size(ScreenSize().responsiveImageSize(24, 26, 28))
                         .align(Alignment.Center)
 
                 )
@@ -1802,13 +1838,13 @@ private fun QuestionItem(
 
                     }
                 )
-                .padding(8.dp)
+                .padding(ScreenSize().responsivePadding(8, 10, 12))
                 .align(Alignment.Center)
 
         ) {
             
             Text(text = questionTitle,
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
@@ -1856,7 +1892,7 @@ private fun QuestionItem(
                         tint = Color(0xFF4D4747),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(20.dp)
+                            .size(ScreenSize().responsiveImageSize(20, 24, 28))
                             .align(Alignment.Center)
 
                     )
@@ -1917,13 +1953,13 @@ private fun HistoryItem(
                 )
 
                 //.background(color = Color(0xFFFFFFFF))
-                .padding(8.dp)
+                .padding(ScreenSize().responsivePadding(8, 11, 14))
                 .align(Alignment.Center)
 
         ) {
 
             Text(text = historyTitle,
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
@@ -1939,6 +1975,7 @@ private fun HistoryItem(
                 tint = Color.Gray,
                 modifier = Modifier
                     .wrapContentWidth()
+                    .size(ScreenSize().responsiveImageSize(22, 26, 30))
                     .align(Alignment.CenterEnd)
 
             )
@@ -2012,7 +2049,7 @@ private fun BookmarkScreen(
                         contentDescription = "Empty",
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(90.dp)
+                            .size(ScreenSize().responsiveImageSize(80, 90, 100))
                             .align(Alignment.CenterHorizontally)
 
                     )
@@ -2020,7 +2057,7 @@ private fun BookmarkScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text("কোন বুকমার্ক নেই।",
-                        fontSize = 14.sp,
+                        fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                         fontFamily = Bangla.banglaFont(),
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF000000),
@@ -2050,7 +2087,7 @@ private fun SearchSuggestions(
 
     val lazyState = rememberLazyListState()
 
-    val itemHeight = 50.dp
+    val itemHeight = ScreenSize().responsiveHeightWidth(40, 50, 60)
     val maxItems = 6
     val visibleCount = if (list.size > maxItems) maxItems else list.size
 
@@ -2089,7 +2126,7 @@ private fun SearchSuggestions(
 
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(5.dp)
+                            .padding(ScreenSize().responsivePadding(3, 5, 7))
 
                     ) {
 
@@ -2109,7 +2146,7 @@ private fun SearchSuggestions(
                                 tint = Color(0xFF776666),
                                 modifier = Modifier
                                     .wrapContentWidth()
-                                    .size(20.dp)
+                                    .size(ScreenSize().responsiveImageSize(18, 20, 21))
                                     .align(Alignment.CenterVertically)
 
                             )
@@ -2117,7 +2154,7 @@ private fun SearchSuggestions(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(text = it.question,
-                                fontSize = 15.sp,
+                                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 color = Color(0xFF000000),
@@ -2188,7 +2225,7 @@ fun Quiz(
                     interactionSource = null
                 ){ quizClick() }
                 .background(color = Color(0xFFFAEBFD))
-                .padding(7.dp)
+                .padding(ScreenSize().responsivePadding(7, 10, 13))
 
         ) {
 
@@ -2201,27 +2238,27 @@ fun Quiz(
             ) {
 
                 Text( text = "সাপ্তাহিক শেখার অগ্রগতি",
-                    fontSize = 15.sp,
+                    fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                     fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start,
                     color = Color(0xFF3B3939),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(5.dp)
+                        .padding(ScreenSize().responsivePadding(5, 7, 9))
                         .align(Alignment.Start)
 
                 )
 
                 Text( text = "নিয়মিত অনুশীলনের মাধ্যমে আইনি জ্ঞানকে আরও শক্তিশালী করুন।",
-                    fontSize = 13.sp,
+                    fontSize = ScreenSize().responsiveTextSize(13, 15, 17),
                     fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Normal,
                     textAlign = TextAlign.Start,
                     color = Color(0xFF676565),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(5.dp)
+                        .padding(ScreenSize().responsivePadding(5, 7, 9))
                         .align(Alignment.Start)
 
                 )
@@ -2240,11 +2277,11 @@ fun Quiz(
                     progress = { progress.value },
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(80.dp)
+                        .size(ScreenSize().responsiveImageSize(80, 92, 102))
                         .padding(5.dp)
                         .align(Alignment.CenterEnd),
                     color = Color(0xFF7FB441),
-                    strokeWidth = 10.dp,
+                    strokeWidth = ScreenSize().responsiveImageSize(10, 12, 14),
                     strokeCap = StrokeCap.Butt,
                     trackColor = Color(0xFFFFFFFF),
                     gapSize = 0.dp
@@ -2260,7 +2297,7 @@ fun Quiz(
                                 color = if (quizCompleted == totalQuizCount) Color(0xFF000000) else Color(
                                     0xFF5E5E5E
                                 ),
-                                fontSize = 14.sp,
+                                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = if (quizCompleted == totalQuizCount) FontWeight.SemiBold else FontWeight.Normal
 
@@ -2275,7 +2312,7 @@ fun Quiz(
                             style = SpanStyle(
 
                                 color = Color(0xFF000000),
-                                fontSize = 14.sp,
+                                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.SemiBold
 
@@ -2290,7 +2327,7 @@ fun Quiz(
                             style = SpanStyle(
 
                                 color = Color(0xFF000000),
-                                fontSize = 14.sp,
+                                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.SemiBold
 
