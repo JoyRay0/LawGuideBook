@@ -1,14 +1,21 @@
 package com.rk_softwares.lawguidebook.View
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.*
@@ -35,9 +43,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rk_softwares.lawguidebook.Database.QuizDatabase
 import com.rk_softwares.lawguidebook.Helper.Bangla
+import com.rk_softwares.lawguidebook.Helper.IntentHelper
+import com.rk_softwares.lawguidebook.Helper.ScreenSize
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
+import com.rk_softwares.lawguidebook.Model.QuizData
+import com.rk_softwares.lawguidebook.Presenter.Quiz
+import com.rk_softwares.lawguidebook.Presenter.QuizPresenter
 import com.rk_softwares.lawguidebook.R
 import com.rk_softwares.lawguidebook.View.theme_main.LawGuideBookTheme
 import com.rk_softwares.lawguidebook.View.theme_main.LightNav
@@ -46,10 +60,23 @@ import com.rk_softwares.lawguidebook.View.theme_main.LightToolBar
 import com.rk_softwares.lawguidebook.View.theme_main.LightToolBarIcon
 import kotlinx.coroutines.delay
 
-class Act_quiz : ComponentActivity() {
+class Act_quiz : ComponentActivity(), Quiz{
+
+    private lateinit var qDB : QuizDatabase
+    private lateinit var qPresenter : QuizPresenter
+
+    /* Initialize variable */
+
+    private var qList = mutableStateListOf<QuizData>()
+    private var qStatus = mutableStateOf("")
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        init()
+
         setContent {
 
             ThemeHelper.SystemUi(
@@ -58,24 +85,82 @@ class Act_quiz : ComponentActivity() {
                 darkIcons = true
             )
 
+            qPresenter.getAllQuiz()
+
+            //ShortMessageHelper.toast(this, ScreenSize().height().toString())
+
+
             LawGuideBookTheme {
 
                 QuizFullScreen(
-                    backClick = { finish() }
+                    backClick = {
+                        IntentHelper.normalIntent(this, Act_home::class.java)
+                        finishAffinity()
+                                },
+                    list = qList,
+                    qStatus = qStatus.value,
+                    userSelectedInput = { title, userInput ->
+
+                        Log.d("input_title", "$title > $userInput")
+
+                        qPresenter.updateQuiz( title = title, userInput = userInput )
+
+                    }
                 )
 
             }
+
+            BackHandler() {
+
+                IntentHelper.normalIntent(this, Act_home::class.java)
+                finishAffinity()
+
+            }
+
         }
     }//on create=============================
+
+    private fun init(){
+
+        qDB = QuizDatabase(this)
+
+        qPresenter = QuizPresenter(this, qDB)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        qPresenter.onDestroy()
+    }
+
+    override fun quizList(list: List<QuizData>) {
+
+        qList.clear()
+        qList.addAll(list)
+
+    }
+
+    override fun quizCount(tQuiz: Int, cQuiz: Int) {
+
+    }
+
+    override fun dbStatus(status: String) {
+        qStatus.value = status
+    }
+
 }//class=====================================
 
 @Preview(showBackground = true)
 @Composable
 private fun QuizFullScreen(
-    backClick: () -> Unit = {}
+    backClick: () -> Unit = {},
+    list : List<QuizData> = emptyList(),
+    qStatus : String = "",
+    userSelectedInput: (String, Int) -> Unit = {_, _ ->}
 ) {
 
-
+    val lazyState = rememberLazyListState()
+    
     Scaffold(
 
         topBar = { Toolbar( backClick = backClick ) },
@@ -94,6 +179,76 @@ private fun QuizFullScreen(
 
         ) {
 
+            if (list.isEmpty()){
+
+                Column(
+
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+
+                ) {
+
+                    Image( painter = painterResource(R.drawable.img_empty_quiz),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(90.dp)
+                            .align(Alignment.CenterHorizontally)
+
+                    )
+
+                    Spacer(modifier = Modifier.height(9.dp))
+
+                    Text( text = "কোন কুইজ নেই।",
+                        fontSize = 15.sp,
+                        fontFamily = Bangla.banglaFont(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+
+                    )
+
+                }//column
+
+            }else{
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopStart),
+                    state = lazyState
+
+                ) {
+
+                    items(
+
+                        items = list,
+                        key = null
+
+                    ){ quiz ->
+
+                        Item(
+                            title = quiz.title,
+                            optionA = quiz.optionA,
+                            optionB = quiz.optionB,
+                            optionC = quiz.optionC,
+                            optionD = quiz.optionD,
+                            answer = quiz.answer,
+                            userSelectedItem = if (quiz.userInput > 0) quiz.userInput else null,
+                            userSelectedInput = { qttitle, input->
+                                userSelectedInput(qttitle, input)
+                            }
+                        )
+
+                    }
+
+                }//lazy column
+
+            }
 
         }//box
 
@@ -119,7 +274,7 @@ private fun Toolbar(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
+                .padding(ScreenSize().responsivePadding(5, 8, 11))
                 .align(Alignment.CenterStart)
 
         ) {
@@ -131,7 +286,7 @@ private fun Toolbar(
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
-                    .size(34.dp)
+                    .size(ScreenSize().responsiveImageSize(35, 38, 41))
                     //.background(color = Color(0xFFDEC3C3))
                     .align(Alignment.CenterVertically)
             ) {
@@ -141,7 +296,7 @@ private fun Toolbar(
                     tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(22.dp)
+                        .size(ScreenSize().responsiveImageSize(22, 25, 28))
 
                 )
 
@@ -163,7 +318,7 @@ private fun Item(
     optionD: String = "১৯৮১",
     answer : String = "১৯৭২",
     userSelectedItem : Int? = null,
-    userSelectedInput : (Int) -> Unit = {}
+    userSelectedInput : (String, Int) -> Unit = {_, _ ->}
 ) {
 
     var isOptionsVisible = remember { mutableStateOf(false) }
@@ -206,12 +361,12 @@ private fun Item(
                 .clip(shape = RoundedCornerShape(13.dp))
                 .clickable{ isOptionsVisible.value = !isOptionsVisible.value }
                 .background(color = Color(0xFFFFFFFF))
-                .padding(10.dp)
+                .padding(ScreenSize().responsivePadding(7, 10, 13))
 
         ) {
 
             Text( text = title,
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Start,
@@ -230,6 +385,7 @@ private fun Item(
                 tint = Color(0xFF736E6E),
                 modifier = Modifier
                     .wrapContentWidth()
+                    .size(ScreenSize().responsiveImageSize(24, 27, 29))
                     .rotate(arrowAnimation.value)
                     .align(Alignment.CenterEnd)
 
@@ -279,15 +435,15 @@ private fun Item(
 
                                     isAnswerClicked.value = true
 
-                                    userSelectedInput(index + 1)
+                                    userSelectedInput(title ,index + 1)
                                 }
                                 .alpha(alpha = if (!isAnswerClicked.value || selectedIndex.value == index) 1f else 0.5f)
-                                .padding(12.dp)
+                                .padding(ScreenSize().responsivePadding(9, 12, 15))
 
                         ) {
 
                             Text( text = serial[index] ,
-                                fontSize = 15.sp,
+                                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.SemiBold,
                                 textAlign = TextAlign.Start,
@@ -299,7 +455,7 @@ private fun Item(
                             )
 
                             Text( text = text ,
-                                fontSize = 15.sp,
+                                fontSize = ScreenSize().responsiveTextSize(14, 16, 18),
                                 fontFamily = Bangla.banglaFont(),
                                 fontWeight = FontWeight.Normal,
                                 textAlign = TextAlign.Start,
@@ -321,7 +477,7 @@ private fun Item(
                                     tint = Color(0xFF5E5C5C),
                                     modifier = Modifier
                                         .wrapContentWidth()
-                                        .size( if (isCorrect) 21.dp else 17.dp)
+                                        .size( if (isCorrect) ScreenSize().responsiveImageSize(19, 21, 24) else ScreenSize().responsiveImageSize(14, 17, 20))
                                         .align(Alignment.CenterVertically)
 
                                 )
