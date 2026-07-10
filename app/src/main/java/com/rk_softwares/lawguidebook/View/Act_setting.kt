@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -51,6 +52,7 @@ import com.rk_softwares.lawguidebook.Database.HistoryDatabase
 import com.rk_softwares.lawguidebook.Helper.Bangla
 import com.rk_softwares.lawguidebook.Helper.IntentHelper
 import com.rk_softwares.lawguidebook.Helper.KeyHelper
+import com.rk_softwares.lawguidebook.Helper.ScreenSize
 import com.rk_softwares.lawguidebook.Helper.ShortMessageHelper
 import com.rk_softwares.lawguidebook.Helper.ThemeHelper
 import com.rk_softwares.lawguidebook.Model.Items
@@ -208,6 +210,7 @@ class Act_setting : ComponentActivity(), Home {
 
 }//class=========================================
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 private fun SettingFullScreen(
@@ -262,7 +265,7 @@ private fun SettingFullScreen(
                         topStartCorner = 17,
                         topEndCorner = 17,
                         startIcon = R.drawable.ic_feature,
-                        startIconSize = 28,
+                        startIconSize = ScreenSize().responsiveImageSize(24, 29, 30),
                         spaceWidth = 15
                     )
 
@@ -274,7 +277,7 @@ private fun SettingFullScreen(
                         bottomStartCorner = 17,
                         bottomEndCorner = 17,
                         startIcon = R.drawable.ic_other_app,
-                        startIconSize = 20,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24),
                         spaceWidth = 23
                     )
 
@@ -295,7 +298,7 @@ private fun SettingFullScreen(
                         topStartCorner = 17,
                         topEndCorner = 17,
                         startIcon = R.drawable.ic_feedback,
-                        startIconSize = 20,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24) ,
                         spaceWidth = 22
                     )
 
@@ -305,7 +308,7 @@ private fun SettingFullScreen(
                         text = "অ্যাপ শেয়ার",
                         textClick = { appShareClick() },
                         startIcon = R.drawable.ic_share,
-                        startIconSize = 20,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24),
                         spaceWidth = 22
                     )
 
@@ -317,7 +320,7 @@ private fun SettingFullScreen(
                         bottomStartCorner = 17,
                         bottomEndCorner = 17,
                         startIcon = R.drawable.ic_review,
-                        startIconSize = 22,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24),
                         spaceWidth = 22
                     )
 
@@ -337,7 +340,7 @@ private fun SettingFullScreen(
                         topStartCorner = 17,
                         topEndCorner = 17,
                         startIcon = R.drawable.ic_privacy,
-                        startIconSize = 24,
+                        startIconSize = ScreenSize().responsiveImageSize(21, 24, 27),
                         spaceWidth = 22
                     )
 
@@ -349,7 +352,7 @@ private fun SettingFullScreen(
                         bottomStartCorner = 17,
                         bottomEndCorner = 17,
                         startIcon = R.drawable.ic_info,
-                        startIconSize = 20,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24),
                         spaceWidth = 25
                     )
 
@@ -371,7 +374,7 @@ private fun SettingFullScreen(
                         bottomStartCorner = 12,
                         bottomEndCorner = 12,
                         startIcon = R.drawable.ic_delete,
-                        startIconSize = 25,
+                        startIconSize = ScreenSize().responsiveImageSize(18, 21, 24),
                         spaceWidth = 15
                     )
 
@@ -382,12 +385,17 @@ private fun SettingFullScreen(
 
             if (isInfoDialogVisible){
 
-                InfoDialog(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    okClick = { isInfoDialogVisible = false }
-                )
+                ModalBottomSheet(
+                    onDismissRequest = { isInfoDialogVisible = false },
+                    dragHandle = null,
+                    containerColor = Color(0xFFFFFFFF)
+
+                ) {
+
+                    InfoDialog()
+
+                }
+
 
             }
 
@@ -415,7 +423,7 @@ private fun Toolbar(
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(3.dp)
+                .padding(ScreenSize().responsivePadding(3, 6, 9))
 
         ) {
 
@@ -424,7 +432,7 @@ private fun Toolbar(
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(shape = CircleShape)
-                    .size(35.dp)
+                    .size(ScreenSize().responsiveImageSize(35, 38, 41))
                     .align(Alignment.CenterVertically)
             ) {
 
@@ -433,7 +441,7 @@ private fun Toolbar(
                     tint = LightToolBarIcon,
                     modifier = Modifier
                         .wrapContentWidth()
-                        .size(22.dp)
+                        .size(ScreenSize().responsiveImageSize(22, 25, 28))
 
                 )
 
@@ -456,7 +464,7 @@ private fun TextButtonHelper(
     bottomStartCorner : Int = 5,
     bottomEndCorner : Int = 5,
     startIcon : Int  = 0,
-    startIconSize : Int = 0,
+    startIconSize : Dp = 0.dp,
     spaceWidth : Int = 10
 ) {
 
@@ -491,7 +499,7 @@ private fun TextButtonHelper(
                 )
                 .clickable { textClick() }
                 .background(color = Color(0xFFFAF5F5))
-                .padding(7.dp)
+                .padding(ScreenSize().responsivePadding(6, 9, 12))
 
         ) {
 
@@ -511,7 +519,7 @@ private fun TextButtonHelper(
                         tint = Color(0xFF000000),
                         modifier = Modifier
                             .wrapContentWidth()
-                            .size(if (startIconSize > 0) startIconSize.dp else 20.dp)
+                            .size(if (startIconSize > 0.dp) startIconSize else 20.dp)
                             .align(Alignment.CenterVertically)
 
                     )
@@ -521,7 +529,7 @@ private fun TextButtonHelper(
                 Spacer(modifier = Modifier.width(spaceWidth.dp))
 
                 Text(text = text,
-                    fontSize = 16.sp,
+                    fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                     fontFamily = Bangla.banglaFont(),
                     fontWeight = FontWeight.Normal,
                     color = Color(0xFF000000),
@@ -539,6 +547,7 @@ private fun TextButtonHelper(
                 tint = Color.Gray,
                 modifier = Modifier
                     .wrapContentWidth()
+                    .size(ScreenSize().responsiveImageSize(22, 25, 28))
                     .align(Alignment.CenterEnd)
 
             )
@@ -552,16 +561,13 @@ private fun TextButtonHelper(
 
 @Preview(showBackground = true)
 @Composable
-private fun InfoDialog(
-    modifier: Modifier = Modifier,
-    okClick : () -> Unit = {}
-) {
+private fun InfoDialog() {
 
     Box(
 
-        modifier = modifier
+        modifier = Modifier
             .wrapContentWidth()
-            .padding(7.dp)
+            .padding(ScreenSize().responsivePadding(4, 7, 10))
 
     ) {
 
@@ -569,16 +575,13 @@ private fun InfoDialog(
 
             modifier = Modifier
                 .wrapContentWidth()
-                .shadow(elevation = 5.dp, shape = RoundedCornerShape(15.dp))
-                .clip(shape = RoundedCornerShape(15.dp))
-                .background(color = Color(0xFFFFFFFF))
-                .padding(13.dp)
+                .padding(ScreenSize().responsivePadding(13, 16, 19))
                 .align(Alignment.Center)
 
         ) {
 
             Text(text = "ধন্যবাদ আমাদের অ্যাপ ব্যবহার করার জন্য",
-                fontSize = 18.sp,
+                fontSize = ScreenSize().responsiveTextSize(18, 20, 22),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF000000),
@@ -591,7 +594,7 @@ private fun InfoDialog(
             Spacer(modifier = Modifier.height(15.dp))
 
             Text(text = "আমরা অ্যাপ এর মধ্যে নিয়মিত আপডেট দিই এবং প্রতিটি আপডেটে নতুন নতুন ফিচার যুক্ত করি। আমাদের অ্যাপ ব্যবহার করতে যদি কোনো প্রকার সমস্যা হয় তবে দয়া করে আমাদের জানান। আমরা আপনার সমস্যা সমাধানের যথাসাধ্য চেষ্টা করবো।",
-                fontSize = 15.sp,
+                fontSize = ScreenSize().responsiveTextSize(15, 17, 19),
                 fontFamily = Bangla.banglaFont(),
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF000000),
@@ -600,22 +603,6 @@ private fun InfoDialog(
                     .wrapContentWidth()
                     .align(Alignment.CenterHorizontally)
             )
-
-            Spacer(modifier = Modifier.height(17.dp))
-
-            Text("ঠিক আছে",
-                fontSize = 13.sp,
-                fontFamily = Bangla.banglaFont(),
-                fontWeight = FontWeight.Normal,
-                color = Color(0xFF000000),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .clip(shape = RoundedCornerShape(12.dp))
-                    .clickable{ okClick() }
-                    .align(Alignment.End)
-                    .padding(10.dp)
-                )
 
         }//column
 
